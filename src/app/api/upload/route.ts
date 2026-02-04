@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 
 export async function POST(request: Request) {
     try {
@@ -23,17 +21,9 @@ export async function POST(request: Request) {
 
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
+        const base64String = `data:${file.type};base64,${buffer.toString('base64')}`;
 
-        const uploadDir = path.join(process.cwd(), "public", "uploads");
-        await mkdir(uploadDir, { recursive: true });
-
-        // Unique filename
-        const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-        const filepath = path.join(uploadDir, filename);
-
-        await writeFile(filepath, buffer);
-
-        return NextResponse.json({ success: true, path: `/uploads/${filename}` });
+        return NextResponse.json({ success: true, path: base64String });
     } catch (error) {
         console.error("Upload error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
