@@ -72,8 +72,20 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Business Logo</label>
                 <div className="flex items-center space-x-6">
                     {logo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={logo} alt="Business Logo" className="h-24 w-24 object-contain border border-gray-200 rounded-lg bg-white p-2" />
+                        <div className="relative group">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={logo} alt="Business Logo" className="h-24 w-24 object-contain border border-gray-200 rounded-lg bg-white p-2" />
+                            <button
+                                type="button"
+                                onClick={() => setLogo(null)}
+                                className="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-1 shadow-sm hover:bg-red-200 transition-colors"
+                                title="Remove Logo"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
                     ) : (
                         <div className="h-24 w-24 bg-white flex items-center justify-center border border-gray-200 rounded-lg text-gray-300 text-xs uppercase tracking-wide">No Logo</div>
                     )}
