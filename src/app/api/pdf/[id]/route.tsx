@@ -122,8 +122,8 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
                 <p class="text-sm text-gray-400 mb-4">Thank you for your business!</p>
                 <div class="flex items-center justify-center gap-1.5 opacity-60 grayscale">
                     <span class="text-[10px] uppercase tracking-wider text-gray-400 font-medium">Receipt Hub is powered by</span>
-                    <img src="data:image/png;base64,${tektriqLogoBase64}" alt="Tektriq" class="h-3 w-auto object-contain" />
-                    <span class="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Tektriq</span>
+                    <img src="data:image/png;base64,${tektriqLogoBase64}" alt="Tektriq LLC" class="h-3 w-auto object-contain" />
+                    <span class="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Tektriq LLC</span>
                 </div>
               </div>
           </div>

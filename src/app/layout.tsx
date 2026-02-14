@@ -56,6 +56,24 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className={`${inter.className} h-full`}>
         <div className="min-h-screen bg-gray-50 flex flex-col">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: 'Tektriq LLC',
+                url: 'https://tektriq.com',
+                logo: 'https://receipthub.tektriq.com/tektriq-logo.png',
+                contactPoint: {
+                  '@type': 'ContactPoint',
+                  telephone: '',
+                  contactType: 'customer support',
+                  email: 'support@tektriq.com',
+                },
+              }),
+            }}
+          />
           <Navbar />
           <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
             {children}

@@ -4,33 +4,48 @@ export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <footer className="bg-white border-t border-gray-100 mt-auto">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="md:flex md:items-center md:justify-between">
-                    <div className="flex justify-center space-x-6 md:order-2">
-                        <Link href="/about" className="text-gray-400 hover:text-gray-500 text-xs text-center block w-full md:w-auto">
-                            About
-                        </Link>
-                        <Link href="/privacy" className="text-gray-400 hover:text-gray-500 text-xs text-center block w-full md:w-auto">
-                            Privacy
-                        </Link>
-                        <Link href="/terms" className="text-gray-400 hover:text-gray-500 text-xs text-center block w-full md:w-auto">
-                            Terms
-                        </Link>
+                    {/* Branding Section */}
+                    <div className="flex flex-col space-y-4">
+                        <div className="flex items-center space-x-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src="/tektriq-logo.png" alt="Tektriq LLC" className="h-5 w-auto object-contain opacity-80" />
+                            <span className="text-sm font-semibold text-gray-900">Tektriq LLC</span>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                            &copy; {currentYear} Tektriq LLC. All rights reserved.
+                        </p>
+                        <p className="text-xs text-gray-400">
+                            Powered by Tektriq LLC
+                        </p>
                     </div>
-                    <div className="mt-8 md:mt-0 md:order-1">
-                        <div className="text-center md:text-left">
-                            <p className="text-xs text-gray-500">
-                                &copy; {currentYear} Tektriq. All rights reserved.
-                            </p>
-                            <p className="mt-1 text-xs text-gray-400">
-                                Receipt Hub is a product of Tektriq.
-                            </p>
-                            <p className="mt-1">
-                                <a href="https://tektriq.com" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-gray-500">
-                                    https://tektriq.com
-                                </a>
-                            </p>
+
+                    {/* Links Section */}
+                    <div className="mt-8 md:mt-0 flex flex-col md:flex-row md:items-center md:space-x-8 space-y-4 md:space-y-0">
+                        <nav className="flex flex-wrap gap-6">
+                            <Link href="/about" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+                                About
+                            </Link>
+                            <Link href="/terms" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+                                Terms of Service
+                            </Link>
+                            <Link href="/privacy" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+                                Privacy Policy
+                            </Link>
+                            <a href="mailto:support@tektriq.com" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+                                Contact
+                            </a>
+                        </nav>
+
+                        <div className="hidden md:block w-px h-4 bg-gray-200"></div>
+
+                        <div className="flex flex-col">
+                            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Support</span>
+                            <a href="mailto:support@tektriq.com" className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                                support@tektriq.com
+                            </a>
                         </div>
                     </div>
                 </div>
