@@ -1,7 +1,16 @@
+"use client";
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function Footer() {
+    const pathname = usePathname();
     const currentYear = new Date().getFullYear();
+
+    // Hide global footer on landing page since it has its own custom footer
+    if (pathname === '/') {
+        return null;
+    }
 
     return (
         <footer className="bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] mt-auto">

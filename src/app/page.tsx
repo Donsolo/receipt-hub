@@ -39,6 +39,45 @@ export default function LandingPage() {
           </div>
         </div>
 
+        {/* Feature Strip Section */}
+        <div className="relative w-full max-w-4xl mx-auto mt-10">
+
+          {/* Background Glow */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.08),transparent_70%)] pointer-events-none" />
+
+          <div className="grid md:grid-cols-2 gap-6 relative z-10">
+            {/* Feature 1: PDF Generation */}
+            <div className="relative bg-gradient-to-br from-[#111827] to-[#0F172A] border border-[#1F2937] rounded-2xl p-6 transition-all duration-300 hover:border-indigo-500/40 hover:-translate-y-1 flex items-start gap-4 group">
+              <div className="shrink-0 h-12 w-12 flex items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-400 shadow-inner group-hover:text-indigo-300 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                  <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3 3 0 0016.5 9.75h-3a3 3 0 01-3-3v-3a3 3 0 00-3-3H5.625zM12 3v3.75a.75.75 0 00.75.75H16.5a.75.75 0 00.52-1.29l-3.48-3.47A.75.75 0 0012 3zm4.5 12a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h7.5a.75.75 0 00.75-.75zm0 3.75a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h7.5a.75.75 0 00.75-.75z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">Instant PDF Generation</h3>
+                <p className="text-sm text-gray-400 mt-2 leading-relaxed">
+                  Create professional, formatted receipts instantly using the built-in generator.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 2: Secure Storage */}
+            <div className="relative bg-gradient-to-br from-[#111827] to-[#0F172A] border border-[#1F2937] rounded-2xl p-6 transition-all duration-300 hover:border-indigo-500/40 hover:-translate-y-1 flex items-start gap-4 group">
+              <div className="shrink-0 h-12 w-12 flex items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-400 shadow-inner group-hover:text-indigo-300 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">Secure Image Storage</h3>
+                <p className="text-sm text-gray-400 mt-2 leading-relaxed">
+                  Upload and store receipt images securely with private, user-based access.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Tektriq Branding Section */}
         <div className="w-full max-w-2xl mx-auto py-12 text-center opacity-90">
           <div className="border-t border-[#2D3748] w-24 mx-auto mb-6"></div>
