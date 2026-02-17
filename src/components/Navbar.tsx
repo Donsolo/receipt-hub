@@ -59,14 +59,12 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                                         Admin
                                     </Link>
                                 ) : null}
-                                <form action="/api/auth/logout" method="POST">
-                                    <button
-                                        type="submit"
-                                        className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                                    >
-                                        Sign Out
-                                    </button>
-                                </form>
+                                <button
+                                    onClick={handleLogout}
+                                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                >
+                                    Sign Out
+                                </button>
                             </>
                         ) : null}
                     </div>
