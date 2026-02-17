@@ -45,12 +45,15 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                     <div className="flex items-center space-x-4">
                         {isAuthenticated ? (
                             <>
-                                <Link
-                                    href="/dashboard"
-                                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                                >
-                                    Dashboard
-                                </Link>
+                                {authLinks.map((link) => (
+                                    <Link
+                                        key={link.href}
+                                        href={link.href}
+                                        className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ))}
                                 {role === 'ADMIN' || role === 'SUPER_ADMIN' ? (
                                     <Link
                                         href="/admin"
