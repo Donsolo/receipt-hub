@@ -18,13 +18,11 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL('/login', request.url));
         }
 
-        if (pathname.startsWith('/admin') && payload.role !== 'ADMIN' && payload.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); // Or redirect, existing code redirects
-        }
-
-        // Actually, existing code redirects to dashboard.
-        if (pathname.startsWith('/admin') && payload.role !== 'ADMIN' && payload.role !== 'SUPER_ADMIN') {
-            return NextResponse.redirect(new URL('/dashboard', request.url));
+        if (pathname.startsWith('/admin')) {
+            if (payload.role !== 'ADMIN' && payload.role !== 'SUPER_ADMIN') {
+                console.log(`Middleware: Unauthorized Admin Access attempt by ${payload.email} (Role: ${payload.role})`);
+                return NextResponse.redirect(new URL('/dashboard', request.url));
+            }
         }
     }
 

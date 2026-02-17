@@ -23,7 +23,7 @@ export default function RegisterPage() {
 
         if (res.ok) {
             // Auto-login successful, redirect to dashboard
-            router.refresh(); // Ensure layout updates auth state
+            router.refresh();
             router.push('/dashboard');
         } else {
             setError(data.error || 'Registration failed');
