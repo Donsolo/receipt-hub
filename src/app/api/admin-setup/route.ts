@@ -27,11 +27,18 @@ export async function GET() {
             data: { role: 'SUPER_ADMIN' }
         });
 
-        return NextResponse.json({
+        // REFRESH COOKIE IMMEDIATELY
+        const token = await signToken({ userId: updatedUser.id, email: updatedUser.email, role: updatedUser.role });
+        const cookie = createAuthCookie(token);
+
+        const response = NextResponse.json({
             success: true,
-            message: `User ${updatedUser.email} has been promoted to ${updatedUser.role}.`,
+            message: `User ${updatedUser.email} has been promoted to ${updatedUser.role}. Cookie refreshed.`,
             user: { id: updatedUser.id, email: updatedUser.email, role: updatedUser.role }
         });
+        response.headers.set('Set-Cookie', cookie);
+
+        return response;
 
     } catch (error) {
         console.error('Admin Setup Error:', error);
