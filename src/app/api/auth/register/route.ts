@@ -6,11 +6,13 @@ import { signToken, createAuthCookie } from '@/lib/auth';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { email, password } = body;
+        let { email, password } = body;
 
         if (!email || !password) {
             return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
         }
+
+        email = email.toLowerCase();
 
         // Check existing
         const existingUser = await db.user.findUnique({ where: { email } });

@@ -6,7 +6,9 @@ import { signToken, createAuthCookie } from '@/lib/auth';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { email, password } = body;
+        let { email, password } = body;
+
+        email = email.toLowerCase();
 
         const user = await db.user.findUnique({ where: { email } });
         if (!user) {

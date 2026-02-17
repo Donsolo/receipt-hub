@@ -69,7 +69,12 @@ export default async function RootLayout({
     if (payload) {
       isAuthenticated = true;
       userRole = payload.role as string;
+      console.log('RootLayout: User Authenticated', { userId: payload.userId, role: userRole });
+    } else {
+      console.log('RootLayout: Invalid Token');
     }
+  } else {
+    console.log('RootLayout: No Token Found');
   }
 
   return (

@@ -7,9 +7,15 @@ export async function GET() {
     console.log('Admin Setup Route Accessed');
     try {
         const targetEmail = 'dariusreeder@gmail.com';
+        console.log(`Attempting to promote: ${targetEmail}`);
 
-        const user = await db.user.findUnique({
-            where: { email: targetEmail }
+        const user = await db.user.findFirst({
+            where: {
+                email: {
+                    equals: targetEmail,
+                    mode: 'insensitive',
+                }
+            }
         });
 
         if (!user) {
