@@ -66,7 +66,7 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
     }
 
     return (
-        <form action={handleSubmit} className="bg-gray-50 shadow-sm border border-gray-200 rounded-xl p-8 space-y-8 max-w-2xl">
+        <form action={handleSubmit} className="bg-[#1F2937] shadow-sm border border-[#2D3748] rounded-xl p-8 space-y-8 max-w-2xl">
             {/* Logo Section */}
             <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Business Logo</label>
@@ -74,7 +74,7 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                     {logo ? (
                         <div className="relative group">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={logo} alt="Business Logo" className="h-24 w-24 object-contain border border-gray-200 rounded-lg bg-white p-2" />
+                            <img src={logo} alt="Business Logo" className="h-24 w-24 object-contain border border-[#2D3748] rounded-lg bg-[#111827] p-2" />
                             <button
                                 type="button"
                                 onClick={() => setLogo(null)}
@@ -87,7 +87,7 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                             </button>
                         </div>
                     ) : (
-                        <div className="h-24 w-24 bg-white flex items-center justify-center border border-gray-200 rounded-lg text-gray-300 text-xs uppercase tracking-wide">No Logo</div>
+                        <div className="h-24 w-24 bg-[#111827] flex items-center justify-center border border-[#2D3748] rounded-lg text-gray-500 text-xs uppercase tracking-wide">No Logo</div>
                     )}
                     <div className="flex-1">
                         <input
@@ -112,7 +112,7 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                     id="businessName"
                     required
                     defaultValue={initialData.businessName}
-                    className="block w-full border-gray-300 rounded-md shadow-sm focus:border-gray-500 focus:ring-gray-500 sm:text-sm py-2 px-3 text-gray-900 bg-white"
+                    className="block w-full border-[#2D3748] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-gray-100 bg-[#111827]"
                 />
             </div>
 
@@ -126,7 +126,7 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                     id="businessAddress"
                     rows={3}
                     defaultValue={initialData.businessAddress || ""}
-                    className="block w-full border-gray-300 rounded-md shadow-sm focus:border-gray-500 focus:ring-gray-500 sm:text-sm py-2 px-3 text-gray-900 bg-white"
+                    className="block w-full border-[#2D3748] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-gray-100 bg-[#111827]"
                 />
             </div>
 
@@ -140,7 +140,7 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                     name="businessPhone"
                     id="businessPhone"
                     defaultValue={initialData.businessPhone || ""}
-                    className="block w-full border-gray-300 rounded-md shadow-sm focus:border-gray-500 focus:ring-gray-500 sm:text-sm py-2 px-3 text-gray-900 bg-white"
+                    className="block w-full border-[#2D3748] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-gray-100 bg-[#111827]"
                 />
             </div>
 
@@ -154,12 +154,12 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                     name="businessEmail"
                     id="businessEmail"
                     defaultValue={initialData.businessEmail || ""}
-                    className="block w-full border-gray-300 rounded-md shadow-sm focus:border-gray-500 focus:ring-gray-500 sm:text-sm py-2 px-3 text-gray-900 bg-white"
+                    className="block w-full border-[#2D3748] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-gray-100 bg-[#111827]"
                 />
             </div>
 
             {/* Submit */}
-            <div className="pt-4 border-t border-gray-200 flex items-center justify-between">
+            <div className="pt-4 border-t border-[#2D3748] flex items-center justify-between">
                 <button
                     type="submit"
                     disabled={loading}

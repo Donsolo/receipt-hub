@@ -8,10 +8,10 @@ export default async function CreateReceiptPage() {
         <div className="max-w-3xl mx-auto">
             <div className="md:flex md:items-center md:justify-between mb-8">
                 <div className="flex-1 min-w-0">
-                    <h2 className="text-xl font-semibold text-gray-800">
+                    <h2 className="text-xl font-semibold text-[var(--text-primary)]">
                         New Receipt
                     </h2>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-[var(--text-secondary)]">
                         Create and save a receipt
                     </p>
                 </div>

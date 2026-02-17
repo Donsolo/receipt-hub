@@ -54,7 +54,7 @@ export async function getNextReceiptNumber() {
         orderBy: { receiptNumber: "desc" },
     });
 
-    if (lastReceipt) {
+    if (lastReceipt && lastReceipt.receiptNumber) {
         const lastNum = parseInt(lastReceipt.receiptNumber.split("-").pop() || "0", 10);
         return `${prefix}${String(lastNum + 1).padStart(4, "0")}`;
     }
@@ -72,8 +72,17 @@ export async function createReceipt(formData: {
     total: number;
     items: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
 }) {
+    const { cookies } = require("next/headers");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+    const { verifyToken } = require("./auth"); // Import verifyToken
+    const user = await verifyToken(token || "");
+
+    if (!user) throw new Error("Unauthorized");
+
     const receipt = await db.receipt.create({
         data: {
+            userId: user.userId,
             receiptNumber: formData.receiptNumber,
             date: formData.date,
             clientName: formData.clientName,
@@ -92,11 +101,23 @@ export async function createReceipt(formData: {
 }
 
 export async function getReceipts(query: string) {
-    const where: any = {};
+    const { cookies } = require("next/headers");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+    const { verifyToken } = require("./auth");
+    const user = await verifyToken(token || "");
+
+    if (!user) return [];
+
+    const where: any = {
+        userId: user.userId,
+    };
+
     if (query) {
         where.OR = [
             { receiptNumber: { contains: query } },
             { clientName: { contains: query } },
+            // Allow searching uploaded receipts by date or other metadata if we add it later
         ];
     }
 

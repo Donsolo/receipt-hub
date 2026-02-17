@@ -3,41 +3,54 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
-model BusinessProfile {
-  id             String   @id @default(cuid())
-  businessName   String
-  businessAddress String?
-  businessPhone  String?
-  businessEmail  String?
-  logoPath       String?
-  updatedAt      DateTime @updatedAt
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      String   @default("USER") // Managed as Enum in App Code
+  createdAt DateTime @default(now())
+
+  receipts  Receipt[]
 }
 
 model Receipt {
-  id            String      @id @default(cuid())
-  receiptNumber String      @unique
+  id            String   @id @default(cuid())
+  receiptNumber String?  @unique
+  userId        String
+  imageUrl      String?
   date          DateTime
   clientName    String?
   notes         String?
-  taxType       String      @default("none") // "none" | "percent" | "flat"
-  taxValue      Decimal?
-  subtotal      Decimal
-  total         Decimal
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  taxType       String   @default("none")
+  taxValue      Float?
+  subtotal      Float    @default(0)
+  total         Float    @default(0)
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   items         ReceiptItem[]
 }
 
 model ReceiptItem {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   receiptId   String
   description String
   quantity    Int
-  unitPrice   Decimal
-  lineTotal   Decimal
-  receipt     Receipt  @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  unitPrice   Float
+  lineTotal   Float
+
+  receipt     Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+}
+
+model BusinessProfile {
+  id              String  @id @default(cuid())
+  businessName    String
+  businessAddress String?
+  businessPhone   String?
+  businessEmail   String?
+  logoPath        String?
 }

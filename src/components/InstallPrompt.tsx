@@ -59,7 +59,7 @@ export default function InstallPrompt() {
 
     return (
         <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-5 duration-500">
-            <div className="bg-white/90 backdrop-blur-md border border-gray-200 shadow-xl rounded-2xl p-4 flex items-center justify-between max-w-md mx-auto">
+            <div className="bg-[#1F2937]/90 backdrop-blur-md border border-[#2D3748] shadow-xl rounded-2xl p-4 flex items-center justify-between max-w-md mx-auto">
                 <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0 shadow-sm rounded-xl overflow-hidden">
                         <Image
@@ -71,12 +71,8 @@ export default function InstallPrompt() {
                         />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-bold text-gray-900">Install Receipt Hub</h3>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                            {isIOS
-                                ? "Tap 'Share' then 'Add to Home Screen'"
-                                : "Add to home screen for quick access"}
-                        </p>
+                        <p className="text-sm font-medium text-gray-100">Install Receipt Hub</p>
+                        <p className="text-xs text-gray-400 truncate">Add to Home Screen for quick access</p>
                     </div>
                 </div>
 
@@ -91,7 +87,8 @@ export default function InstallPrompt() {
                     )}
                     <button
                         onClick={dismissPrompt}
-                        className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                        className="p-2 text-gray-400 hover:text-gray-200 rounded-full hover:bg-[#243043] transition-colors"
+                        aria-label="Dismiss"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

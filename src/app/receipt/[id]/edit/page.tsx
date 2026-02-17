@@ -16,10 +16,10 @@ export default async function EditReceiptPage(props: { params: Promise<{ id: str
     // Transform data for ReceiptForm
     const initialData = {
         id: receipt.id,
-        receiptNumber: receipt.receiptNumber,
+        receiptNumber: receipt.receiptNumber || "",
         date: receipt.date,
-        clientName: receipt.clientName,
-        notes: receipt.notes,
+        clientName: receipt.clientName || "",
+        notes: receipt.notes || "",
         taxType: receipt.taxType,
         taxValue: receipt.taxValue ? Number(receipt.taxValue) : null,
         items: receipt.items.map((item: any) => ({

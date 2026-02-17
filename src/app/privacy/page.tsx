@@ -1,9 +1,9 @@
 export default function PrivacyPage() {
     return (
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Privacy Policy</h1>
-            <div className="prose prose-sm text-gray-500">
-                <p className="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
+            <h1 className="text-2xl font-bold text-gray-100 mb-6">Privacy Policy</h1>
+            <div className="prose prose-sm text-gray-300">
+                <p className="mb-4 bg-[#1F2937] p-4 rounded-lg border border-[#2D3748]">
                     <strong>Receipt Hub</strong> is a product of <strong>Tektriq LLC</strong>. Tektriq LLC respects your privacy and is committed to protecting your information.
                 </p>
                 <p className="mb-4">
