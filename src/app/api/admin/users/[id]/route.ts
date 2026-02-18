@@ -15,7 +15,7 @@ export async function GET(
         const token = cookieStore.get('auth_token')?.value;
         const user = await verifyToken(token || '');
 
-        if (!user || user.role !== 'ADMIN') {
+        if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
