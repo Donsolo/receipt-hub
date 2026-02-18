@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import { deleteS3Object } from '@/lib/s3';
+import { cookies } from 'next/headers';
 
 export async function DELETE(
     request: Request,
@@ -9,10 +10,11 @@ export async function DELETE(
 ) {
     const params = await props.params;
     try {
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const cookieStore = await cookies();
+        const token = cookieStore.get('auth_token')?.value;
         const authUser = await verifyToken(token || '');
 
-        if (!authUser || authUser.role !== 'ADMIN') {
+        if (!authUser || (authUser.role !== 'ADMIN' && authUser.role !== 'SUPER_ADMIN')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 

@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 
+import { cookies } from 'next/headers';
+
 export async function GET(request: Request) {
     try {
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const cookieStore = await cookies();
+        const token = cookieStore.get('auth_token')?.value;
         const user = await verifyToken(token || '');
 
-        if (!user || user.role !== 'ADMIN') {
+        if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
