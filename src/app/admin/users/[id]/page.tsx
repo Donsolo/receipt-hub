@@ -220,7 +220,7 @@ export default function AdminUserDetailsPage({ params }: { params: Promise<{ id:
                 </div>
 
                 <h2 className="text-xl font-bold text-gray-100 mb-4">Receipts</h2>
-                <div className="bg-[#1F2937] rounded-lg shadow overflow-hidden border border-[#2D3748]">
+                <div className="bg-[#1F2937] rounded-lg shadow overflow-x-auto border border-[#2D3748]">
                     <table className="min-w-full divide-y divide-[#2D3748]">
                         <thead className="bg-[#1F2937]">
                             <tr>
