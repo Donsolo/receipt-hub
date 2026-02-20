@@ -69,8 +69,15 @@ export default function UploadButton({
             // 2. Get Presigned URL
             const presignRes = await fetch('/api/upload/presign', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: file.name, fileType: 'image/jpeg' })
             });
-            if (!presignRes.ok) throw new Error('Failed to get upload URL');
+
+            if (!presignRes.ok) {
+                const responseText = await presignRes.text();
+                console.error("Upload presign failed", responseText);
+                throw new Error('Failed to get upload URL');
+            }
             const { uploadUrl, fileUrl } = await presignRes.json();
 
             // 3. Upload to S3
