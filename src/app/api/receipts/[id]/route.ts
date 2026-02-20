@@ -65,3 +65,49 @@ export async function DELETE(
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export async function PATCH(
+    request: Request,
+    props: { params: Promise<{ id: string }> }
+) {
+    const params = await props.params;
+    try {
+        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const user = await verifyToken(token || '');
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const body = await request.json();
+        const { date, clientName, notes, total, taxValue } = body;
+
+        // Verify ownership
+        const existingReceipt = await db.receipt.findUnique({
+            where: {
+                id: params.id,
+                userId: user.userId,
+            }
+        });
+
+        if (!existingReceipt) {
+            return NextResponse.json({ error: 'Receipt not found or unauthorized' }, { status: 404 });
+        }
+
+        const updatedReceipt = await db.receipt.update({
+            where: { id: params.id },
+            data: {
+                date: date ? new Date(date) : undefined,
+                clientName: clientName !== undefined ? clientName : undefined,
+                notes: notes !== undefined ? notes : undefined,
+                total: total !== undefined ? parseFloat(total) : undefined,
+                taxValue: taxValue !== undefined ? parseFloat(taxValue) : undefined,
+            },
+        });
+
+        return NextResponse.json(updatedReceipt);
+    } catch (error) {
+        console.error('Update Receipt Error:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
