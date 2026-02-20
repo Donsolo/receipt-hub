@@ -185,7 +185,8 @@ export default function AdminPage() {
                                     users.map((user) => (
                                         <tr
                                             key={user.id}
-                                            className={`hover:bg-[#1F2937] transition-colors ${user.role === 'SUPER_ADMIN' ? 'border-l-2 border-l-yellow-600' : ''}`}
+                                            onClick={() => router.push(`/admin/users/${user.id}`)}
+                                            className={`hover:bg-[#1F2937] transition-colors cursor-pointer ${user.role === 'SUPER_ADMIN' ? 'border-l-2 border-l-yellow-600' : ''}`}
                                         >
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-medium">
                                                 {user.name}
@@ -195,16 +196,16 @@ export default function AdminPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${user.role === 'SUPER_ADMIN' ? 'bg-yellow-900/20 text-yellow-500 border-yellow-800/50' :
-                                                        user.role === 'ADMIN' ? 'bg-blue-900/20 text-blue-400 border-blue-800/50' :
-                                                            'bg-gray-800/50 text-gray-400 border-gray-700'
+                                                    user.role === 'ADMIN' ? 'bg-blue-900/20 text-blue-400 border-blue-800/50' :
+                                                        'bg-gray-800/50 text-gray-400 border-gray-700'
                                                     }`}>
                                                     {user.role}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${user.plan === 'Pro' ? 'bg-purple-900/20 text-purple-400 border-purple-800/50' :
-                                                        user.plan === 'Business' ? 'bg-emerald-900/20 text-emerald-400 border-emerald-800/50' :
-                                                            'bg-gray-800/50 text-gray-400 border-gray-700'
+                                                    user.plan === 'Business' ? 'bg-emerald-900/20 text-emerald-400 border-emerald-800/50' :
+                                                        'bg-gray-800/50 text-gray-400 border-gray-700'
                                                     }`}>
                                                     {user.plan}
                                                 </span>
