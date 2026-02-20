@@ -97,6 +97,7 @@ export async function createReceipt(formData: {
         },
     });
 
+    revalidatePath("/history");
     return receipt.id;
 }
 
