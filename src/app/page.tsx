@@ -1,7 +1,20 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+
+  if (token) {
+    const payload = await verifyToken(token);
+    if (payload) {
+      redirect('/dashboard');
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#0B1220] flex flex-col font-sans text-gray-100">
       {/* Main Content Area */}

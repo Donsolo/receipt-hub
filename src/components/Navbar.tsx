@@ -24,10 +24,6 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
         { href: '/uploads', label: 'Upload' },
     ];
 
-    if (role === 'ADMIN') {
-        authLinks.push({ href: '/admin', label: 'Admin' });
-    }
-
     const guestLinks = [
         { href: '/login', label: 'Login' },
         { href: '/register', label: 'Register' },
