@@ -22,6 +22,7 @@ model Receipt {
   receiptNumber String?  @unique
   userId        String
   imageUrl      String?
+  fileSize      Int?     // bytes
   date          DateTime
   clientName    String?
   notes         String?
