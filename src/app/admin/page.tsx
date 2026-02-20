@@ -3,17 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-type User = {
+type UnifiedUser = {
     id: string;
     email: string;
     createdAt: string;
     role: string;
-};
-
-type UsageUser = {
-    id: string;
     name: string;
-    email: string;
     plan: string;
     receiptCount: number;
     storageMB: number;
@@ -27,16 +22,13 @@ type UsageData = {
     totalStorageMB: number;
     uploads24h: number;
     uploads7d: number;
-    users: UsageUser[];
 };
 
 export default function AdminPage() {
     const router = useRouter();
-    const [users, setUsers] = useState<User[]>([]);
-    const [usersLoading, setUsersLoading] = useState(true);
-
+    const [users, setUsers] = useState<UnifiedUser[]>([]);
     const [usageData, setUsageData] = useState<UsageData | null>(null);
-    const [usageLoading, setUsageLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     const fetchData = async () => {
         try {
@@ -50,17 +42,48 @@ export default function AdminPage() {
                 return;
             }
 
+            let fetchedUsers = [];
+            let fetchedUsage = null;
+
             if (usersRes.ok) {
-                setUsers(await usersRes.json());
+                fetchedUsers = await usersRes.json();
             }
             if (usageRes.ok) {
-                setUsageData(await usageRes.json());
+                fetchedUsage = await usageRes.json();
+                // We only store the top level metrics in usageData state 
+                setUsageData({
+                    totalUsers: fetchedUsage.totalUsers,
+                    activeUsers7d: fetchedUsage.activeUsers7d,
+                    totalReceipts: fetchedUsage.totalReceipts,
+                    totalStorageMB: fetchedUsage.totalStorageMB,
+                    uploads24h: fetchedUsage.uploads24h,
+                    uploads7d: fetchedUsage.uploads7d,
+                });
             }
+
+            // Merge datasets in memory
+            if (fetchedUsers.length > 0) {
+                const unified = fetchedUsers.map((u: any) => {
+                    const usageInfo = fetchedUsage?.users?.find((usageUser: any) => usageUser.id === u.id);
+                    return {
+                        id: u.id,
+                        email: u.email,
+                        createdAt: u.createdAt,
+                        role: u.role,
+                        name: usageInfo?.name || u.email,
+                        plan: usageInfo?.plan || 'Free',
+                        receiptCount: usageInfo?.receiptCount || 0,
+                        storageMB: usageInfo?.storageMB || 0.0,
+                        lastUploadDate: usageInfo?.lastUploadDate || null,
+                    };
+                });
+                setUsers(unified);
+            }
+
         } catch (error) {
             // Silently handle
         } finally {
-            setUsersLoading(false);
-            setUsageLoading(false);
+            setLoading(false);
         }
     };
 
@@ -91,77 +114,40 @@ export default function AdminPage() {
                     <h1 className="text-2xl font-bold text-gray-100">Admin Dashboard</h1>
                 </div>
 
-                {/* Platform Usage Section */}
+                {/* Platform Usage Metrics Section */}
                 <section>
                     <h2 className="text-xl font-semibold text-gray-100 mb-6">Platform Usage</h2>
-                    {usageLoading ? (
+                    {loading ? (
                         <div className="text-sm text-gray-400 animate-pulse">Loading usage statistics...</div>
                     ) : usageData ? (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
-                                    <div className="text-sm text-gray-400 mb-1">Total Users</div>
-                                    <div className="text-2xl font-semibold text-gray-100">{usageData.totalUsers.toLocaleString()}</div>
-                                </div>
-                                <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
-                                    <div className="text-sm text-gray-400 mb-1">Active Users (7d)</div>
-                                    <div className="text-2xl font-semibold text-gray-100">{usageData.activeUsers7d.toLocaleString()}</div>
-                                </div>
-                                <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
-                                    <div className="text-sm text-gray-400 mb-1">Total Receipts</div>
-                                    <div className="text-2xl font-semibold text-gray-100">{usageData.totalReceipts.toLocaleString()}</div>
-                                </div>
-                                <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
-                                    <div className="text-sm text-gray-400 mb-1">Total Storage (MB)</div>
-                                    <div className="text-2xl font-semibold text-gray-100">{usageData.totalStorageMB.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</div>
-                                </div>
-                                <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
-                                    <div className="text-sm text-gray-400 mb-1">Uploads (24h)</div>
-                                    <div className="text-2xl font-semibold text-gray-100">{usageData.uploads24h.toLocaleString()}</div>
-                                </div>
-                                <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
-                                    <div className="text-sm text-gray-400 mb-1">Uploads (7d)</div>
-                                    <div className="text-2xl font-semibold text-gray-100">{usageData.uploads7d.toLocaleString()}</div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
+                                <div className="text-sm text-gray-400 mb-1">Total Users</div>
+                                <div className="text-2xl font-semibold text-gray-100">{usageData.totalUsers.toLocaleString()}</div>
+                            </div>
+                            <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
+                                <div className="text-sm text-gray-400 mb-1">Active Users (7d)</div>
+                                <div className="text-2xl font-semibold text-gray-100">{usageData.activeUsers7d.toLocaleString()}</div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                    {usageData.totalUsers > 0 ? ((usageData.activeUsers7d / usageData.totalUsers) * 100).toFixed(1) : 0}% of total users
                                 </div>
                             </div>
-
-                            <div className="bg-[#111827] border border-[#2D3748] rounded-md overflow-x-auto shadow-sm">
-                                <table className="min-w-full divide-y divide-[#2D3748]">
-                                    <thead className="bg-[#1F2937]">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Name</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Email</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Plan</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Receipts</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Storage (MB)</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Last Upload</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-[#2D3748]">
-                                        {usageData.users.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-400">No usage data found.</td>
-                                            </tr>
-                                        ) : (
-                                            usageData.users.map(u => (
-                                                <tr key={u.id} className="hover:bg-[#243043] transition-colors">
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-medium">{u.name}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{u.email}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-800 text-gray-300 border border-gray-700">
-                                                            {u.plan}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{u.receiptCount.toLocaleString()}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{u.storageMB.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                                                        {u.lastUploadDate ? new Date(u.lastUploadDate).toLocaleDateString() : 'Never'}
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
+                            <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
+                                <div className="text-sm text-gray-400 mb-1">Total Receipts</div>
+                                <div className="text-2xl font-semibold text-gray-100">{usageData.totalReceipts.toLocaleString()}</div>
+                            </div>
+                            <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
+                                <div className="text-sm text-gray-400 mb-1">Total Storage (MB)</div>
+                                <div className="text-2xl font-semibold text-gray-100">{usageData.totalStorageMB.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</div>
+                            </div>
+                            <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
+                                <div className="text-sm text-gray-400 mb-1">Uploads (24h)</div>
+                                <div className="text-2xl font-semibold text-gray-100">{usageData.uploads24h.toLocaleString()}</div>
+                            </div>
+                            <div className="bg-[#111827] border border-[#2D3748] rounded-md p-4 flex flex-col justify-center">
+                                <div className="text-sm text-gray-400 mb-1">Uploads (7d)</div>
+                                <div className="text-2xl font-semibold text-gray-100">{usageData.uploads7d.toLocaleString()}</div>
+                                <div className="text-xs text-gray-500 mt-1">Last 7 days activity</div>
                             </div>
                         </div>
                     ) : (
@@ -169,46 +155,72 @@ export default function AdminPage() {
                     )}
                 </section>
 
-                {/* User Management Section */}
+                {/* Unified Users Table Section */}
                 <section>
-                    <h2 className="text-xl font-semibold text-gray-100 mb-6">User Management</h2>
                     <div className="bg-[#111827] border border-[#2D3748] rounded-md overflow-x-auto shadow-sm">
                         <table className="min-w-full divide-y divide-[#2D3748]">
                             <thead className="bg-[#1F2937]">
                                 <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Name</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Email</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Role</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Plan</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Receipts</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Storage (MB)</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Last Upload</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Joined</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#2D3748]">
-                                {usersLoading ? (
+                                {loading ? (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-400 animate-pulse">Loading users...</td>
+                                        <td colSpan={9} className="px-6 py-8 text-center text-sm text-gray-400 animate-pulse">Loading generic data...</td>
                                     </tr>
                                 ) : users.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-400">No users found.</td>
+                                        <td colSpan={9} className="px-6 py-8 text-center text-sm text-gray-400">No users found.</td>
                                     </tr>
                                 ) : (
                                     users.map((user) => (
                                         <tr
                                             key={user.id}
-                                            className="hover:bg-[#243043] transition-colors"
+                                            className={`hover:bg-[#1F2937] transition-colors ${user.role === 'SUPER_ADMIN' ? 'border-l-2 border-l-yellow-600' : ''}`}
                                         >
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-300">{user.email}</div>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-medium">
+                                                {user.name}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${user.role === 'SUPER_ADMIN' ? 'bg-yellow-900/30 text-yellow-500 border-yellow-800' :
-                                                        user.role === 'ADMIN' ? 'bg-indigo-900/30 text-indigo-400 border-indigo-800' :
-                                                            'bg-gray-800 text-gray-300 border-gray-700'
+                                                {user.email}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${user.role === 'SUPER_ADMIN' ? 'bg-yellow-900/20 text-yellow-500 border-yellow-800/50' :
+                                                        user.role === 'ADMIN' ? 'bg-blue-900/20 text-blue-400 border-blue-800/50' :
+                                                            'bg-gray-800/50 text-gray-400 border-gray-700'
                                                     }`}>
                                                     {user.role}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{new Date(user.createdAt).toLocaleDateString()}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${user.plan === 'Pro' ? 'bg-purple-900/20 text-purple-400 border-purple-800/50' :
+                                                        user.plan === 'Business' ? 'bg-emerald-900/20 text-emerald-400 border-emerald-800/50' :
+                                                            'bg-gray-800/50 text-gray-400 border-gray-700'
+                                                    }`}>
+                                                    {user.plan}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                {user.receiptCount.toLocaleString()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                {user.storageMB.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                                                {user.lastUploadDate ? new Date(user.lastUploadDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : '—'}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                                                {new Date(user.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <button
                                                     onClick={(e) => {
