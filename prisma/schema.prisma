@@ -8,37 +8,47 @@ datasource db {
 }
 
 model User {
-  id              String   @id @default(cuid())
-  email           String   @unique
+  id              String    @id @default(cuid())
+  email           String    @unique
   password        String
-  role            String   @default("USER") // Managed as Enum in App Code
-  createdAt       DateTime @default(now())
-  
-  // Business Profile Info
+  role            String    @default("USER")
+  createdAt       DateTime  @default(now())
+  lastSeenChangelogVersion String?
+  businessAddress String?
   businessName    String?
   businessPhone   String?
-  businessAddress String?
-
+  name            String?
   receipts        Receipt[]
+  
+  // Connections
+  sentConnections     Connection[] @relation("Requester")
+  receivedConnections Connection[] @relation("Receiver")
+
+  // Messages
+  sentMessages        Message[]    @relation("Sender")
+  receivedMessages    Message[]    @relation("MessageReceiver")
+
+  // Saved Receipt Items for Auto-Populate
+  savedReceiptItems   SavedReceiptItem[]
 }
 
 model Receipt {
-  id            String   @id @default(cuid())
-  receiptNumber String?  @unique
+  id            String        @id @default(cuid())
+  receiptNumber String?       @unique
   userId        String
   imageUrl      String?
-  fileSize      Int?     // bytes
   date          DateTime
   clientName    String?
   notes         String?
-  taxType       String   @default("none")
+  taxType       String        @default("none")
   taxValue      Float?
-  subtotal      Float    @default(0)
-  total         Float    @default(0)
-  createdAt     DateTime @default(now())
-
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subtotal      Float         @default(0)
+  total         Float         @default(0)
+  createdAt     DateTime      @default(now())
+  fileSize      Int?
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items         ReceiptItem[]
+  messages      MessageReceipt[]
 }
 
 model ReceiptItem {
@@ -48,7 +58,6 @@ model ReceiptItem {
   quantity    Int
   unitPrice   Float
   lineTotal   Float
-
   receipt     Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
 }
 
@@ -59,4 +68,57 @@ model BusinessProfile {
   businessPhone   String?
   businessEmail   String?
   logoPath        String?
+}
+
+model Connection {
+  id          String   @id @default(cuid())
+  requesterId String
+  receiverId  String
+  status      String   @default("pending") // "pending", "accepted", "declined"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requester   User     @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, receiverId])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  text       String
+  createdAt  DateTime @default(now())
+
+  sender     User     @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  receipts   MessageReceipt[]
+}
+
+model MessageReceipt {
+  id        String   @id @default(cuid())
+  messageId String
+  receiptId String
+  createdAt DateTime @default(now())
+
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  receipt   Receipt  @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, receiptId])
+}
+
+model SavedReceiptItem {
+  id             String   @id @default(cuid())
+  userId         String
+  name           String
+  normalizedName String
+  usageCount     Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, normalizedName])
+  @@index([userId, normalizedName])
 }

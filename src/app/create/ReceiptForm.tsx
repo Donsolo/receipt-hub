@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createReceipt, updateReceipt } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
@@ -24,6 +24,18 @@ export interface ReceiptData {
     items?: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
 }
 
+// Hook for debouncing
+function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+        return () => clearTimeout(handler);
+    }, [value, delay]);
+    return debouncedValue;
+}
+
 export default function ReceiptForm({ initialData }: { initialData: ReceiptData }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
@@ -45,6 +57,47 @@ export default function ReceiptForm({ initialData }: { initialData: ReceiptData 
     // Totals
     const [taxType, setTaxType] = useState<"none" | "percent" | "flat">(initialData.taxType as any || "none");
     const [taxValue, setTaxValue] = useState<number>(initialData.taxValue ? Number(initialData.taxValue) : 0);
+
+    // Auto-Populate State
+    const [activeInputId, setActiveInputId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+
+    const debouncedQuery = useDebounce(searchQuery, 250);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+
+    // Fetch suggestions
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (!debouncedQuery || !activeInputId) {
+                setSuggestions([]);
+                return;
+            }
+            try {
+                const res = await fetch(`/api/items/suggest?q=${encodeURIComponent(debouncedQuery)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setSuggestions(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch suggestions", error);
+            }
+        };
+        fetchSuggestions();
+    }, [debouncedQuery, activeInputId]);
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                setSuggestions([]);
+                setActiveInputId(null);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     // Derived state
     const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
@@ -70,6 +123,37 @@ export default function ReceiptForm({ initialData }: { initialData: ReceiptData 
             }
             return item;
         }));
+
+        if (field === 'description') {
+            setActiveInputId(id);
+            setSearchQuery(value as string);
+            setActiveSuggestionIndex(-1);
+            if (!value) setSuggestions([]);
+        }
+    };
+
+    const handleSelectSuggestion = (id: string, value: string) => {
+        updateItem(id, 'description', value);
+        setSuggestions([]);
+        setActiveInputId(null);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent, id: string) => {
+        if (!activeInputId || suggestions.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActiveSuggestionIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveSuggestionIndex(prev => (prev > 0 ? prev - 1 : -1));
+        } else if (e.key === 'Enter' && activeSuggestionIndex >= 0) {
+            e.preventDefault();
+            handleSelectSuggestion(id, suggestions[activeSuggestionIndex]);
+        } else if (e.key === 'Escape') {
+            setSuggestions([]);
+            setActiveInputId(null);
+        }
     };
 
     const addItem = () => {
@@ -177,15 +261,42 @@ export default function ReceiptForm({ initialData }: { initialData: ReceiptData 
                         <tbody className="bg-[var(--bg-card)] divide-y divide-[var(--border-subtle)]">
                             {items.map((item) => (
                                 <tr key={item.id} className="group hover:bg-[var(--bg-surface)] transition-colors">
-                                    <td className="pl-4 pr-2 py-3">
+                                    <td className="pl-4 pr-2 py-3 relative">
                                         <input
                                             type="text"
                                             required
                                             value={item.description}
                                             onChange={e => updateItem(item.id, 'description', e.target.value)}
-                                            className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-3 text-[var(--text-primary)] bg-[var(--bg-surface)] placeholder-gray-500"
+                                            onFocus={() => {
+                                                setActiveInputId(item.id);
+                                                setSearchQuery(item.description);
+                                            }}
+                                            onKeyDown={e => handleKeyDown(e, item.id)}
+                                            className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-3 text-[var(--text-primary)] bg-[var(--bg-surface)] placeholder-gray-500 relative z-10"
                                             placeholder="Item description"
+                                            autoComplete="off"
                                         />
+
+                                        {/* Dropdown Suggestions */}
+                                        {activeInputId === item.id && suggestions.length > 0 && (
+                                            <div ref={wrapperRef} className="absolute left-4 right-2 top-[calc(100%-4px)] mt-1 bg-[#1E293B] border border-gray-600/50 rounded-md shadow-2xl z-50 overflow-hidden max-h-48">
+                                                <ul className="py-1">
+                                                    {suggestions.map((suggestion, idx) => (
+                                                        <li
+                                                            key={idx}
+                                                            onClick={() => handleSelectSuggestion(item.id, suggestion)}
+                                                            onMouseEnter={() => setActiveSuggestionIndex(idx)}
+                                                            className={`px-3 py-2 text-sm cursor-pointer transition-colors ${idx === activeSuggestionIndex
+                                                                    ? 'bg-indigo-600/20 text-indigo-300'
+                                                                    : 'text-gray-300 hover:bg-white/5'
+                                                                }`}
+                                                        >
+                                                            {suggestion}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-2 py-3">
                                         <input

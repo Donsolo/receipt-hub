@@ -12,7 +12,7 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const { imageUrl } = body;
+        const { imageUrl, items } = body;
 
         if (!imageUrl) {
             return NextResponse.json({ error: 'Image URL required' }, { status: 400 });
@@ -25,6 +25,45 @@ export async function POST(request: Request) {
                 date: new Date(),
             },
         });
+
+        // Create nested items
+        if (items && Array.isArray(items) && items.length > 0) {
+            await (db as any).receiptItem.createMany({
+                data: items.map((item: any) => ({
+                    receiptId: receipt.id,
+                    description: item.description,
+                    amount: item.amount,
+                })),
+            });
+
+            // PHASE 4 AUTO-POPULATE: Save/Update frequently used items
+            for (const item of items) {
+                if (item.description && typeof item.description === 'string') {
+                    const originalName = item.description.trim();
+                    if (originalName) {
+                        const normalizedName = originalName.toLowerCase();
+
+                        await (db as any).savedReceiptItem.upsert({
+                            where: {
+                                userId_normalizedName: {
+                                    userId: user.userId,
+                                    normalizedName
+                                }
+                            },
+                            update: {
+                                usageCount: { increment: 1 }
+                            },
+                            create: {
+                                userId: user.userId,
+                                name: originalName,
+                                normalizedName,
+                                usageCount: 1
+                            }
+                        });
+                    }
+                }
+            }
+        }
 
         return NextResponse.json(receipt);
     } catch (error) {

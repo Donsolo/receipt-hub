@@ -14,7 +14,7 @@ export default function Footer() {
 
     return (
         <footer className="bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] mt-auto">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div className="md:flex md:items-center md:justify-between">
                     {/* Branding Section */}
                     <div className="flex flex-col space-y-4">

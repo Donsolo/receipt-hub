@@ -6,7 +6,7 @@ import { signToken, createAuthCookie } from '@/lib/auth';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        let { email, password } = body;
+        let { email, password, name, businessName } = body;
 
         if (!email || !password) {
             return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
@@ -31,6 +31,10 @@ export async function POST(request: Request) {
                 email,
                 password: hashedPassword,
                 role,
+                ...({
+                    name: name?.trim() || null,
+                    businessName: businessName?.trim() || null,
+                } as any)
             },
         });
 

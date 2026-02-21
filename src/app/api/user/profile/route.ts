@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
     try {
         const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
@@ -12,7 +14,7 @@ export async function GET(request: Request) {
 
         const profile = await db.user.findUnique({
             where: { id: user.userId },
-            select: { email: true, createdAt: true, ...({ businessName: true, businessPhone: true, businessAddress: true } as any) }
+            select: { email: true, createdAt: true, ...({ name: true, businessName: true, businessPhone: true, businessAddress: true } as any) }
         });
 
         if (!profile) return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -36,19 +38,22 @@ export async function PATCH(request: Request) {
         }
 
         const body = await request.json();
-        const { businessName, businessPhone, businessAddress } = body;
+        const { name, businessName, businessPhone, businessAddress } = body;
 
         const updatedUser = await db.user.update({
             where: { id: user.userId },
             data: {
-                businessName: businessName || null,
-                businessPhone: businessPhone || null,
-                businessAddress: businessAddress || null,
-            } as any,
+                ...({
+                    name: name || null,
+                    businessName: businessName || null,
+                    businessPhone: businessPhone || null,
+                    businessAddress: businessAddress || null,
+                } as any)
+            },
             select: {
                 id: true,
                 email: true,
-                ...({ businessName: true, businessPhone: true, businessAddress: true } as any)
+                ...({ name: true, businessName: true, businessPhone: true, businessAddress: true } as any)
             }
         });
 

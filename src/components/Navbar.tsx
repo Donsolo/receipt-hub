@@ -22,6 +22,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
         { href: '/history', label: 'Receipt History' },
         { href: '/create', label: 'Generator' },
         { href: '/uploads', label: 'Upload' },
+        { href: '/dashboard/connections', label: 'Network' },
         { href: '/dashboard/profile', label: 'Profile' }
     ];
 

@@ -10,6 +10,7 @@ type UserProfile = {
     businessName: string | null;
     businessPhone: string | null;
     businessAddress: string | null;
+    name?: string | null;
 };
 
 export default function ProfilePage() {
@@ -20,6 +21,7 @@ export default function ProfilePage() {
     const [toastMessage, setToastMessage] = useState<string | null>(null);
 
     // Form state
+    const [name, setName] = useState('');
     const [businessName, setBusinessName] = useState('');
     const [businessPhone, setBusinessPhone] = useState('');
     const [businessAddress, setBusinessAddress] = useState('');
@@ -39,13 +41,21 @@ export default function ProfilePage() {
                 // Creating a specific GET request to /api/user/profile makes more sense, 
                 // but let's just make /api/user/profile accept GET.
                 // Wait, I only created PATCH. Let me update the route to support GET as well.
-                const profileRes = await fetch('/api/user/profile');
+                // Try to fetch profile directly
+                const profileRes = await fetch('/api/user/profile', { cache: 'no-store' });
+
                 if (profileRes.ok) {
                     const data = await profileRes.json();
                     setProfile(data);
+                    setName(data.name || '');
                     setBusinessName(data.businessName || '');
                     setBusinessPhone(data.businessPhone || '');
                     setBusinessAddress(data.businessAddress || '');
+                } else if (profileRes.status === 404) {
+                    // User exists in cookie but not in database (ghost session due to DB swap)
+                    await fetch('/api/auth/logout', { method: 'POST', cache: 'no-store' });
+                    router.refresh();
+                    router.push('/login');
                 } else {
                     router.push('/login');
                 }
@@ -69,6 +79,7 @@ export default function ProfilePage() {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    name: name.trim() || null,
                     businessName: businessName.trim() || null,
                     businessPhone: businessPhone.trim() || null,
                     businessAddress: businessAddress.trim() || null,
@@ -79,6 +90,7 @@ export default function ProfilePage() {
                 const updated = await res.json();
                 setProfile(prev => prev ? {
                     ...prev,
+                    name: updated.name,
                     businessName: updated.businessName,
                     businessPhone: updated.businessPhone,
                     businessAddress: updated.businessAddress
@@ -101,6 +113,12 @@ export default function ProfilePage() {
 
     const needsBusinessName = !profile.businessName;
 
+    // Determine if form is dirty
+    const isDirty = name !== (profile.name || '') ||
+        businessName !== (profile.businessName || '') ||
+        businessPhone !== (profile.businessPhone || '') ||
+        businessAddress !== (profile.businessAddress || '');
+
     return (
         <div className="min-h-screen bg-[#0B1220] p-4 sm:p-8 relative">
 
@@ -111,17 +129,17 @@ export default function ProfilePage() {
                 </div>
             )}
 
-            <div className="max-w-3xl mx-auto space-y-8">
+            <div className="max-w-6xl mx-auto space-y-6">
 
-                <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-gray-100">Profile Settings</h1>
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-3xl font-bold text-gray-100">Profile Settings</h1>
                 </div>
 
                 {needsBusinessName && showBanner && (
-                    <div className="bg-indigo-900/30 border border-indigo-800/50 rounded-lg p-4 flex justify-between items-start">
+                    <div className="bg-indigo-900/40 border border-indigo-500/30 rounded-lg p-4 flex justify-between items-start mb-6">
                         <div>
                             <h3 className="text-sm font-medium text-indigo-300">Action Recommended</h3>
-                            <p className="mt-1 text-sm text-indigo-200/70">
+                            <p className="mt-1 text-sm text-indigo-200/80">
                                 Add your business name below to display it on all generated receipts automatically.
                             </p>
                         </div>
@@ -134,112 +152,160 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                {/* Account Info (Read Only) */}
-                <section className="bg-[#111827] border border-[#2D3748] rounded-lg shadow-sm overflow-hidden">
-                    <div className="px-6 py-5 border-b border-[#2D3748] bg-[#1F2937]/50">
-                        <h2 className="text-lg font-medium text-gray-100">Account Information</h2>
-                        <p className="text-sm text-gray-400 mt-1">Read-only system account details.</p>
-                    </div>
-                    <div className="px-6 py-5">
-                        <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-                            <div className="sm:col-span-1">
-                                <dt className="text-sm font-medium text-gray-500">Name</dt>
-                                <dd className="mt-1 text-sm text-gray-200">{profile.email.split('@')[0]}</dd>
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+                    {/* LEFT COLUMN (40%): Account Information */}
+                    <div className="lg:col-span-2">
+                        <section className="bg-[#0F172A] border border-white/5 rounded-xl shadow-sm p-6 sm:p-8">
+                            <div className="mb-6">
+                                <h2 className="text-lg font-semibold text-gray-100">Account Information</h2>
+                                <p className="text-sm text-gray-500 mt-1">System read-only details.</p>
                             </div>
-                            <div className="sm:col-span-1">
-                                <dt className="text-sm font-medium text-gray-500">Email address</dt>
-                                <dd className="mt-1 text-sm text-gray-200">{profile.email}</dd>
-                            </div>
-                            <div className="sm:col-span-1">
-                                <dt className="text-sm font-medium text-gray-500">Current Plan</dt>
-                                <dd className="mt-1">
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-800 text-gray-300 border border-gray-700">
-                                        Free
+
+                            <div className="space-y-4">
+                                <div className="flex flex-col border-b border-white/5 pb-3">
+                                    <span className="text-xs font-medium text-gray-500/80 uppercase tracking-wider mb-1">Email Address</span>
+                                    <span className="text-[15px] font-medium text-gray-200">{profile.email}</span>
+                                </div>
+                                <div className="flex flex-col border-b border-white/5 pb-3">
+                                    <span className="text-xs font-medium text-gray-500/80 uppercase tracking-wider mb-1">Current Plan</span>
+                                    <div className="flex items-center">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-[#1E293B] text-gray-300 border border-white/5">
+                                            Free
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col pt-1">
+                                    <span className="text-xs font-medium text-gray-500/80 uppercase tracking-wider mb-1">Joined Date</span>
+                                    <span className="text-[15px] font-medium text-gray-200">
+                                        {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </span>
-                                </dd>
+                                </div>
                             </div>
-                            <div className="sm:col-span-1">
-                                <dt className="text-sm font-medium text-gray-500">Joined Date</dt>
-                                <dd className="mt-1 text-sm text-gray-200">
-                                    {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                </dd>
-                            </div>
-                        </dl>
+                        </section>
                     </div>
-                </section>
 
-                {/* Business Information (Editable) */}
-                <section className="bg-[#111827] border border-[#2D3748] rounded-lg shadow-sm overflow-hidden">
-                    <div className="px-6 py-5 border-b border-[#2D3748] bg-[#1F2937]/50">
-                        <h2 className="text-lg font-medium text-gray-100">Business Identity</h2>
-                        <p className="text-sm text-gray-400 mt-1">These details will appear on the receipts you generate for your clients.</p>
-                    </div>
-                    <form onSubmit={handleSave} className="px-6 py-5 space-y-6">
-
-                        <div>
-                            <label htmlFor="businessName" className="block text-sm font-medium text-gray-300">
-                                Business Name <span className="text-gray-500 font-normal">(appears in receipt header)</span>
-                            </label>
-                            <div className="mt-1">
-                                <input
-                                    type="text"
-                                    id="businessName"
-                                    name="businessName"
-                                    value={businessName}
-                                    onChange={(e) => setBusinessName(e.target.value)}
-                                    className="block w-full rounded-md border border-[#374151] bg-[#1F2937] px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-                                    placeholder="e.g. Acme Corp"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                            <div>
-                                <label htmlFor="businessPhone" className="block text-sm font-medium text-gray-300">
-                                    Business Phone <span className="text-gray-500 font-normal">(optional)</span>
-                                </label>
-                                <div className="mt-1">
-                                    <input
-                                        type="tel"
-                                        id="businessPhone"
-                                        name="businessPhone"
-                                        value={businessPhone}
-                                        onChange={(e) => setBusinessPhone(e.target.value)}
-                                        className="block w-full rounded-md border border-[#374151] bg-[#1F2937] px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-                                        placeholder="(555) 123-4567"
-                                    />
+                    {/* RIGHT COLUMN (60%): Business Identity */}
+                    <div className="lg:col-span-3">
+                        <section className="bg-[#0B101D] border border-white/5 border-l-4 border-l-indigo-500/30 rounded-xl shadow-xl shadow-black/20 flex flex-col h-full relative overflow-hidden">
+                            <div className="px-6 sm:px-8 pt-6 pb-5 border-b border-white/5 flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-xl font-semibold text-gray-100 flex items-center gap-3">
+                                        Business Identity
+                                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-indigo-500/5 text-indigo-300 border border-transparent align-middle">
+                                            Used on receipts
+                                        </span>
+                                    </h2>
                                 </div>
                             </div>
 
-                            <div>
-                                <label htmlFor="businessAddress" className="block text-sm font-medium text-gray-300">
-                                    Business Address <span className="text-gray-500 font-normal">(optional)</span>
-                                </label>
-                                <div className="mt-1">
-                                    <input
-                                        type="text"
-                                        id="businessAddress"
-                                        name="businessAddress"
-                                        value={businessAddress}
-                                        onChange={(e) => setBusinessAddress(e.target.value)}
-                                        className="block w-full rounded-md border border-[#374151] bg-[#1F2937] px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-                                        placeholder="123 Main St, City, ST 12345"
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                            <form onSubmit={handleSave} className="flex flex-col flex-1">
+                                <div className="px-6 sm:px-8 py-6 space-y-6 flex-1">
 
-                        <div className="pt-4 flex justify-end">
-                            <button
-                                type="submit"
-                                disabled={saving}
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-[#0B1220] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                {saving ? 'Saving...' : 'Save Changes'}
-                            </button>
-                        </div>
-                    </form>
-                </section>
+                                    {/* 1. Business Name (Primary) */}
+                                    <div>
+                                        <label htmlFor="businessName" className="block text-sm font-medium text-gray-200">
+                                            Business Name
+                                        </label>
+                                        <p className="text-xs text-indigo-300/80 mb-2">Displayed in receipt header</p>
+                                        <input
+                                            type="text"
+                                            id="businessName"
+                                            name="businessName"
+                                            value={businessName}
+                                            onChange={(e) => setBusinessName(e.target.value)}
+                                            className="block w-full rounded-md border border-white/10 shadow-inner bg-[#1A2234] px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[#1E293B] transition-colors text-[15px]"
+                                            placeholder="e.g. Acme Corp"
+                                        />
+                                        <p className="mt-2 text-[12px] text-gray-500">
+                                            Preview text will reflect this name on PDFs.
+                                        </p>
+                                    </div>
+
+                                    {/* 2. Business Phone */}
+                                    <div>
+                                        <label htmlFor="businessPhone" className="block text-sm font-medium text-gray-300">
+                                            Business Phone <span className="text-gray-500 font-normal ml-1">(optional)</span>
+                                        </label>
+                                        <div className="mt-1.5">
+                                            <input
+                                                type="tel"
+                                                id="businessPhone"
+                                                name="businessPhone"
+                                                value={businessPhone}
+                                                onChange={(e) => setBusinessPhone(e.target.value)}
+                                                className="block w-full rounded-md border border-white/10 shadow-inner bg-[#1A2234] px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[#1E293B] transition-colors text-[15px]"
+                                                placeholder="(555) 123-4567"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* 3. Business Address */}
+                                    <div>
+                                        <label htmlFor="businessAddress" className="block text-sm font-medium text-gray-300">
+                                            Business Address <span className="text-gray-500 font-normal ml-1">(optional)</span>
+                                        </label>
+                                        <div className="mt-1.5">
+                                            <input
+                                                type="text"
+                                                id="businessAddress"
+                                                name="businessAddress"
+                                                value={businessAddress}
+                                                onChange={(e) => setBusinessAddress(e.target.value)}
+                                                className="block w-full rounded-md border border-white/10 shadow-inner bg-[#1A2234] px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[#1E293B] transition-colors text-[15px]"
+                                                placeholder="123 Main St, City, ST 12345"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* 4. Full Name */}
+                                    <div className="pt-2">
+                                        <label htmlFor="name" className="block text-sm font-medium text-gray-300">
+                                            Personal Name <span className="text-gray-500 font-normal ml-1">(optional)</span>
+                                        </label>
+                                        <div className="mt-1.5">
+                                            <input
+                                                type="text"
+                                                id="name"
+                                                name="name"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                className="block w-full rounded-md border border-white/10 shadow-inner bg-[#1A2234] px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[#1E293B] transition-colors text-[15px]"
+                                                placeholder="e.g. John Doe"
+                                            />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                {/* ACTION ROW */}
+                                <div className="px-6 sm:px-8 py-5 border-t border-white/5 bg-[#0F1523] flex items-center justify-between">
+                                    <div className="text-sm font-medium">
+                                        {isDirty ? (
+                                            <span className="text-amber-500/90 flex items-center gap-2">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                                Unsaved changes
+                                            </span>
+                                        ) : (
+                                            <span className="text-emerald-400/90 flex items-center gap-2">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                All changes saved
+                                            </span>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={saving || !isDirty}
+                                        className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-[#0F1523] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                    >
+                                        {saving ? 'Saving...' : 'Save Changes'}
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+                    </div>
+
+                </div>
             </div>
         </div>
     );
