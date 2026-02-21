@@ -9,7 +9,8 @@ export const dynamic = "force-dynamic";
 
 export default async function ReceiptViewPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
-    const receipt = await getReceipt(params.id);
+    const rawReceipt = await getReceipt(params.id);
+    const receipt: any = rawReceipt;
     const business = await getBusinessProfile();
 
     if (!receipt) {
@@ -50,19 +51,21 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
             {/* Receipt Paper */}
             <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-12 print:shadow-none print:border-none print:p-0">
                 {/* Header */}
-                <div className="flex justify-between items-start mb-12">
+                <div className="flex justify-between items-start mb-12 border-b border-gray-200 pb-8">
                     <div className="flex items-start">
                         {business.logoPath && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={business.logoPath} alt="Logo" className="h-16 w-auto object-contain mr-6" />
                         )}
                         <div>
-                            <h1 className="text-xl font-bold text-gray-900">{business.businessName}</h1>
-                            {business.businessAddress && (
-                                <p className="mt-1 text-sm text-gray-500 whitespace-pre-wrap leading-relaxed">{business.businessAddress}</p>
+                            <h1 className="text-2xl font-bold text-gray-900">
+                                {receipt.user?.businessName || receipt.user?.email?.split('@')[0] || business.businessName}
+                            </h1>
+                            {(receipt.user?.businessAddress || business.businessAddress) && (
+                                <p className="mt-1 text-sm text-gray-500 whitespace-pre-wrap leading-relaxed">{receipt.user?.businessAddress || business.businessAddress}</p>
                             )}
-                            {business.businessPhone && <p className="mt-1 text-sm text-gray-500">{business.businessPhone}</p>}
-                            {business.businessEmail && <p className="text-sm text-gray-500">{business.businessEmail}</p>}
+                            {(receipt.user?.businessPhone || business.businessPhone) && <p className="mt-1 text-sm text-gray-500">{receipt.user?.businessPhone || business.businessPhone}</p>}
+                            <p className="text-sm text-gray-500">{receipt.user?.email || business.businessEmail}</p>
                         </div>
                     </div>
                     <div className="text-right">

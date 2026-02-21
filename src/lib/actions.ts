@@ -129,10 +129,19 @@ export async function getReceipts(query: string) {
 }
 
 export async function getReceipt(id: string) {
-    return await db.receipt.findUnique({
+    const receipt = await db.receipt.findUnique({
         where: { id },
-        include: { items: true },
+        include: {
+            items: true,
+            user: {
+                select: {
+                    email: true,
+                    ...({ businessName: true, businessPhone: true, businessAddress: true } as any)
+                }
+            }
+        },
     });
+    return receipt as any;
 }
 
 export async function updateReceipt(id: string, formData: {

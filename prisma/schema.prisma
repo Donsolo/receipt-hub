@@ -8,13 +8,18 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      String   @default("USER") // Managed as Enum in App Code
-  createdAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  email           String   @unique
+  password        String
+  role            String   @default("USER") // Managed as Enum in App Code
+  createdAt       DateTime @default(now())
+  
+  // Business Profile Info
+  businessName    String?
+  businessPhone   String?
+  businessAddress String?
 
-  receipts  Receipt[]
+  receipts        Receipt[]
 }
 
 model Receipt {

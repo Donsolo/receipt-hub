@@ -62,10 +62,12 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
                 <div class="flex items-start">
                   ${logoHtml}
                   <div>
-                    <h1 class="text-2xl font-bold text-gray-900">${business.businessName}</h1>
-                    ${business.businessAddress ? `<p class="mt-1 text-sm text-gray-500 whitespace-pre-wrap">${business.businessAddress}</p>` : ''}
-                    ${business.businessPhone ? `<p class="text-sm text-gray-500">${business.businessPhone}</p>` : ''}
-                    ${business.businessEmail ? `<p class="text-sm text-gray-500">${business.businessEmail}</p>` : ''}
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        ${receipt.user?.businessName || receipt.user?.email?.split('@')[0] || business.businessName}
+                    </h1>
+                    ${receipt.user?.businessAddress || business.businessAddress ? `<p class="mt-1 text-sm text-gray-500 whitespace-pre-wrap">${receipt.user?.businessAddress || business.businessAddress}</p>` : ''}
+                    ${receipt.user?.businessPhone || business.businessPhone ? `<p class="text-sm text-gray-500">${receipt.user?.businessPhone || business.businessPhone}</p>` : ''}
+                    <p class="text-sm text-gray-500">${receipt.user?.email || business.businessEmail}</p>
                   </div>
                 </div>
                 <div class="text-right">
@@ -135,7 +137,8 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
 export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const receipt = await getReceipt(params.id);
+    const rawReceipt = await getReceipt(params.id);
+    const receipt: any = rawReceipt;
     const business = await getBusinessProfile();
 
     if (!receipt) {
