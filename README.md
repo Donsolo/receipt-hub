@@ -1,32 +1,73 @@
-# Receipt Hub - Deployment Guide
+# Receipt Hub
 
-This project is a Next.js application designed to be deployed on **Vercel** with a **PostgreSQL** (or SQLite for testing) database.
+Generate. Share. Done.
 
-## 🚀 Quick Deploy (Vercel)
+Receipt Hub is a lightweight, professional web app for generating clean, client-ready PDF receipts in seconds. Built for contractors, small business owners, freelancers, and service providers who need fast, polished documentation without complicated accounting software.
 
-1.  **Push to GitHub**: Push this repository to your GitHub account.
-2.  **Import to Vercel**:
-    - Go to [Vercel Dashboard](https://vercel.com/dashboard).
-    - Click **Add New** -> **Project**.
-    - Select this repository.
-3.  **Configure Project**:
-    - **Framework Preset**: Next.js (Auto-detected).
-    - **Environment Variables**:
-      - `DATABASE_URL`: Connection string to your database (e.g., Vercel Postgres, Supabase, or Neon).
-4.  **Deploy**: Click **Deploy**.
+---
 
-## 🛠 Database Setup
+## 🚀 Overview
 
-Since this app uses Prisma, you need a database.
-- **Vercel Postgres (Recommended)**: Create a store in Vercel Storage and link it. Vercel will auto-set `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING`.
-- **SQLite (Local only)**: The default `dev.db` is ignored to prevent conflicts. Do not use SQLite for serverless production unless you know what you are doing (data will vanish on re-deploy).
+Receipt Hub allows users to:
 
-## ⚠️ Important Notes
-- **Puppeteer (PDFs)**: Capturing PDFs in serverless builds (Vercel) can be tricky due to size limits.
-  - This project uses `puppeteer`. Vercel *may* require `puppeteer-core` and `@sparticuz/chromium` for serverless function size limits.
-  - If PDF generation fails in production, you might need to swap to `puppeteer-core`.
+- Create professional receipts instantly
+- Export clean PDF documents
+- Store and manage receipt history
+- Upgrade for enhanced features
+- Share receipts directly with clients
 
-## commands
-- `npm run dev`: Start local server.
-- `npm run build`: Build for production.
-- `npx prisma studio`: View database locally.
+Designed to be fast, simple, and modern — without feature bloat.
+
+---
+
+## ✨ Core Features
+
+- 🧾 Instant PDF Receipt Generation  
+- 📁 Secure Receipt Storage  
+- 🔐 Role-Based Access (User / Admin)  
+- 💳 Stripe Subscription Integration (Pro Tier)  
+- 📊 Admin Dashboard Monitoring  
+- ⚡ Atomic Database Upserts (Race Condition Safe)  
+- 🧠 Case-Insensitive Duplicate Protection  
+
+---
+
+## 🛠 Tech Stack
+
+- Next.js (App Router)
+- Prisma ORM
+- PostgreSQL
+- Stripe API
+- Vercel Deployment
+- Secure API Routes
+
+---
+
+## 🏢 Built By
+
+**Tektriq LLC**  
+https://tektriq.com  
+
+Detroit-based digital infrastructure and platform development.
+
+---
+
+## 📦 Deployment
+
+Production hosted on Vercel.
+
+Environment variables required:
+
+- DATABASE_URL
+- STRIPE_SECRET_KEY
+- STRIPE_WEBHOOK_SECRET
+- NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+
+---
+
+## 🔒 License
+
+This project is proprietary software owned by Tektriq LLC.  
+All rights reserved.
+
+Unauthorized copying, distribution, or modification is prohibited.
