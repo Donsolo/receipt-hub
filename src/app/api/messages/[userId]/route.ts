@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
+import { verifyToken, ensureActivated } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +15,8 @@ export async function GET(
 
         const user = await verifyToken(token);
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        try { await ensureActivated(user); } catch (e: any) { if (e.message === 'CORE_ACTIVATION_REQUIRED') return NextResponse.json({ error: 'Core activation required' }, { status: 403 }); throw e; }
 
         // Ensure these users are actually connected and accepted
         const connection = await (db as any).connection.findFirst({
@@ -67,6 +69,8 @@ export async function POST(
 
         const user = await verifyToken(token);
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        try { await ensureActivated(user); } catch (e: any) { if (e.message === 'CORE_ACTIVATION_REQUIRED') return NextResponse.json({ error: 'Core activation required' }, { status: 403 }); throw e; }
 
         if (user.userId === receiverId) {
             return NextResponse.json({ error: 'Cannot message yourself.' }, { status: 400 });

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
+import { verifyToken, ensureActivated } from '@/lib/auth';
 
 export async function PATCH(
     request: Request,
@@ -13,6 +13,8 @@ export async function PATCH(
 
         const user = await verifyToken(token);
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        try { await ensureActivated(user); } catch (e: any) { if (e.message === 'CORE_ACTIVATION_REQUIRED') return NextResponse.json({ error: 'Core activation required' }, { status: 403 }); throw e; }
 
         const connectionId = params.id;
         const body = await request.json();

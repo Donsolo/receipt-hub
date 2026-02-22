@@ -20,7 +20,7 @@ export default async function Dashboard() {
     // Fetch user details for the greeting
     const user = await db.user.findUnique({
         where: { id: authUser.userId },
-        select: { email: true, lastSeenChangelogVersion: true, ...({ name: true, businessName: true } as any) }
+        select: { email: true, lastSeenChangelogVersion: true, isEarlyAccess: true, ...({ name: true, businessName: true } as any) }
     }) as any;
 
     const showChangelog = user?.lastSeenChangelogVersion !== CURRENT_CHANGELOG_VERSION;
@@ -73,10 +73,17 @@ export default async function Dashboard() {
 
                 {/* Greeting Section */}
                 <div className="mt-2 mb-5">
-                    <h1 className="text-2xl sm:text-3xl font-normal text-gray-100 tracking-tight flex gap-2">
-                        <span>{timeGreeting},</span>
-                        {displayName ? <span className="font-semibold">{displayName}.</span> : <span>.</span>}
-                    </h1>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                        <h1 className="text-2xl sm:text-3xl font-normal text-gray-100 tracking-tight flex gap-2">
+                            <span>{timeGreeting},</span>
+                            {displayName ? <span className="font-semibold">{displayName}.</span> : <span>.</span>}
+                        </h1>
+                        {user?.isEarlyAccess && (
+                            <span className="inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-900/40 text-indigo-300 border border-indigo-800/50 mt-1 sm:mt-0">
+                                Core (Early Access Founder)
+                            </span>
+                        )}
+                    </div>
                     <p className="text-sm text-gray-400 mt-2">Here’s your receipt workspace.</p>
                 </div>
 
@@ -148,6 +155,28 @@ export default async function Dashboard() {
                                 <div>
                                     <h2 className="text-[15px] font-medium text-gray-200 group-hover:text-gray-100 transition-colors">Receipt History</h2>
                                     <p className="text-[12px] text-gray-500 mt-1">View, manage, and search all your generated and uploaded receipts.</p>
+                                </div>
+                            </div>
+                            <div className="text-gray-500 group-hover:text-gray-300 transition-transform duration-150 group-hover:translate-x-1 sm:pr-2 hidden sm:block">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* Row 3: Submit Feedback (Full Width) */}
+                    <Link href="/feedback" className="block group md:col-span-2 mt-4">
+                        <div className="bg-[#0F172A] border border-white/5 rounded-xl px-5 py-4 sm:px-6 sm:py-5 hover:bg-[#111A2C] hover:-translate-y-0.5 hover:shadow-lg shadow-sm transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="h-9 w-9 bg-fuchsia-500/10 rounded-lg flex items-center justify-center text-fuchsia-400 group-hover:bg-fuchsia-500/20 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 className="text-[15px] font-medium text-gray-200 group-hover:text-gray-100 transition-colors">Submit Feedback</h2>
+                                    <p className="text-[12px] text-gray-500 mt-1">Help shape the future of Receipt Hub. Report bugs or request features.</p>
                                 </div>
                             </div>
                             <div className="text-gray-500 group-hover:text-gray-300 transition-transform duration-150 group-hover:translate-x-1 sm:pr-2 hidden sm:block">

@@ -14,6 +14,11 @@ model User {
   role            String    @default("USER")
   createdAt       DateTime  @default(now())
   lastSeenChangelogVersion String?
+  isActivated         Boolean   @default(true)
+  isEarlyAccess       Boolean   @default(false)
+  activatedAt         DateTime?
+  activationSource    String?
+  activationTransactionId String?
   businessAddress String?
   businessName    String?
   businessPhone   String?
@@ -30,6 +35,9 @@ model User {
 
   // Saved Receipt Items for Auto-Populate
   savedReceiptItems   SavedReceiptItem[]
+  
+  // Feedback System
+  feedbacks           Feedback[]
 }
 
 model Receipt {
@@ -121,4 +129,28 @@ model SavedReceiptItem {
 
   @@unique([userId, normalizedName])
   @@index([userId, normalizedName])
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Feedback {
+  id            String   @id @default(cuid())
+  userId        String
+  type          String   // 'positive', 'suggestion', 'bug'
+  message       String
+  rating        Int?     // 1-5
+  isApproved    Boolean  @default(false)
+  isShowcased   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([isShowcased])
 }

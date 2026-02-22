@@ -77,7 +77,7 @@ export async function GET(request: Request) {
                 id: u.id,
                 name: u.email, // Fallback since User model has no 'name'
                 email: u.email,
-                plan: "Free", // Fallback since Plan model does not exist
+                plan: "Core (Early Access)", // Fallback since Plan model does not exist
                 receiptCount,
                 storageMB,
                 lastUploadDate

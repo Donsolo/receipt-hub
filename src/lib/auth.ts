@@ -7,6 +7,9 @@ export interface JWTPayload {
     userId: string;
     email: string;
     role: string;
+    isActivated?: boolean;
+    isEarlyAccess?: boolean;
+    activationSource?: string | null;
     [key: string]: any; // Jose requires Index signature
 }
 
@@ -24,6 +27,22 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
         return payload as JWTPayload;
     } catch (error) {
         return null;
+    }
+}
+
+import { getSystemSettings } from '@/lib/settings';
+
+export async function ensureActivated(user: JWTPayload) {
+    const settings = await getSystemSettings();
+    if (settings.REQUIRE_ACTIVATION) {
+        if (
+            user.isActivated === false &&
+            user.isEarlyAccess !== true &&
+            user.activationSource !== 'admin' &&
+            user.activationSource !== 'beta'
+        ) {
+            throw new Error('CORE_ACTIVATION_REQUIRED');
+        }
     }
 }
 import { serialize } from 'cookie';

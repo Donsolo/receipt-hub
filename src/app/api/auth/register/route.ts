@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import bcrypt from 'bcrypt';
 import { signToken, createAuthCookie } from '@/lib/auth';
+import { getSystemSettings } from '@/lib/settings';
 
 export async function POST(request: Request) {
     try {
@@ -23,6 +24,12 @@ export async function POST(request: Request) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Dynamic Early Access
+        const settings = await getSystemSettings();
+        const isEarlyAccess = settings.EARLY_ACCESS_OPEN;
+        const isActivated = isEarlyAccess;
+        const activationSource = isEarlyAccess ? 'early_access' : null;
+
         // Create user
         const role = email === 'Cp0165@yahoo.com' ? 'ADMIN' : 'USER';
 
@@ -31,6 +38,9 @@ export async function POST(request: Request) {
                 email,
                 password: hashedPassword,
                 role,
+                isActivated,
+                isEarlyAccess,
+                activationSource,
                 ...({
                     name: name?.trim() || null,
                     businessName: businessName?.trim() || null,
@@ -39,7 +49,7 @@ export async function POST(request: Request) {
         });
 
         // AUTO-LOGIN: Generate Token & Set Cookie
-        const token = await signToken({ userId: newUser.id, email: newUser.email, role: newUser.role });
+        const token = await signToken({ userId: newUser.id, email: newUser.email, role: newUser.role, isActivated, isEarlyAccess, activationSource });
         const cookie = createAuthCookie(token);
 
         const response = NextResponse.json({ success: true, message: 'User created successfully', user: { email: newUser.email, role: newUser.role } });

@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         }
 
         // Generate Token
-        const token = await signToken({ userId: user.id, email: user.email, role: user.role });
+        const token = await signToken({ userId: user.id, email: user.email, role: user.role, isActivated: (user as any).isActivated, isEarlyAccess: (user as any).isEarlyAccess, activationSource: (user as any).activationSource });
 
         // Set Cookie using shared helper
         const cookie = createAuthCookie(token);

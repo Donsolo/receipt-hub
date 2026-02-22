@@ -171,7 +171,7 @@ export default function ProfilePage() {
                                     <span className="text-xs font-medium text-gray-500/80 uppercase tracking-wider mb-1">Current Plan</span>
                                     <div className="flex items-center">
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-[#1E293B] text-gray-300 border border-white/5">
-                                            Free
+                                            Core (Early Access)
                                         </span>
                                     </div>
                                 </div>

@@ -4,6 +4,8 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default async function LandingPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
@@ -13,6 +15,15 @@ export default async function LandingPage() {
     if (payload) {
       redirect('/dashboard');
     }
+  }
+
+  // Fetch showcase feedback
+  let showcase = [];
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/feedback/showcase`, { cache: 'no-store' });
+    if (res.ok) showcase = await res.json();
+  } catch (err) {
+    // silently fail for landing page
   }
 
   return (
@@ -91,6 +102,44 @@ export default async function LandingPage() {
           </div>
         </div>
 
+        {/* What Founders Are Saying Section */}
+        {showcase.length > 0 && (
+          <div className="w-full max-w-6xl mx-auto py-20 relative z-10">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-white mb-4">What Founders Are Saying</h2>
+              <p className="text-gray-400">Join a network of early access founders already utilizing the core workspace.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {showcase.map((fb: any) => (
+                <div key={fb.id} className="bg-gradient-to-br from-[#111827] to-[#0F172A] border border-[#1F2937] rounded-xl p-6 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex text-indigo-400 mb-4">
+                      {[...Array(fb.rating || 5)].map((_, i) => (
+                        <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                          <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-gray-300 text-sm leading-relaxed mb-6 italic">"{fb.message}"</p>
+                  </div>
+                  <div className="flex items-center gap-3 border-t border-[#1F2937] pt-4">
+                    <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-300 font-semibold border border-indigo-500/20">
+                      {(fb.user.businessName || fb.user.name || 'F').charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-200">{fb.user.businessName || fb.user.name || 'Anonymous Founder'}</h4>
+                      {fb.user.isEarlyAccess && (
+                        <span className="text-[10px] uppercase font-medium tracking-wide text-indigo-400">Early Access Founder</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Tektriq Branding Section */}
         <div className="w-full max-w-2xl mx-auto py-12 text-center opacity-90">
           <div className="border-t border-[#2D3748] w-24 mx-auto mb-6"></div>
@@ -139,6 +188,7 @@ export default async function LandingPage() {
               <Link href="#" className="hover:text-white transition-colors duration-200">About</Link>
               <Link href="/terms" className="hover:text-white transition-colors duration-200">Terms of Service</Link>
               <Link href="/privacy" className="hover:text-white transition-colors duration-200">Privacy Policy</Link>
+              <Link href="/feedback" className="hover:text-indigo-400 transition-colors duration-200">Submit Feedback</Link>
               <Link href="#" className="hover:text-white transition-colors duration-200">Contact</Link>
             </div>
 
