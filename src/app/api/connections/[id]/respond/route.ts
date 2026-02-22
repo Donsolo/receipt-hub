@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(
+    request: Request,
+    props: { params: Promise<{ id: string }> }
+) {
+    const params = await props.params;
     try {
         const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
         if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
