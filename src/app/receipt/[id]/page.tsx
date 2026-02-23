@@ -53,9 +53,9 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
                 {/* Header */}
                 <div className="flex justify-between items-start mb-12 border-b border-gray-200 pb-8">
                     <div className="flex items-start">
-                        {business.logoPath && (
+                        {((receipt.user as any)?.businessLogoPath || business.logoPath) && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={business.logoPath} alt="Logo" className="h-16 w-auto object-contain mr-6" />
+                            <img src={(receipt.user as any)?.businessLogoPath || business.logoPath} alt="Logo" className="h-16 w-auto object-contain mr-6" />
                         )}
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900">
@@ -65,7 +65,6 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
                                 <p className="mt-1 text-sm text-gray-500 whitespace-pre-wrap leading-relaxed">{receipt.user?.businessAddress || business.businessAddress}</p>
                             )}
                             {(receipt.user?.businessPhone || business.businessPhone) && <p className="mt-1 text-sm text-gray-500">{receipt.user?.businessPhone || business.businessPhone}</p>}
-                            <p className="text-sm text-gray-500">{receipt.user?.email || business.businessEmail}</p>
                         </div>
                     </div>
                     <div className="text-right">

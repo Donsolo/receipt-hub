@@ -72,7 +72,6 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
                 </h1>
                 ${receipt.user?.businessAddress || business.businessAddress ? `<p class="mt-1 text-sm text-gray-500 whitespace-pre-wrap">${receipt.user?.businessAddress || business.businessAddress}</p>` : ''}
                 ${receipt.user?.businessPhone || business.businessPhone ? `<p class="text-sm text-gray-500">${receipt.user?.businessPhone || business.businessPhone}</p>` : ''}
-                <p class="text-sm text-gray-500">${receipt.user?.email || business.businessEmail}</p>
               </div>
             </div>
             <div class="text-right">

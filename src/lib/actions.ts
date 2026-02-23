@@ -136,7 +136,7 @@ export async function getReceipt(id: string) {
             user: {
                 select: {
                     email: true,
-                    ...({ businessName: true, businessPhone: true, businessAddress: true } as any)
+                    ...({ businessName: true, businessPhone: true, businessAddress: true, businessLogoPath: true } as any)
                 }
             }
         },
