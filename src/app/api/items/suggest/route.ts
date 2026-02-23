@@ -17,19 +17,20 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const q = searchParams.get('q');
 
-        if (!q || q.trim() === '') {
-            return NextResponse.json([]);
+        let whereClause: any = {
+            userId: user.userId
+        };
+
+        if (q && q.trim() !== '') {
+            whereClause.name = {
+                contains: q.trim(),
+                mode: 'insensitive'
+            };
         }
 
         // Case-insensitive exact matching via ilike behavior is supported by Prisma via 'contains' + 'mode: insensitive'
         const suggestions = await (db as any).savedReceiptItem.findMany({
-            where: {
-                userId: user.userId,
-                name: {
-                    contains: q.trim(),
-                    mode: 'insensitive'
-                }
-            },
+            where: whereClause,
             orderBy: [
                 { usageCount: 'desc' },
                 { name: 'asc' }

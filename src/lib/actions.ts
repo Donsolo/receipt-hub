@@ -97,6 +97,36 @@ export async function createReceipt(formData: {
         },
     });
 
+    // AUTO-POPULATE: Save/Update frequently used items
+    if (formData.items && Array.isArray(formData.items)) {
+        for (const item of formData.items) {
+            if (item.description && typeof item.description === 'string') {
+                const originalName = item.description.trim();
+                if (originalName) {
+                    const normalizedName = originalName.toLowerCase();
+
+                    await (db as any).savedReceiptItem.upsert({
+                        where: {
+                            userId_normalizedName: {
+                                userId: user.userId,
+                                normalizedName
+                            }
+                        },
+                        update: {
+                            usageCount: { increment: 1 }
+                        },
+                        create: {
+                            userId: user.userId,
+                            name: originalName,
+                            normalizedName,
+                            usageCount: 1
+                        }
+                    });
+                }
+            }
+        }
+    }
+
     revalidatePath("/history");
     return receipt.id;
 }

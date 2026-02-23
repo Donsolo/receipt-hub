@@ -70,12 +70,13 @@ export default function ReceiptForm({ initialData }: { initialData: ReceiptData 
     // Fetch suggestions
     useEffect(() => {
         const fetchSuggestions = async () => {
-            if (!debouncedQuery || !activeInputId) {
+            if (!activeInputId) {
                 setSuggestions([]);
                 return;
             }
             try {
-                const res = await fetch(`/api/items/suggest?q=${encodeURIComponent(debouncedQuery)}`);
+                const queryStr = debouncedQuery ? debouncedQuery : "";
+                const res = await fetch(`/api/items/suggest?q=${encodeURIComponent(queryStr)}`);
                 if (res.ok) {
                     const data = await res.json();
                     setSuggestions(data);
@@ -287,8 +288,8 @@ export default function ReceiptForm({ initialData }: { initialData: ReceiptData 
                                                             onClick={() => handleSelectSuggestion(item.id, suggestion)}
                                                             onMouseEnter={() => setActiveSuggestionIndex(idx)}
                                                             className={`px-3 py-2 text-sm cursor-pointer transition-colors ${idx === activeSuggestionIndex
-                                                                    ? 'bg-indigo-600/20 text-indigo-300'
-                                                                    : 'text-gray-300 hover:bg-white/5'
+                                                                ? 'bg-indigo-600/20 text-indigo-300'
+                                                                : 'text-gray-300 hover:bg-white/5'
                                                                 }`}
                                                         >
                                                             {suggestion}
