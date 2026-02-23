@@ -10,7 +10,9 @@ type UserProfile = {
     businessName: string | null;
     businessPhone: string | null;
     businessAddress: string | null;
+    businessLogoPath: string | null;
     name?: string | null;
+    role: string;
 };
 
 export default function ProfilePage() {
@@ -25,7 +27,37 @@ export default function ProfilePage() {
     const [businessName, setBusinessName] = useState('');
     const [businessPhone, setBusinessPhone] = useState('');
     const [businessAddress, setBusinessAddress] = useState('');
+    const [businessLogoPath, setBusinessLogoPath] = useState<string | null>(null);
+    const [role, setRole] = useState<string>('USER');
     const [showBanner, setShowBanner] = useState(true);
+
+    async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            setToastMessage('File too large. Max 2MB.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+            const data = await res.json();
+            if (data.success) {
+                setBusinessLogoPath(data.path);
+            } else {
+                setToastMessage(data.message || "Upload failed");
+            }
+        } catch (error) {
+            setToastMessage("Failed to upload logo.");
+        }
+    }
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -45,12 +77,17 @@ export default function ProfilePage() {
                 const profileRes = await fetch('/api/user/profile', { cache: 'no-store' });
 
                 if (profileRes.ok) {
+                    // Fetch core auth to securely get role
+                    const authData = await res.json();
+                    setRole(authData.role);
+
                     const data = await profileRes.json();
                     setProfile(data);
                     setName(data.name || '');
                     setBusinessName(data.businessName || '');
                     setBusinessPhone(data.businessPhone || '');
                     setBusinessAddress(data.businessAddress || '');
+                    setBusinessLogoPath(data.businessLogoPath || null);
                 } else if (profileRes.status === 404) {
                     // User exists in cookie but not in database (ghost session due to DB swap)
                     await fetch('/api/auth/logout', { method: 'POST', cache: 'no-store' });
@@ -83,6 +120,7 @@ export default function ProfilePage() {
                     businessName: businessName.trim() || null,
                     businessPhone: businessPhone.trim() || null,
                     businessAddress: businessAddress.trim() || null,
+                    businessLogoPath: businessLogoPath,
                 })
             });
 
@@ -93,7 +131,9 @@ export default function ProfilePage() {
                     name: updated.name,
                     businessName: updated.businessName,
                     businessPhone: updated.businessPhone,
-                    businessAddress: updated.businessAddress
+                    businessAddress: updated.businessAddress,
+                    businessLogoPath: updated.businessLogoPath,
+                    role: updated.role || role // retain role in UI state
                 } : null);
 
                 setToastMessage('Profile updated successfully');
@@ -117,7 +157,8 @@ export default function ProfilePage() {
     const isDirty = name !== (profile.name || '') ||
         businessName !== (profile.businessName || '') ||
         businessPhone !== (profile.businessPhone || '') ||
-        businessAddress !== (profile.businessAddress || '');
+        businessAddress !== (profile.businessAddress || '') ||
+        businessLogoPath !== profile.businessLogoPath;
 
     return (
         <div className="min-h-screen bg-[#0B1220] p-4 sm:p-8 relative">
@@ -202,7 +243,46 @@ export default function ProfilePage() {
                             <form onSubmit={handleSave} className="flex flex-col flex-1">
                                 <div className="px-6 sm:px-8 py-6 space-y-6 flex-1">
 
-                                    {/* 1. Business Name (Primary) */}
+                                    {/* 1. Business Logo (Admins Only) */}
+                                    {(role === 'ADMIN' || role === 'SUPER_ADMIN') && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-200 mb-2">
+                                                Business Logo <span className="inline-flex items-center ml-1.5 px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">Pro</span>
+                                            </label>
+                                            <p className="text-xs text-indigo-300/80 mb-3">Upload your corporate logo to seamlessly brand all generated PDFs.</p>
+                                            <div className="flex items-center space-x-6">
+                                                {businessLogoPath ? (
+                                                    <div className="relative group">
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img src={businessLogoPath} alt="Business Logo" className="h-20 w-20 object-contain border border-[#2D3748] rounded-lg bg-[#111827] p-2" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setBusinessLogoPath(null)}
+                                                            className="absolute -top-2 -right-2 bg-red-500/20 text-red-500 rounded-full p-1 shadow-sm hover:bg-red-500/40 transition-colors"
+                                                            title="Remove Logo"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="h-20 w-20 bg-[#111827] flex items-center justify-center border border-[#2D3748] rounded-lg text-gray-500 text-[10px] font-bold uppercase tracking-wide">No Logo</div>
+                                                )}
+                                                <div className="flex-1">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/png, image/jpeg, image/webp"
+                                                        onChange={handleLogoUpload}
+                                                        className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 transition-colors cursor-pointer"
+                                                    />
+                                                    <p className="mt-2 text-xs text-gray-500">PNG, JPG, WEBP up to 2MB.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 2. Business Name (Primary) */}
                                     <div>
                                         <label htmlFor="businessName" className="block text-sm font-medium text-gray-200">
                                             Business Name

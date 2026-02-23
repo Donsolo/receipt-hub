@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
             }
         }
 
-        if (pathname.startsWith('/admin')) {
+        if (pathname.startsWith('/admin') || pathname.startsWith('/settings')) {
             if (payload.role !== 'ADMIN' && payload.role !== 'SUPER_ADMIN') {
                 console.log(`Middleware: Unauthorized Admin Access attempt by ${payload.email} (Role: ${payload.role})`);
                 return NextResponse.redirect(new URL('/dashboard', request.url));

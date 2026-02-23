@@ -22,6 +22,7 @@ model User {
   businessAddress String?
   businessName    String?
   businessPhone   String?
+  businessLogoPath String?
   name            String?
   receipts        Receipt[]
   

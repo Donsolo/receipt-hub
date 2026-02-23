@@ -26,28 +26,31 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
   // Assuming logoPath is '/uploads/...' relative to public.
   // We can try using process.env.NEXT_PUBLIC_BASE_URL (http://localhost:3000) if available, or just the path for web view.
   // Since we rely on tailwind CDN, we assume networking is allowed.
-  const logoSrc = business.logoPath;
-  const logoHtml = logoSrc ? `< img src = "${logoSrc}" alt = "Logo" class="h-16 w-auto object-contain mr-4" /> ` : '';
+  let logoSrc = (receipt.user as any)?.businessLogoPath || business.logoPath;
+  if (logoSrc && !logoSrc.startsWith('http') && process.env.NEXT_PUBLIC_BASE_URL) {
+    logoSrc = `${process.env.NEXT_PUBLIC_BASE_URL}${logoSrc}`;
+  }
+  const logoHtml = logoSrc ? `<img src="${logoSrc}" alt="Logo" class="h-16 w-auto object-contain mr-4" />` : '';
 
   const taxInfo = receipt.taxType !== 'none' ? `
-  < div class="flex justify-between py-2" >
+  <div class="flex justify-between py-2">
          <span class="text-sm font-medium text-gray-500">
             Tax ${receipt.taxType === 'percent' ? `(${receipt.taxValue}%)` : '(Flat)'}
          </span>
          <span class="text-sm text-gray-900">
             ${formatMoney(Number(receipt.total) - Number(receipt.subtotal))}
          </span>
-      </div >
+      </div>
   ` : '';
   const notesHtml = receipt.notes ? `
-  < div class="mt-8 border-t border-gray-200 pt-8" >
+  <div class="mt-8 border-t border-gray-200 pt-8">
          <h4 class="text-sm font-medium text-gray-500">Notes</h4>
          <p class="mt-2 text-sm text-gray-600">${receipt.notes}</p>
-      </div >
+      </div>
   ` : '';
 
   return `
-  < !DOCTYPE html >
+  <!DOCTYPE html>
     <html>
       <head>
         <meta charset="utf-8">
