@@ -243,12 +243,12 @@ export default function ReceiptForm({ initialData }: { initialData: ReceiptData 
             </div>
 
             {/* Section: Line Items */}
-            <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+            <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)] shadow-sm">
                 <div className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] px-6 py-4">
                     <h3 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Line Items</h3>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="w-full">
                     <table className="min-w-full divide-y divide-[var(--border-subtle)] table-fixed">
                         <thead className="bg-[var(--bg-card)]">
                             <tr>
