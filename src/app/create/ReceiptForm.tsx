@@ -262,42 +262,44 @@ export default function ReceiptForm({ initialData }: { initialData: ReceiptData 
                         <tbody className="bg-[var(--bg-card)] divide-y divide-[var(--border-subtle)]">
                             {items.map((item) => (
                                 <tr key={item.id} className="group hover:bg-[var(--bg-surface)] transition-colors">
-                                    <td className="pl-4 pr-2 py-3 relative">
-                                        <input
-                                            type="text"
-                                            required
-                                            value={item.description}
-                                            onChange={e => updateItem(item.id, 'description', e.target.value)}
-                                            onFocus={() => {
-                                                setActiveInputId(item.id);
-                                                setSearchQuery(item.description);
-                                            }}
-                                            onKeyDown={e => handleKeyDown(e, item.id)}
-                                            className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-3 text-[var(--text-primary)] bg-[var(--bg-surface)] placeholder-gray-500 relative z-10"
-                                            placeholder="Item description"
-                                            autoComplete="off"
-                                        />
+                                    <td className="pl-4 pr-2 py-3">
+                                        <div className="relative w-full">
+                                            <input
+                                                type="text"
+                                                required
+                                                value={item.description}
+                                                onChange={e => updateItem(item.id, 'description', e.target.value)}
+                                                onFocus={() => {
+                                                    setActiveInputId(item.id);
+                                                    setSearchQuery(item.description);
+                                                }}
+                                                onKeyDown={e => handleKeyDown(e, item.id)}
+                                                className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-3 text-[var(--text-primary)] bg-[var(--bg-surface)] placeholder-gray-500 relative z-10"
+                                                placeholder="Item description"
+                                                autoComplete="off"
+                                            />
 
-                                        {/* Dropdown Suggestions */}
-                                        {activeInputId === item.id && suggestions.length > 0 && (
-                                            <div ref={wrapperRef} className="absolute left-4 right-2 top-[calc(100%-4px)] mt-1 bg-[#1E293B] border border-gray-600/50 rounded-md shadow-2xl z-50 overflow-hidden max-h-48">
-                                                <ul className="py-1">
-                                                    {suggestions.map((suggestion, idx) => (
-                                                        <li
-                                                            key={idx}
-                                                            onClick={() => handleSelectSuggestion(item.id, suggestion)}
-                                                            onMouseEnter={() => setActiveSuggestionIndex(idx)}
-                                                            className={`px-3 py-2 text-sm cursor-pointer transition-colors ${idx === activeSuggestionIndex
-                                                                ? 'bg-indigo-600/20 text-indigo-300'
-                                                                : 'text-gray-300 hover:bg-white/5'
-                                                                }`}
-                                                        >
-                                                            {suggestion}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
+                                            {/* Dropdown Suggestions */}
+                                            {activeInputId === item.id && suggestions.length > 0 && (
+                                                <div ref={wrapperRef} className="absolute left-0 right-0 top-full mt-1 bg-[#1E293B] border border-gray-600/50 rounded-md shadow-2xl z-[100] overflow-hidden">
+                                                    <ul className="py-1">
+                                                        {suggestions.map((suggestion, idx) => (
+                                                            <li
+                                                                key={idx}
+                                                                onClick={() => handleSelectSuggestion(item.id, suggestion)}
+                                                                onMouseEnter={() => setActiveSuggestionIndex(idx)}
+                                                                className={`px-3 py-2 text-sm cursor-pointer transition-colors ${idx === activeSuggestionIndex
+                                                                    ? 'bg-indigo-600/20 text-indigo-300'
+                                                                    : 'text-gray-300 hover:bg-white/5'
+                                                                    }`}
+                                                            >
+                                                                {suggestion}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-2 py-3">
                                         <input
