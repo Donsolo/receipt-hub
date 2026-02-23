@@ -55,10 +55,10 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
                     <div className="flex items-start">
                         {((receipt.user as any)?.businessLogoPath || business.logoPath) && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={(receipt.user as any)?.businessLogoPath || business.logoPath} alt="Logo" className="h-16 w-auto object-contain mr-6" />
+                            <img src={(receipt.user as any)?.businessLogoPath || business.logoPath} alt="Logo" className="h-12 w-auto object-contain mr-4" />
                         )}
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">
+                            <h1 className="text-xl font-bold text-gray-900">
                                 {receipt.user?.businessName || receipt.user?.email?.split('@')[0] || business.businessName}
                             </h1>
                             {(receipt.user?.businessAddress || business.businessAddress) && (
@@ -67,10 +67,10 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
                             {(receipt.user?.businessPhone || business.businessPhone) && <p className="mt-1 text-sm text-gray-500">{receipt.user?.businessPhone || business.businessPhone}</p>}
                         </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0 ml-4">
                         <div className="text-xs uppercase tracking-widest text-gray-400 font-bold mb-1">Receipt</div>
-                        <div className="text-lg font-mono text-gray-900">#{receipt.receiptNumber}</div>
-                        <div className="text-sm text-gray-500 mt-1">{format(receipt.date, "MMMM d, yyyy")}</div>
+                        <div className="text-base sm:text-lg font-mono text-gray-900 whitespace-nowrap">#{receipt.receiptNumber}</div>
+                        <div className="text-sm text-gray-500 mt-1 whitespace-nowrap">{format(receipt.date, "MMMM d, yyyy")}</div>
                     </div>
                 </div>
 

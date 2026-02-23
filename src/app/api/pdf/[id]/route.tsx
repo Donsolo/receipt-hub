@@ -30,7 +30,7 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
   if (logoSrc && !logoSrc.startsWith('http') && process.env.NEXT_PUBLIC_BASE_URL) {
     logoSrc = `${process.env.NEXT_PUBLIC_BASE_URL}${logoSrc}`;
   }
-  const logoHtml = logoSrc ? `<img src="${logoSrc}" alt="Logo" class="h-16 w-auto object-contain mr-4" />` : '';
+  const logoHtml = logoSrc ? `<img src="${logoSrc}" alt="Logo" class="h-12 w-auto object-contain mr-4" />` : '';
 
   const taxInfo = receipt.taxType !== 'none' ? `
   <div class="flex justify-between py-2">
@@ -57,7 +57,7 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
             @page {margin: 20mm; }
-            body {font - family: sans-serif; -webkit-print-color-adjust: exact; }
+            body {font-family: sans-serif; -webkit-print-color-adjust: exact; }
           </style>
       </head>
       <body>
@@ -67,17 +67,17 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
             <div class="flex items-start">
               ${logoHtml}
               <div>
-                <h1 class="text-2xl font-bold text-gray-900">
+                <h1 class="text-xl font-bold text-gray-900">
                   ${receipt.user?.businessName || receipt.user?.email?.split('@')[0] || business.businessName}
                 </h1>
                 ${receipt.user?.businessAddress || business.businessAddress ? `<p class="mt-1 text-sm text-gray-500 whitespace-pre-wrap">${receipt.user?.businessAddress || business.businessAddress}</p>` : ''}
                 ${receipt.user?.businessPhone || business.businessPhone ? `<p class="text-sm text-gray-500">${receipt.user?.businessPhone || business.businessPhone}</p>` : ''}
               </div>
             </div>
-            <div class="text-right">
-              <h2 class="text-xl font-bold text-gray-900">RECEIPT</h2>
-              <p class="mt-1 text-sm text-gray-500">#${receipt.receiptNumber}</p>
-              <p class="mt-1 text-sm text-gray-500">${formatDate(receipt.date)}</p>
+            <div class="text-right shrink-0 ml-4">
+              <h2 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-1">Receipt</h2>
+              <p class="text-base sm:text-lg font-mono text-gray-900 whitespace-nowrap">#${receipt.receiptNumber}</p>
+              <p class="text-sm text-gray-500 mt-1 whitespace-nowrap">${formatDate(receipt.date)}</p>
             </div>
           </div>
 
