@@ -64,6 +64,16 @@ export async function GET(request: Request) {
                 imageUrl: { not: null },
                 receiptNumber: null as any,
             },
+            include: {
+                category: { select: { name: true, color: true } },
+                bundles: {
+                    include: {
+                        bundle: {
+                            select: { id: true, name: true }
+                        }
+                    }
+                }
+            },
             orderBy: {
                 createdAt: 'desc',
             },

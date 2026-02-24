@@ -40,6 +40,13 @@ export default function UploadsPage() {
     const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
     const [selectedUploadCategory, setSelectedUploadCategory] = useState<string>('');
 
+    // Bundle Modal State
+    const [isBundleModalOpen, setIsBundleModalOpen] = useState(false);
+    const [selectedReceiptForBundle, setSelectedReceiptForBundle] = useState<Receipt | null>(null);
+    const [userBundles, setUserBundles] = useState<any[]>([]);
+    const [isBundlesLoading, setIsBundlesLoading] = useState(false);
+    const [addingToBundleId, setAddingToBundleId] = useState<string | null>(null);
+
     const fetchCategories = async () => {
         try {
             const res = await fetch('/api/categories');
@@ -136,6 +143,46 @@ export default function UploadsPage() {
         }
     };
 
+    const handleOpenBundleModal = async (receipt: Receipt) => {
+        setSelectedReceiptForBundle(receipt);
+        setIsBundleModalOpen(true);
+        setIsBundlesLoading(true);
+        try {
+            const res = await fetch('/api/bundles');
+            if (res.ok) {
+                const data = await res.json();
+                setUserBundles(data);
+            }
+        } catch (error) {
+            console.error('Failed to load bundles:', error);
+        } finally {
+            setIsBundlesLoading(false);
+        }
+    };
+
+    const handleAddToBundle = async (bundleId: string) => {
+        if (!selectedReceiptForBundle) return;
+        setAddingToBundleId(bundleId);
+        try {
+            const res = await fetch(`/api/bundles/${bundleId}/add-receipt`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ receiptId: selectedReceiptForBundle.id })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || 'Failed to add to bundle');
+            } else {
+                alert('Added to bundle successfully!');
+                setIsBundleModalOpen(false);
+            }
+        } catch (error) {
+            alert('Failed to add to bundle');
+        } finally {
+            setAddingToBundleId(null);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#0B1220] text-gray-100 p-8">
             <div className="max-w-7xl mx-auto">
@@ -222,12 +269,18 @@ export default function UploadsPage() {
                                             )}
                                         </div>
                                         {!receipt.isFinalized && (
-                                            <div className="flex justify-between w-full border-t border-gray-800 pt-2 mt-1">
+                                            <div className="flex justify-between w-full border-t border-gray-800 pt-2 mt-1 gap-2">
                                                 <button
-                                                    onClick={(e) => handleEditClick(receipt, e)}
+                                                    onClick={(e) => { e.stopPropagation(); handleOpenBundleModal(receipt); }}
                                                     className="text-indigo-400 hover:text-indigo-300 text-xs font-medium tracking-wide transition-colors"
                                                 >
-                                                    Edit Details
+                                                    Bundle
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleEditClick(receipt, e)}
+                                                    className="text-gray-400 hover:text-gray-300 text-xs font-medium tracking-wide transition-colors"
+                                                >
+                                                    Edit
                                                 </button>
                                                 <button
                                                     onClick={(e) => {
@@ -369,6 +422,61 @@ export default function UploadsPage() {
                             alt="Full Size Receipt"
                             className="max-h-full max-w-full object-contain rounded border border-gray-800 shadow-2xl"
                         />
+                    </div>
+                </div>
+            )}
+
+            {/* Add to Bundle Modal */}
+            {isBundleModalOpen && selectedReceiptForBundle && (
+                <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-[#0F172A] border border-[#1F2937] rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh]">
+                        <div className="p-6 border-b border-[#1F2937] flex justify-between items-center shrink-0">
+                            <h2 className="text-lg font-semibold text-white">Add to Bundle</h2>
+                            <button onClick={() => setIsBundleModalOpen(false)} className="text-gray-500 hover:text-gray-300 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto flex-1">
+                            <p className="text-sm text-gray-400 mb-6 font-medium">
+                                Select a bundle to add <strong className="text-gray-200">{selectedReceiptForBundle.clientName || 'this receipt'}</strong> to.
+                            </p>
+
+                            {isBundlesLoading ? (
+                                <div className="text-center py-8 text-gray-500 animate-pulse">Loading bundles...</div>
+                            ) : userBundles.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <p className="text-gray-400 text-sm mb-4">You have no bundles.</p>
+                                    <Link href="/history?view=bundles" className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors">
+                                        Create your first bundle →
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {userBundles.map(bundle => (
+                                        <div key={bundle.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-800 hover:border-gray-600 hover:bg-white/[0.02] transition-colors">
+                                            <div className="flex-1 pr-4">
+                                                <p className="text-sm font-medium text-gray-200 line-clamp-1">{bundle.name}</p>
+                                                <p className="text-xs text-gray-500 mt-1">{bundle.receiptCount} receipts</p>
+                                            </div>
+                                            <button
+                                                onClick={() => handleAddToBundle(bundle.id)}
+                                                disabled={addingToBundleId === bundle.id}
+                                                className="px-3 py-1.5 text-xs font-medium bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-md transition-colors disabled:opacity-50"
+                                            >
+                                                {addingToBundleId === bundle.id ? 'Adding...' : 'Add'}
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className="p-4 border-t border-[#1F2937] bg-[#0B1220] rounded-b-xl text-center shrink-0">
+                            <Link href="/history?view=bundles" className="text-xs font-medium text-gray-500 hover:text-indigo-400 transition-colors">
+                                Manage Bundles
+                            </Link>
+                        </div>
                     </div>
                 </div>
             )}

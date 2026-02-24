@@ -157,7 +157,14 @@ export async function getReceipts(query: string) {
     return await db.receipt.findMany({
         where,
         include: {
-            category: { select: { name: true, color: true } }
+            category: { select: { name: true, color: true } },
+            bundles: {
+                include: {
+                    bundle: {
+                        select: { id: true, name: true }
+                    }
+                }
+            }
         },
         orderBy: { createdAt: "desc" },
     });

@@ -75,9 +75,16 @@ export default function ConnectionsPage() {
 
     // Attachment State
     const [isAttachModalOpen, setIsAttachModalOpen] = useState(false);
+    const [attachModalTab, setAttachModalTab] = useState<'receipts' | 'bundles'>('receipts');
     const [userReceipts, setUserReceipts] = useState<Receipt[]>([]);
     const [selectedReceiptIds, setSelectedReceiptIds] = useState<string[]>([]);
     const [isFetchingReceipts, setIsFetchingReceipts] = useState(false);
+
+    // Bundle Attachment State
+    const [userBundles, setUserBundles] = useState<any[]>([]);
+    const [isFetchingBundles, setIsFetchingBundles] = useState(false);
+    const [selectedBundleForAttach, setSelectedBundleForAttach] = useState<any | null>(null);
+    const [bundleSelectedReceipts, setBundleSelectedReceipts] = useState<any[]>([]);
 
     // Fetch auth userId on mount for message rendering logic
     useEffect(() => {
@@ -259,22 +266,44 @@ export default function ConnectionsPage() {
         setMessages([]);
         setMessageInput('');
         setSelectedReceiptIds([]);
+        setAttachModalTab('receipts');
+        setSelectedBundleForAttach(null);
+        setBundleSelectedReceipts([]);
     };
 
     const handleOpenAttachModal = async () => {
         setIsAttachModalOpen(true);
-        setIsFetchingReceipts(true);
-        try {
-            const res = await fetch('/api/receipts');
-            if (res.ok) {
-                setUserReceipts(await res.json());
+        if (userReceipts.length === 0) {
+            setIsFetchingReceipts(true);
+            try {
+                const res = await fetch('/api/receipts');
+                if (res.ok) setUserReceipts(await res.json());
+            } catch (error) {
+                showToast("Failed to fetch receipts.");
+            } finally {
+                setIsFetchingReceipts(false);
             }
-        } catch (error) {
-            showToast("Failed to fetch receipts.");
-        } finally {
-            setIsFetchingReceipts(false);
         }
     };
+
+    const fetchBundlesForAttach = async () => {
+        if (userBundles.length > 0) return;
+        setIsFetchingBundles(true);
+        try {
+            const res = await fetch('/api/bundles');
+            if (res.ok) setUserBundles(await res.json());
+        } catch (error) {
+            showToast("Failed to fetch bundles.");
+        } finally {
+            setIsFetchingBundles(false);
+        }
+    };
+
+    useEffect(() => {
+        if (attachModalTab === 'bundles') {
+            fetchBundlesForAttach();
+        }
+    }, [attachModalTab]);
 
     const toggleReceiptSelection = (receiptId: string) => {
         setSelectedReceiptIds(prev =>
@@ -282,17 +311,39 @@ export default function ConnectionsPage() {
         );
     };
 
+    const toggleBundleReceiptSelection = (receipt: any) => {
+        setBundleSelectedReceipts(prev => {
+            const exists = prev.find(r => r.id === receipt.id);
+            if (exists) {
+                return prev.filter(r => r.id !== receipt.id);
+            } else {
+                if (prev.length >= 10) return prev; // Limit to 10
+                return [...prev, receipt];
+            }
+        });
+    };
+
     const handleSendMessage = async (e: React.FormEvent | React.KeyboardEvent) => {
         if ('preventDefault' in e) e.preventDefault();
 
         const text = messageInput.trim();
-        if ((!text && selectedReceiptIds.length === 0) || !selectedConnection) return;
+        const hasText = text.length > 0;
+        const hasReceipts = selectedReceiptIds.length > 0;
+        const hasBundle = selectedBundleForAttach !== null && bundleSelectedReceipts.length > 0;
+
+        if (!hasText && !hasReceipts && !hasBundle) return;
+        if (!selectedConnection) return;
 
         const payloadText = text;
-        const payloadReceipts = [...selectedReceiptIds];
+        const payloadReceiptIds = [...selectedReceiptIds];
+        const payloadBundleObj = selectedBundleForAttach;
+        const payloadBundleReceipts = [...bundleSelectedReceipts];
 
         setMessageInput('');
         setSelectedReceiptIds([]);
+        setSelectedBundleForAttach(null);
+        setBundleSelectedReceipts([]);
+        setAttachModalTab('receipts');
 
         // Optimistic UI logic (mostly for text, attachments won't render fully optimistcally unless complex mocked)
         const optimisticMsg: Message = {
@@ -306,10 +357,20 @@ export default function ConnectionsPage() {
         setMessages(prev => [...prev, optimisticMsg]);
 
         try {
+            const bodyPayload: any = { text: payloadText };
+            if (hasBundle && payloadBundleObj) {
+                bodyPayload.attachmentType = 'BUNDLE_SNAPSHOT';
+                bodyPayload.bundleName = payloadBundleObj.name;
+                bodyPayload.snapshotData = payloadBundleReceipts;
+            } else if (hasReceipts) {
+                bodyPayload.attachmentType = 'RECEIPT';
+                bodyPayload.receiptIds = payloadReceiptIds;
+            }
+
             const res = await fetch(`/api/messages/${selectedConnection.connectedUser.id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: payloadText, receiptIds: payloadReceipts })
+                body: JSON.stringify(bodyPayload)
             });
 
             if (res.ok) {
@@ -641,12 +702,46 @@ export default function ConnectionsPage() {
                                             )}
 
                                             {/* Render Attachments */}
+                                            {/* Legacy Single/Multiple Receipts OR Bundle Snapshot Receipts */}
                                             {msg.receipts && msg.receipts.length > 0 && (
                                                 <div className={`flex flex-col gap-2 mt-1 ${isSelf ? 'items-end' : 'items-start'}`}>
                                                     {msg.receipts.map((assoc: any) => {
+                                                        const isBundleSnapshot = assoc.type === 'BUNDLE_SNAPSHOT';
+
+                                                        if (isBundleSnapshot) {
+                                                            const snapshotArr = Array.isArray(assoc.snapshotData) ? assoc.snapshotData : [];
+                                                            return (
+                                                                <div key={assoc.id} className="bg-[#111A2C] border border-indigo-500/20 p-4 rounded-xl shadow-sm flex flex-col w-[280px]">
+                                                                    <div className="flex items-center gap-2 mb-3 border-b border-white/5 pb-2">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                                                                            <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
+                                                                            <path fillRule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clipRule="evenodd" />
+                                                                        </svg>
+                                                                        <span className="text-sm font-semibold text-indigo-100 truncate">{assoc.bundleName || 'Receipt Bundle'}</span>
+                                                                    </div>
+                                                                    <div className="space-y-2">
+                                                                        {snapshotArr.map((r: any, idx: number) => (
+                                                                            <div key={idx} className="flex justify-between items-center text-xs">
+                                                                                <span className="text-gray-300 truncate pr-2 flex-1">{r.clientName || 'Receipt'}</span>
+                                                                                <span className="text-gray-500 font-medium">${(r.total || 0).toFixed(2)}</span>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                    <div className="mt-3 pt-2 border-t border-white/5 flex justify-between items-center text-[11px] text-gray-500">
+                                                                        <span>{snapshotArr.length} Receipts</span>
+                                                                        <span className="font-semibold text-emerald-400/80">
+                                                                            ${snapshotArr.reduce((sum: number, r: any) => sum + (r.total || 0), 0).toFixed(2)} Total
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        }
+
                                                         const receipt = assoc.receipt;
+                                                        if (!receipt) return null; // Fallback just in case
+
                                                         return (
-                                                            <div key={receipt.id} className="bg-[#111A2C] border border-white/10 p-3 rounded-lg shadow-sm flex items-center justify-between min-w-[200px] max-w-[280px] gap-4">
+                                                            <div key={assoc.id} className="bg-[#111A2C] border border-white/10 p-3 rounded-lg shadow-sm flex items-center justify-between min-w-[200px] max-w-[280px] gap-4">
                                                                 <div className="flex items-center gap-3 overflow-hidden">
                                                                     <div className="h-8 w-8 bg-indigo-500/10 rounded flex items-center justify-center text-indigo-400 shrink-0">
                                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -700,14 +795,19 @@ export default function ConnectionsPage() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
                                                 <span className="truncate max-w-[100px]">{r?.clientName || 'Receipt'}</span>
-                                                <button type="button" onClick={() => toggleReceiptSelection(id)} className="hover:text-white ml-0.5">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
                                             </div>
                                         )
                                     })}
+                                </div>
+                            )}
+
+                            {selectedBundleForAttach && bundleSelectedReceipts.length > 0 && (
+                                <div className="flex flex-wrap items-center gap-2 mb-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-3 py-2 rounded-lg text-sm font-medium w-fit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
+                                        <path fillRule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                    <span>{selectedBundleForAttach.name} ({bundleSelectedReceipts.length} items)</span>
                                 </div>
                             )}
                             <form
@@ -768,43 +868,150 @@ export default function ConnectionsPage() {
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-5">
-                            {isFetchingReceipts ? (
-                                <p className="text-center text-sm text-gray-400">Loading your receipts...</p>
-                            ) : userReceipts.length === 0 ? (
-                                <p className="text-center text-sm text-gray-400 py-4">You have no stored receipts.</p>
+                            {/* Tabs Header */}
+                            <div className="flex gap-4 mb-4 border-b border-white/5 pb-2">
+                                {!selectedBundleForAttach && (
+                                    <>
+                                        <button
+                                            onClick={() => { setAttachModalTab('receipts'); setSelectedBundleForAttach(null); }}
+                                            className={`text-sm font-medium transition-colors border-b-2 pb-2 -mb-[9px] ${attachModalTab === 'receipts' ? 'text-indigo-400 border-indigo-500' : 'text-gray-500 border-transparent hover:text-gray-300'}`}
+                                        >
+                                            Single Receipts
+                                        </button>
+                                        <button
+                                            onClick={() => { setAttachModalTab('bundles'); setSelectedBundleForAttach(null); }}
+                                            className={`text-sm font-medium transition-colors border-b-2 pb-2 -mb-[9px] ${attachModalTab === 'bundles' ? 'text-indigo-400 border-indigo-500' : 'text-gray-500 border-transparent hover:text-gray-300'}`}
+                                        >
+                                            Bundles
+                                        </button>
+                                    </>
+                                )}
+                                {selectedBundleForAttach && (
+                                    <button
+                                        onClick={() => setSelectedBundleForAttach(null)}
+                                        className="text-sm font-medium text-indigo-400 border-b-2 border-indigo-500 pb-2 -mb-[9px] flex items-center gap-1"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                        </svg>
+                                        Back to Bundles
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* View Content */}
+                            {selectedBundleForAttach ? (
+                                <div>
+                                    <div className="mb-4 flex items-center justify-between bg-indigo-500/10 p-3 rounded text-sm text-indigo-200">
+                                        <span>Select up to 10 receipts to snapshot for <strong>{selectedBundleForAttach.name}</strong></span>
+                                        <span className="font-bold">{bundleSelectedReceipts.length} / 10</span>
+                                    </div>
+                                    <div className="space-y-3">
+                                        {selectedBundleForAttach.receipts.map((assoc: any) => {
+                                            const receipt = assoc.receipt;
+                                            if (!receipt) return null;
+                                            const isSelected = bundleSelectedReceipts.find(r => r.id === receipt.id) !== undefined;
+                                            const isAtLimit = !isSelected && bundleSelectedReceipts.length >= 10;
+                                            return (
+                                                <button
+                                                    key={receipt.id}
+                                                    type="button"
+                                                    disabled={isAtLimit}
+                                                    onClick={() => toggleBundleReceiptSelection(receipt)}
+                                                    className={`w-full text-left p-3 rounded border flex items-center justify-between transition-colors
+                                                        ${isAtLimit ? 'opacity-50 cursor-not-allowed' : ''}
+                                                        ${isSelected ? 'bg-indigo-600/10 border-indigo-500/50' : 'bg-[#1E293B]/50 border-white/5 hover:border-white/10'}`}
+                                                >
+                                                    <div>
+                                                        <p className={`text-[14px] font-medium ${isSelected ? 'text-indigo-200' : 'text-gray-200'}`}>
+                                                            {receipt.clientName || 'Unnamed Receipt'}
+                                                        </p>
+                                                        <div className="flex gap-2 text-[12px] opacity-70 mt-0.5">
+                                                            <span>${(receipt.total || 0).toFixed(2)}</span>
+                                                            <span>•</span>
+                                                            <span>{new Date(receipt.createdAt).toLocaleDateString()}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className={`h-5 w-5 rounded border flex items-center justify-center shrink-0 transition-colors
+                                                        ${isSelected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-500 text-transparent'}`}
+                                                    >
+                                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                        </svg>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ) : attachModalTab === 'receipts' ? (
+                                isFetchingReceipts ? (
+                                    <p className="text-center text-sm text-gray-400">Loading your receipts...</p>
+                                ) : userReceipts.length === 0 ? (
+                                    <p className="text-center text-sm text-gray-400 py-4">You have no stored receipts.</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {userReceipts.map(receipt => {
+                                            const isSelected = selectedReceiptIds.includes(receipt.id);
+                                            return (
+                                                <button
+                                                    key={receipt.id}
+                                                    type="button"
+                                                    onClick={() => toggleReceiptSelection(receipt.id)}
+                                                    className={`w-full text-left p-3 rounded border flex items-center justify-between transition-colors
+                                                        ${isSelected ? 'bg-indigo-600/10 border-indigo-500/50' : 'bg-[#1E293B]/50 border-white/5 hover:border-white/10'}`}
+                                                >
+                                                    <div>
+                                                        <p className={`text-[14px] font-medium ${isSelected ? 'text-indigo-200' : 'text-gray-200'}`}>
+                                                            {receipt.clientName || 'Unnamed Receipt'}
+                                                        </p>
+                                                        <div className="flex gap-2 text-[12px] opacity-70 mt-0.5">
+                                                            <span>${(receipt.total || 0).toFixed(2)}</span>
+                                                            <span>•</span>
+                                                            <span>{new Date(receipt.createdAt).toLocaleDateString()}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className={`h-5 w-5 rounded border flex items-center justify-center shrink-0 transition-colors
+                                                        ${isSelected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-500 text-transparent'}`}
+                                                    >
+                                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                        </svg>
+                                                    </div>
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                )
                             ) : (
-                                <div className="space-y-3">
-                                    {userReceipts.map(receipt => {
-                                        const isSelected = selectedReceiptIds.includes(receipt.id);
-                                        return (
+                                isFetchingBundles ? (
+                                    <p className="text-center text-sm text-gray-400">Loading your bundles...</p>
+                                ) : userBundles.length === 0 ? (
+                                    <p className="text-center text-sm text-gray-400 py-4">You have no bundles. Create some in the Dashboard.</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {userBundles.map(bundle => (
                                             <button
-                                                key={receipt.id}
+                                                key={bundle.id}
                                                 type="button"
-                                                onClick={() => toggleReceiptSelection(receipt.id)}
-                                                className={`w-full text-left p-3 rounded border flex items-center justify-between transition-colors
-                                                    ${isSelected ? 'bg-indigo-600/10 border-indigo-500/50' : 'bg-[#1E293B]/50 border-white/5 hover:border-white/10'}`}
+                                                onClick={() => {
+                                                    setSelectedBundleForAttach(bundle);
+                                                    setBundleSelectedReceipts([]);
+                                                    setSelectedReceiptIds([]); // clear any other picks
+                                                }}
+                                                className="w-full text-left p-4 rounded bg-[#1E293B]/50 border border-white/5 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-colors flex items-center justify-between"
                                             >
                                                 <div>
-                                                    <p className={`text-[14px] font-medium ${isSelected ? 'text-indigo-200' : 'text-gray-200'}`}>
-                                                        {receipt.clientName || 'Unnamed Receipt'}
-                                                    </p>
-                                                    <div className="flex gap-2 text-[12px] opacity-70 mt-0.5">
-                                                        <span>${(receipt.total || 0).toFixed(2)}</span>
-                                                        <span>•</span>
-                                                        <span>{new Date(receipt.createdAt).toLocaleDateString()}</span>
-                                                    </div>
+                                                    <p className="text-[14px] font-medium text-gray-200">{bundle.name}</p>
+                                                    <p className="text-xs text-gray-500 mt-1">{bundle.receiptCount} receipts contained</p>
                                                 </div>
-                                                <div className={`h-5 w-5 rounded border flex items-center justify-center shrink-0 transition-colors
-                                                    ${isSelected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-500 text-transparent'}`}
-                                                >
-                                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                    </svg>
-                                                </div>
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
                                             </button>
-                                        )
-                                    })}
-                                </div>
+                                        ))}
+                                    </div>
+                                )
                             )}
                         </div>
                         <div className="px-5 py-4 border-t border-white/5 flex gap-3 shrink-0 bg-[#0B1220] rounded-b-xl">

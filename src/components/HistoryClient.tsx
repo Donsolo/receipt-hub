@@ -15,6 +15,7 @@ type Receipt = {
     createdAt: Date;
     category?: { name: string; color: string | null } | null;
     isFinalized?: boolean;
+    bundles?: Array<{ bundle: { id: string; name: string } }>;
 };
 
 export default function HistoryClient({ initialReceipts }: { initialReceipts: Receipt[] }) {
@@ -23,6 +24,13 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
     const [statusFilter, setStatusFilter] = useState<'all' | 'generated' | 'uploaded'>('all');
     const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'az'>('newest');
     const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+
+    // Bundle Modal State
+    const [isBundleModalOpen, setIsBundleModalOpen] = useState(false);
+    const [selectedReceiptForBundle, setSelectedReceiptForBundle] = useState<Receipt | null>(null);
+    const [userBundles, setUserBundles] = useState<any[]>([]);
+    const [isBundlesLoading, setIsBundlesLoading] = useState(false);
+    const [addingToBundleId, setAddingToBundleId] = useState<string | null>(null);
 
     const router = useRouter();
 
@@ -36,11 +44,11 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
     const toggleCategory = (category: string) => {
         setOpenCategories(prev => ({
             ...prev,
-            [category]: prev[category] === false ? true : false
+            [category]: !isOpen(category)
         }));
     };
 
-    const isOpen = (category: string) => openCategories[category] !== false; // default true
+    const isOpen = (category: string) => openCategories[category] === true; // default false
 
     let filteredReceipts = initialReceipts.filter(receipt => {
         if (statusFilter === 'generated' && !receipt.receiptNumber) return false;
@@ -110,6 +118,46 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
         }
     };
 
+    const handleOpenBundleModal = async (receipt: Receipt) => {
+        setSelectedReceiptForBundle(receipt);
+        setIsBundleModalOpen(true);
+        setIsBundlesLoading(true);
+        try {
+            const res = await fetch('/api/bundles');
+            if (res.ok) {
+                const data = await res.json();
+                setUserBundles(data);
+            }
+        } catch (error) {
+            console.error('Failed to load bundles:', error);
+        } finally {
+            setIsBundlesLoading(false);
+        }
+    };
+
+    const handleAddToBundle = async (bundleId: string) => {
+        if (!selectedReceiptForBundle) return;
+        setAddingToBundleId(bundleId);
+        try {
+            const res = await fetch(`/api/bundles/${bundleId}/add-receipt`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ receiptId: selectedReceiptForBundle.id })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || 'Failed to add to bundle');
+            } else {
+                alert('Added to bundle successfully!');
+                setIsBundleModalOpen(false);
+            }
+        } catch (error) {
+            alert('Failed to add to bundle');
+        } finally {
+            setAddingToBundleId(null);
+        }
+    };
+
     return (
         <div
             className="min-h-screen px-4 pb-12 sm:px-6 lg:px-8 transition-opacity duration-500 ease-out"
@@ -131,11 +179,11 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
 
             <div className="max-w-7xl mx-auto space-y-6 pt-6 flex flex-col min-h-[50vh]">
 
-                {/* Search + Filter + Sort Bar */}
-                <div className="flex flex-col md:flex-row gap-4 mb-2 z-10 relative">
+                {/* Search + Filter + Sort Bar - Elevated Container */}
+                <div className="bg-[#111827] border border-[#2D3748] rounded-[16px] p-4 sm:p-5 shadow-lg relative z-10 flex flex-col md:flex-row items-center gap-4">
                     {/* Search Input */}
-                    <div className="flex-1 relative">
-                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="flex-1 relative w-full">
+                        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         <input
@@ -143,46 +191,66 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                             placeholder="Search receipts..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 bg-[#0f172a] border border-white/10 rounded-[10px] text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm h-[40px]"
+                            className="w-full pl-10 pr-4 py-2 bg-[#0B1220] border border-white/5 rounded-xl text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all shadow-inner h-[42px]"
                         />
                     </div>
 
-                    <div className="flex gap-4 sm:w-auto">
+                    <div className="flex flex-wrap md:flex-nowrap w-full md:w-auto items-center gap-3">
                         {/* Status Filter Dropdown */}
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value as any)}
-                            className="w-full sm:w-40 px-4 py-2 bg-[#0f172a] border border-white/10 rounded-[10px] text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm h-[40px] appearance-none cursor-pointer"
-                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em` }}
-                        >
-                            <option value="all">All Statuses</option>
-                            <option value="generated">Generated</option>
-                            <option value="uploaded">Uploaded</option>
-                        </select>
+                        <div className="relative flex-1 md:flex-none">
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value as any)}
+                                className="w-full md:w-36 px-3.5 py-2 bg-[#0B1220] border border-white/5 rounded-xl text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all shadow-inner h-[42px] appearance-none cursor-pointer"
+                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.25em 1.25em` }}
+                            >
+                                <option value="all">All Statuses</option>
+                                <option value="generated">Generated</option>
+                                <option value="uploaded">Uploaded</option>
+                            </select>
+                        </div>
 
                         {/* Sort Dropdown */}
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as any)}
-                            className="w-full sm:w-40 px-4 py-2 bg-[#0f172a] border border-white/10 rounded-[10px] text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm h-[40px] appearance-none cursor-pointer"
-                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em` }}
-                        >
-                            <option value="newest">Newest</option>
-                            <option value="oldest">Oldest</option>
-                            <option value="az">A → Z</option>
-                        </select>
-                    </div>
-                </div>
+                        <div className="relative flex-1 md:flex-none">
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value as any)}
+                                className="w-full md:w-36 px-3.5 py-2 bg-[#0B1220] border border-white/5 rounded-xl text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all shadow-inner h-[42px] appearance-none cursor-pointer"
+                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.25em 1.25em` }}
+                            >
+                                <option value="newest">Newest</option>
+                                <option value="oldest">Oldest</option>
+                                <option value="az">A → Z</option>
+                            </select>
+                        </div>
 
-                {/* Expand / Collapse All Toggle */}
-                {filteredReceipts.length > 0 && (
-                    <div className="flex justify-end pt-2 pb-1">
+                        {/* Expand / Collapse All Toggle (Moved inside container) */}
+                        {filteredReceipts.length > 0 && (
+                            <button
+                                onClick={toggleAll}
+                                className="hidden md:inline-flex px-3 py-2 shrink-0 items-center justify-center text-xs font-semibold text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl transition-all duration-200 h-[42px]"
+                            >
+                                {sortedCategoryNames.every(name => isOpen(name)) ? 'Collapse All' : 'Expand All'}
+                            </button>
+                        )}
+                    </div>
+                    {/* Mobile Expand Toggle */}
+                    {filteredReceipts.length > 0 && (
                         <button
                             onClick={toggleAll}
-                            className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 tracking-wide transition-colors active:scale-95 ease-out duration-150"
+                            className="w-full md:hidden px-3 py-2 items-center justify-center text-sm font-semibold text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl transition-all mt-1"
                         >
-                            {sortedCategoryNames.every(name => isOpen(name)) ? 'Collapse All' : 'Expand All'}
+                            {sortedCategoryNames.every(name => isOpen(name)) ? 'Collapse All Categories' : 'Expand All Categories'}
                         </button>
+                    )}
+                </div>
+
+                {/* Summary Strip (Optional Muted Stats) */}
+                {filteredReceipts.length > 0 && (
+                    <div className="flex items-center justify-between px-2 pt-1 pb-2">
+                        <p className="text-xs font-medium text-gray-500 tracking-wide">
+                            {filteredReceipts.length} Receipt{filteredReceipts.length !== 1 ? 's' : ''} • ${filteredReceipts.reduce((sum, r) => sum + (r.total || 0), 0).toFixed(2)} Total
+                        </p>
                     </div>
                 )}
 
@@ -216,39 +284,36 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                     {/* Category Header */}
                                     <div
                                         onClick={() => toggleCategory(categoryName)}
-                                        className="flex items-center justify-between cursor-pointer border border-white/5 hover:bg-white/[0.05] transition-all duration-200 mb-4 shadow-sm"
-                                        style={{
-                                            background: 'rgba(255,255,255,0.03)',
-                                            backdropFilter: 'blur(6px)',
-                                            WebkitBackdropFilter: 'blur(6px)',
-                                            borderRadius: '12px',
-                                            padding: '12px 16px',
-                                        }}
+                                        className="relative flex items-center justify-between cursor-pointer group mb-3 rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.15)] transition-all duration-200 bg-[#1e293b]/50 border border-white/5 hover:bg-[#1e293b]/80 hover:shadow-[0_4px_15px_rgba(0,0,0,0.2)]"
+                                        style={{ padding: '12px 16px' }}
                                     >
-                                        <div className="flex items-center space-x-3">
-                                            <div
-                                                className="w-2.5 h-2.5 rounded-full shadow-sm"
-                                                style={{ backgroundColor: color || '#6b7280' }}
-                                            />
-                                            <h3 className="text-sm font-semibold text-gray-200 tracking-wide uppercase">
+                                        {/* Accent Border Left */}
+                                        <div
+                                            className="absolute left-0 top-0 bottom-0 w-[3px] transition-colors"
+                                            style={{ backgroundColor: color || '#6b7280' }}
+                                        />
+
+                                        <div className="flex items-center space-x-3 ml-2">
+                                            <h3 className="text-sm font-bold text-gray-100 tracking-wider hover:text-white transition-colors">
                                                 {categoryName}
                                             </h3>
                                         </div>
                                         <div className="flex items-center space-x-4">
                                             <span
-                                                className="inline-flex items-center px-[10px] py-[3px] rounded-full text-gray-300 font-semibold uppercase tracking-[0.5px]"
+                                                className="inline-flex items-center px-2.5 py-1 rounded-full text-indigo-200 font-bold uppercase tracking-wider"
                                                 style={{
-                                                    background: '#0f172a',
+                                                    background: 'rgba(99,102,241,0.15)',
+                                                    border: '1px solid rgba(99,102,241,0.2)',
                                                     fontSize: '11px',
                                                 }}
                                             >
                                                 {receipts.length}
                                             </span>
                                             <svg
-                                                className={`w-5 h-5 text-gray-400 transition-transform duration-200 ease-in-out ${expanded ? 'rotate-180' : ''}`}
+                                                className={`w-4 h-4 text-gray-500 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${expanded ? 'rotate-180' : ''}`}
                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                             >
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </div>
                                     </div>
@@ -321,10 +386,39 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                                                         </p>
 
                                                                         {/* Line 3: Date · Category */}
-                                                                        <p className="text-gray-300 truncate" style={{ fontSize: '13px', opacity: 0.6 }}>
-                                                                            {format(new Date(receipt.date || receipt.createdAt), 'MMM d, yyyy')}
-                                                                            {categoryName !== 'Uncategorized' && ` · ${categoryName}`}
-                                                                        </p>
+                                                                        <div className="flex flex-col gap-1.5">
+                                                                            <p className="text-gray-300 truncate" style={{ fontSize: '13px', opacity: 0.6 }}>
+                                                                                {format(new Date(receipt.date || receipt.createdAt), 'MMM d, yyyy')}
+                                                                                {categoryName !== 'Uncategorized' && ` · ${categoryName}`}
+                                                                            </p>
+
+                                                                            {/* Line 4: Bundle Chips */}
+                                                                            {receipt.bundles && receipt.bundles.length > 0 && (
+                                                                                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                                                                    {receipt.bundles.slice(0, 2).map((b) => (
+                                                                                        <Link
+                                                                                            key={b.bundle.id}
+                                                                                            href={`/dashboard/bundles/${b.bundle.id}`}
+                                                                                            className="inline-flex items-center px-[10px] py-[3px] rounded-full text-[11px] font-medium transition-all hover:brightness-125"
+                                                                                            style={{ background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(139, 92, 246, 0.25)', color: '#c7d2fe' }}
+                                                                                            onClick={(e) => e.stopPropagation()}
+                                                                                        >
+                                                                                            {b.bundle.name}
+                                                                                        </Link>
+                                                                                    ))}
+                                                                                    {receipt.bundles.length > 2 && (
+                                                                                        <Link
+                                                                                            href={`/history?view=bundles`}
+                                                                                            className="inline-flex items-center px-[8px] py-[3px] rounded-full text-[10px] font-bold transition-all hover:brightness-125"
+                                                                                            style={{ background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(139, 92, 246, 0.25)', color: '#a78bfa' }}
+                                                                                            onClick={(e) => e.stopPropagation()}
+                                                                                        >
+                                                                                            +{receipt.bundles.length - 2}
+                                                                                        </Link>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -347,6 +441,16 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                                                 >
                                                                     View
                                                                 </Link>
+                                                                <button
+                                                                    onClick={() => handleOpenBundleModal(receipt)}
+                                                                    className="px-[14px] py-[8px] text-sm font-medium rounded-lg transition-all duration-[120ms] ease-out active:scale-[0.97]"
+                                                                    style={{ background: 'rgba(99,102,241,0.15)', color: '#818cf8' }}
+                                                                    title="Add to Bundle"
+                                                                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(99,102,241,0.25)'}
+                                                                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(99,102,241,0.15)'}
+                                                                >
+                                                                    Bundle
+                                                                </button>
                                                                 {!receipt.isFinalized && (
                                                                     <button
                                                                         onClick={() => handleDelete(receipt.id)}
@@ -372,6 +476,61 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                     )}
                 </div>
             </div>
+
+            {/* Add to Bundle Modal */}
+            {isBundleModalOpen && selectedReceiptForBundle && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-[#0F172A] border border-[#1F2937] rounded-xl w-full max-w-md shadow-2xl flex flex-col max-h-[85vh]">
+                        <div className="p-6 border-b border-[#1F2937] flex justify-between items-center shrink-0">
+                            <h2 className="text-lg font-semibold text-white">Add to Bundle</h2>
+                            <button onClick={() => setIsBundleModalOpen(false)} className="text-gray-500 hover:text-gray-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto flex-1">
+                            <p className="text-sm text-gray-400 mb-6">
+                                Select a bundle to add <strong>{selectedReceiptForBundle.receiptNumber || selectedReceiptForBundle.clientName || 'this receipt'}</strong> to.
+                            </p>
+
+                            {isBundlesLoading ? (
+                                <div className="text-center py-8 text-gray-500">Loading bundles...</div>
+                            ) : userBundles.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <p className="text-gray-400 text-sm mb-4">You have no bundles.</p>
+                                    <Link href="/history?view=bundles" className="text-indigo-400 hover:text-indigo-300 text-sm font-medium">
+                                        Create your first bundle →
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {userBundles.map(bundle => (
+                                        <div key={bundle.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-800 hover:border-gray-600 hover:bg-white/[0.02] transition-colors">
+                                            <div className="flex-1 pr-4">
+                                                <p className="text-sm font-medium text-gray-200 line-clamp-1">{bundle.name}</p>
+                                                <p className="text-xs text-gray-500 mt-1">{bundle.receiptCount} receipts</p>
+                                            </div>
+                                            <button
+                                                onClick={() => handleAddToBundle(bundle.id)}
+                                                disabled={addingToBundleId === bundle.id}
+                                                className="px-3 py-1.5 text-xs font-medium bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-md transition-colors disabled:opacity-50"
+                                            >
+                                                {addingToBundleId === bundle.id ? 'Adding...' : 'Add'}
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className="p-4 border-t border-[#1F2937] bg-[#0B1220] rounded-b-xl text-center shrink-0">
+                            <Link href="/history?view=bundles" className="text-xs font-medium text-gray-500 hover:text-indigo-400 transition-colors">
+                                Manage Bundles
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

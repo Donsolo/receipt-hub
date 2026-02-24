@@ -40,7 +40,7 @@ export async function GET(
                 ]
             },
             include: {
-                receipts: {
+                attachments: {
                     include: {
                         receipt: true
                     }
@@ -77,11 +77,11 @@ export async function POST(
         }
 
         const body = await request.json();
-        const { text, receiptIds } = body;
+        const { text, receiptIds, attachmentType = 'RECEIPT', bundleName, snapshotData } = body;
 
         let messageText = text || '';
 
-        if (!messageText && (!receiptIds || receiptIds.length === 0)) {
+        if (!messageText && (!receiptIds || receiptIds.length === 0) && !snapshotData) {
             return NextResponse.json({ error: 'Message text or an attachment is required.' }, { status: 400 });
         }
 
@@ -103,9 +103,9 @@ export async function POST(
             return NextResponse.json({ error: 'You can only message accepted connections.' }, { status: 403 });
         }
 
-        // Validate receipts if any
+        // Validate receipts if any for standard receipt attachment
         let validReceiptIds: string[] = [];
-        if (receiptIds && Array.isArray(receiptIds) && receiptIds.length > 0) {
+        if (attachmentType === 'RECEIPT' && receiptIds && Array.isArray(receiptIds) && receiptIds.length > 0) {
             const ownedReceipts = await (db as any).receipt.findMany({
                 where: {
                     id: { in: receiptIds },
@@ -121,21 +121,36 @@ export async function POST(
             }
         }
 
+        let attachmentsCreate: any = undefined;
+
+        if (attachmentType === 'RECEIPT' && validReceiptIds.length > 0) {
+            attachmentsCreate = {
+                create: validReceiptIds.map(rid => ({
+                    type: 'RECEIPT',
+                    receiptId: rid
+                }))
+            };
+        } else if (attachmentType === 'BUNDLE_SNAPSHOT' && snapshotData) {
+            // Snapshot arrays should strictly be capped at 10 items
+            const limitedSnapshot = Array.isArray(snapshotData) ? snapshotData.slice(0, 10) : snapshotData;
+            attachmentsCreate = {
+                create: {
+                    type: 'BUNDLE_SNAPSHOT',
+                    bundleName: bundleName || 'Receipt Bundle',
+                    snapshotData: limitedSnapshot
+                }
+            };
+        }
+
         const message = await (db as any).message.create({
             data: {
                 senderId: user.userId,
                 receiverId,
                 text: messageText.trim(),
-                ...(validReceiptIds.length > 0 && {
-                    receipts: {
-                        create: validReceiptIds.map(rid => ({
-                            receiptId: rid
-                        }))
-                    }
-                })
+                ...(attachmentsCreate && { attachments: attachmentsCreate })
             },
             include: {
-                receipts: {
+                attachments: {
                     include: {
                         receipt: true
                     }
