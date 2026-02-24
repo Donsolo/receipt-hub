@@ -8,8 +8,7 @@ export async function GET() {
         const showcase = await db.feedback.findMany({
             where: {
                 isShowcased: true,
-                type: 'positive',
-                isApproved: true
+                type: 'positive'
             },
             take: 6,
             orderBy: { createdAt: 'desc' },

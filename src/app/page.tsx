@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,13 +18,28 @@ export default async function LandingPage() {
     }
   }
 
-  // Fetch showcase feedback
-  let showcase = [];
+  // Fetch showcase feedback directly from DB
+  let showcase: any[] = [];
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/feedback/showcase`, { cache: 'no-store' });
-    if (res.ok) showcase = await res.json();
+    showcase = await db.feedback.findMany({
+      where: {
+        isShowcased: true,
+        type: 'positive'
+      },
+      take: 6,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            name: true,
+            businessName: true,
+            isEarlyAccess: true
+          }
+        }
+      }
+    });
   } catch (err) {
-    // silently fail for landing page
+    console.error("Failed to load showcase feedback", err);
   }
 
   return (
@@ -104,33 +120,68 @@ export default async function LandingPage() {
 
         {/* What Founders Are Saying Section */}
         {showcase.length > 0 && (
-          <div className="w-full max-w-6xl mx-auto py-20 relative z-10">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-white mb-4">What Founders Are Saying</h2>
-              <p className="text-gray-400">Join a network of early access founders already utilizing the core workspace.</p>
+          <div className="w-full max-w-7xl mx-auto py-24 relative z-10 px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16 relative">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none" />
+              <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight relative z-10">
+                Loved by <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Pioneers</span>
+              </h2>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto font-medium">
+                Join a rapidly compounding network of early-access founders already scaling their operations on the core workspace.
+              </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {showcase.map((fb: any) => (
-                <div key={fb.id} className="bg-gradient-to-br from-[#111827] to-[#0F172A] border border-[#1F2937] rounded-xl p-6 shadow-sm flex flex-col justify-between">
-                  <div>
-                    <div className="flex text-indigo-400 mb-4">
-                      {[...Array(fb.rating || 5)].map((_, i) => (
-                        <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+            <div
+              className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 pt-4 px-4 -mx-4 relative z-10"
+              style={{
+                scrollbarWidth: 'none', // Firefox
+                msOverflowStyle: 'none', // IE/Edge
+              }}
+            >
+              <style>{`
+                /* Hide scrollbar for Chrome, Safari and Opera */
+                .flex.overflow-x-auto::-webkit-scrollbar {
+                  display: none;
+                }
+              `}</style>
+
+              {showcase.map((fb: any, i: number) => (
+                <div
+                  key={fb.id}
+                  className="shrink-0 w-[85vw] sm:w-[400px] snap-center group relative bg-[#0f172a]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-indigo-500/10 hover:border-indigo-500/30"
+                >
+                  {/* Subtle Gradient Hover Effect within Card */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+                  <div className="relative z-10">
+                    <div className="flex text-indigo-400 mb-6 space-x-1">
+                      {[...Array(fb.rating || 5)].map((_, idx) => (
+                        <svg key={idx} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
                           <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
                         </svg>
                       ))}
                     </div>
-                    <p className="text-gray-300 text-sm leading-relaxed mb-6 italic">"{fb.message}"</p>
+
+                    <p className="text-gray-300 text-[15px] leading-relaxed mb-8 relative">
+                      <span className="text-5xl text-indigo-500/20 absolute -top-4 -left-3 font-serif leading-none">"</span>
+                      <span className="relative z-10">{fb.message}</span>
+                    </p>
                   </div>
-                  <div className="flex items-center gap-3 border-t border-[#1F2937] pt-4">
-                    <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-300 font-semibold border border-indigo-500/20">
-                      {(fb.user.businessName || fb.user.name || 'F').charAt(0).toUpperCase()}
+
+                  <div className="flex items-center gap-4 relative z-10 mt-auto">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px]">
+                      <div className="w-full h-full rounded-full bg-[#0f172a] flex items-center justify-center text-indigo-300 font-bold text-lg">
+                        {(fb.user.businessName || fb.user.name || 'F').charAt(0).toUpperCase()}
+                      </div>
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-200">{fb.user.businessName || fb.user.name || 'Anonymous Founder'}</h4>
+                      <h4 className="text-[15px] font-bold text-gray-100 tracking-wide">
+                        {fb.user.businessName || fb.user.name || 'Anonymous Founder'}
+                      </h4>
                       {fb.user.isEarlyAccess && (
-                        <span className="text-[10px] uppercase font-medium tracking-wide text-indigo-400">Early Access Founder</span>
+                        <span className="inline-block mt-1 text-[11px] font-semibold tracking-wider uppercase text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                          Early Access
+                        </span>
                       )}
                     </div>
                   </div>
