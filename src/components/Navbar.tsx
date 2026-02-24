@@ -19,9 +19,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
 
     const authLinks = [
         { href: '/dashboard', label: 'Dashboard' },
-        { href: '/history', label: 'Receipt History' },
-        { href: '/create', label: 'Generator' },
-        { href: '/uploads', label: 'Upload' },
+        { href: '/history', label: 'Receipts' },
         { href: '/dashboard/connections', label: 'Network' },
         { href: '/dashboard/profile', label: 'Profile' }
     ];

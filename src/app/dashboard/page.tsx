@@ -143,7 +143,7 @@ export default async function Dashboard() {
                         </div>
                     </Link>
 
-                    {/* Row 2: Receipt History (Full Width) */}
+                    {/* Row 2: Receipts (Full Width) */}
                     <Link href="/history" className="block group md:col-span-2">
                         <div className="bg-[#0F172A] border border-white/5 rounded-xl px-5 py-5 sm:px-6 sm:py-6 hover:bg-[#111A2C] hover:-translate-y-0.5 hover:shadow-lg shadow-sm transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
@@ -153,7 +153,7 @@ export default async function Dashboard() {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 className="text-[15px] font-medium text-gray-200 group-hover:text-gray-100 transition-colors">Receipt History</h2>
+                                    <h2 className="text-[15px] font-medium text-gray-200 group-hover:text-gray-100 transition-colors">Receipts</h2>
                                     <p className="text-[12px] text-gray-500 mt-1">View, manage, and search all your generated and uploaded receipts.</p>
                                 </div>
                             </div>

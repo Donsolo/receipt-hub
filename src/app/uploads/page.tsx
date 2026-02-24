@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import UploadButton from '@/components/UploadButton';
+import Link from 'next/link';
 
 type Receipt = {
     id: string;
@@ -13,6 +14,8 @@ type Receipt = {
     taxValue?: number | null;
     date?: string;
     notes?: string | null;
+    categoryId?: string | null;
+    isFinalized?: boolean;
 };
 
 export default function UploadsPage() {
@@ -28,9 +31,26 @@ export default function UploadsPage() {
         total: '',
         taxValue: '',
         date: '',
-        notes: ''
+        notes: '',
+        categoryId: ''
     });
     const [saving, setSaving] = useState(false);
+
+    // Categories State
+    const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
+    const [selectedUploadCategory, setSelectedUploadCategory] = useState<string>('');
+
+    const fetchCategories = async () => {
+        try {
+            const res = await fetch('/api/categories');
+            if (res.ok) {
+                const data = await res.json();
+                setCategories(data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch categories:', error);
+        }
+    };
 
     const fetchReceipts = async () => {
         try {
@@ -50,6 +70,7 @@ export default function UploadsPage() {
 
     useEffect(() => {
         fetchReceipts();
+        fetchCategories();
     }, []);
 
     const handleDelete = async (id: string) => {
@@ -77,7 +98,8 @@ export default function UploadsPage() {
             total: receipt.total?.toString() || '',
             taxValue: receipt.taxValue?.toString() || '',
             date: receipt.date ? new Date(receipt.date).toISOString().split('T')[0] : new Date(receipt.createdAt).toISOString().split('T')[0],
-            notes: receipt.notes || ''
+            notes: receipt.notes || '',
+            categoryId: receipt.categoryId || ''
         });
     };
 
@@ -95,7 +117,8 @@ export default function UploadsPage() {
                     total: parseFloat(editForm.total) || 0,
                     taxValue: parseFloat(editForm.taxValue) || null,
                     date: editForm.date,
-                    notes: editForm.notes
+                    notes: editForm.notes,
+                    categoryId: editForm.categoryId || null
                 })
             });
 
@@ -117,15 +140,33 @@ export default function UploadsPage() {
         <div className="min-h-screen bg-[#0B1220] text-gray-100 p-8">
             <div className="max-w-7xl mx-auto">
                 {/* Header Section */}
-                <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
-                    <div className="flex-1 min-w-0">
-                        <h2 className="text-xl font-semibold text-gray-100">My Uploads</h2>
-                    </div>
-                    <div className="flex gap-3">
-                        <UploadButton
-                            onUploadComplete={fetchReceipts}
-                            endpoint="/api/uploaded-receipts"
-                        />
+                <div className="mb-6">
+                    <Link href="/history" className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-gray-200 transition-colors mb-4 border border-gray-700/50 hover:bg-white/5 rounded-md px-3 py-1.5 w-fit">
+                        <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Receipts
+                    </Link>
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div className="flex-1 min-w-0">
+                            <h2 className="text-xl font-semibold text-gray-100">My Uploads</h2>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <select
+                                value={selectedUploadCategory}
+                                onChange={(e) => setSelectedUploadCategory(e.target.value)}
+                                className="bg-[#1F2937] border border-[#2D3748] text-sm rounded-lg px-3 h-11 text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto"
+                            >
+                                <option value="">No Category</option>
+                                {categories.map(cat => (
+                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                ))}
+                            </select>
+                            <UploadButton
+                                onUploadComplete={fetchReceipts}
+                                endpoint={selectedUploadCategory ? `/api/uploaded-receipts?categoryId=${selectedUploadCategory}` : "/api/uploaded-receipts"}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -174,25 +215,31 @@ export default function UploadsPage() {
                                             <span className="text-xs text-gray-400">
                                                 {new Date(receipt.date || receipt.createdAt).toLocaleDateString()}
                                             </span>
-
+                                            {receipt.isFinalized && (
+                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100/10 text-gray-400 border border-gray-100/20 uppercase tracking-wider">
+                                                    Finalized
+                                                </span>
+                                            )}
                                         </div>
-                                        <div className="flex justify-between w-full border-t border-gray-800 pt-2 mt-1">
-                                            <button
-                                                onClick={(e) => handleEditClick(receipt, e)}
-                                                className="text-indigo-400 hover:text-indigo-300 text-xs font-medium tracking-wide transition-colors"
-                                            >
-                                                Edit Details
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDelete(receipt.id);
-                                                }}
-                                                className="text-red-400 hover:text-red-300 text-xs font-medium tracking-wide transition-colors"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
+                                        {!receipt.isFinalized && (
+                                            <div className="flex justify-between w-full border-t border-gray-800 pt-2 mt-1">
+                                                <button
+                                                    onClick={(e) => handleEditClick(receipt, e)}
+                                                    className="text-indigo-400 hover:text-indigo-300 text-xs font-medium tracking-wide transition-colors"
+                                                >
+                                                    Edit Details
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDelete(receipt.id);
+                                                    }}
+                                                    className="text-red-400 hover:text-red-300 text-xs font-medium tracking-wide transition-colors"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -267,6 +314,19 @@ export default function UploadsPage() {
                                     className="w-full bg-[#111827] border border-[#2D3748] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                                     placeholder="Optional notes..."
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Category</label>
+                                <select
+                                    value={editForm.categoryId}
+                                    onChange={(e) => setEditForm({ ...editForm, categoryId: e.target.value })}
+                                    className="w-full bg-[#111827] border border-[#2D3748] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <option value="">None</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="pt-4 flex justify-end gap-3">
                                 <button

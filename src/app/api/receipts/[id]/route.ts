@@ -29,6 +29,10 @@ export async function DELETE(
             return NextResponse.json({ error: 'Receipt not found or unauthorized' }, { status: 404 });
         }
 
+        if (receipt.isFinalized) {
+            return NextResponse.json({ error: 'This receipt has been finalized and cannot be edited.' }, { status: 403 });
+        }
+
         // If uploaded receipt, delete from S3
         if (receipt.imageUrl) {
             try {
@@ -84,7 +88,7 @@ export async function PATCH(
         try { await ensureActivated(user); } catch (e: any) { if (e.message === 'CORE_ACTIVATION_REQUIRED') return NextResponse.json({ error: 'Core activation required' }, { status: 403 }); throw e; }
 
         const body = await request.json();
-        const { date, clientName, notes, total, taxValue } = body;
+        const { date, clientName, notes, total, taxValue, categoryId } = body;
 
         // Verify ownership
         const existingReceipt = await db.receipt.findUnique({
@@ -98,12 +102,17 @@ export async function PATCH(
             return NextResponse.json({ error: 'Receipt not found or unauthorized' }, { status: 404 });
         }
 
+        if (existingReceipt.isFinalized) {
+            return NextResponse.json({ error: 'This receipt has been finalized and cannot be edited.' }, { status: 403 });
+        }
+
         const updatedReceipt = await db.receipt.update({
             where: { id: params.id },
             data: {
                 date: date ? new Date(date) : undefined,
                 clientName: clientName !== undefined ? clientName : undefined,
                 notes: notes !== undefined ? notes : undefined,
+                categoryId: categoryId !== undefined ? categoryId : undefined,
                 total: total !== undefined ? parseFloat(total) : undefined,
                 taxValue: taxValue !== undefined ? parseFloat(taxValue) : undefined,
             },

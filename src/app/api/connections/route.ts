@@ -24,10 +24,10 @@ export async function GET(request: Request) {
             },
             include: {
                 requester: {
-                    select: { id: true, name: true, businessName: true }
+                    select: { id: true, name: true, businessName: true, email: true }
                 },
                 receiver: {
-                    select: { id: true, name: true, businessName: true }
+                    select: { id: true, name: true, businessName: true, email: true }
                 }
             },
             orderBy: {
@@ -41,14 +41,20 @@ export async function GET(request: Request) {
             const peer = isRequester ? conn.receiver : conn.requester;
             return {
                 connectionId: conn.id,
-                userId: peer.id,
-                name: peer.name,
-                businessName: peer.businessName,
-                connectedAt: conn.updatedAt
+                status: conn.status,
+                connectedAt: conn.connectedAt,
+                connectedUser: {
+                    id: peer.id,
+                    name: peer.name,
+                    businessName: peer.businessName,
+                    email: peer.email
+                }
             };
         });
 
-        return NextResponse.json(formattedConnections);
+        const res = NextResponse.json(formattedConnections);
+        res.headers.set('Cache-Control', 'no-store, max-age=0');
+        return res;
     } catch (error) {
         console.error('Get connections error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

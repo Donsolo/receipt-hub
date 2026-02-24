@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         try { await ensureActivated(user); } catch (e: any) { if (e.message === 'CORE_ACTIVATION_REQUIRED') return NextResponse.json({ error: 'Core activation required' }, { status: 403 }); throw e; }
 
         const body = await request.json();
-        const { imageUrl } = body;
+        const { imageUrl, categoryId } = body;
 
         // Strict validation: Only accept uploads for this route
         if (!imageUrl) {
@@ -34,6 +34,7 @@ export async function POST(request: Request) {
             data: {
                 userId: user.userId,
                 imageUrl,
+                categoryId: categoryId || null,
                 date: new Date(),
             },
         });

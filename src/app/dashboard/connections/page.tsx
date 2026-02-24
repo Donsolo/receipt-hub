@@ -6,7 +6,7 @@ type UserResult = {
     id: string;
     name: string | null;
     businessName: string | null;
-    email?: string; // Only present in email search
+    email?: string | null; // Only present in email search
 };
 
 type IncomingRequest = {
@@ -15,15 +15,20 @@ type IncomingRequest = {
         id: string;
         name: string | null;
         businessName: string | null;
+        email?: string | null;
     };
 };
 
 type Connection = {
     connectionId: string;
-    userId: string;
-    name: string | null;
-    businessName: string | null;
+    status: string;
     connectedAt: string;
+    connectedUser: {
+        id: string;
+        name: string | null;
+        businessName: string | null;
+        email?: string | null;
+    };
 };
 
 type Receipt = {
@@ -92,9 +97,10 @@ export default function ConnectionsPage() {
     // Load initial data
     const loadData = useCallback(async () => {
         try {
+            const timestamp = Date.now();
             const [incomingRes, connectionsRes] = await Promise.all([
-                fetch('/api/connections/incoming', { cache: 'no-store' }),
-                fetch('/api/connections', { cache: 'no-store' })
+                fetch(`/api/connections/incoming?t=${timestamp}`, { cache: 'no-store' }),
+                fetch(`/api/connections?t=${timestamp}`, { cache: 'no-store' })
             ]);
 
             if (incomingRes.ok) setIncomingRequests(await incomingRes.json());
@@ -210,9 +216,22 @@ export default function ConnectionsPage() {
         }
     };
 
-    // Helper for rendering names
-    const getDisplayNameInfo = (user: { name: string | null, businessName: string | null }) => {
-        const primary = user.businessName || user.name || 'Unknown User';
+    // Helper for rendering names (Strict implementation per user prompt)
+    function getDisplayName(user: {
+        name?: string | null;
+        businessName?: string | null;
+        email?: string | null;
+    }) {
+        return (
+            user?.businessName?.trim() ||
+            user?.name?.trim() ||
+            user?.email?.trim() ||
+            "Unknown User"
+        );
+    }
+
+    const getDisplayNameInfo = (user: { name: string | null, businessName: string | null, email?: string | null }) => {
+        const primary = getDisplayName(user);
         const secondary = user.businessName ? (user.name || 'Personal Account') : 'Personal Account';
         return { primary, secondary };
     };
@@ -222,7 +241,7 @@ export default function ConnectionsPage() {
         setSelectedConnection(connection);
         setIsMessageLoading(true);
         try {
-            const res = await fetch(`/api/messages/${connection.userId}`);
+            const res = await fetch(`/api/messages/${connection.connectedUser.id}`);
             if (res.ok) {
                 setMessages(await res.json());
             } else {
@@ -279,7 +298,7 @@ export default function ConnectionsPage() {
         const optimisticMsg: Message = {
             id: `temp-${Date.now()}`,
             senderId: authUserId || '',
-            receiverId: selectedConnection.userId,
+            receiverId: selectedConnection.connectedUser.id,
             text: payloadText,
             createdAt: new Date().toISOString()
         };
@@ -287,7 +306,7 @@ export default function ConnectionsPage() {
         setMessages(prev => [...prev, optimisticMsg]);
 
         try {
-            const res = await fetch(`/api/messages/${selectedConnection.userId}`, {
+            const res = await fetch(`/api/messages/${selectedConnection.connectedUser.id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: payloadText, receiptIds: payloadReceipts })
@@ -510,7 +529,8 @@ export default function ConnectionsPage() {
                                     </div>
                                 ) : (
                                     connections.map(conn => {
-                                        const { primary, secondary } = getDisplayNameInfo(conn);
+                                        console.log('connection.connectedUser:', conn.connectedUser);
+                                        const { primary, secondary } = getDisplayNameInfo(conn.connectedUser);
                                         return (
                                             <div
                                                 key={conn.connectionId}
@@ -556,21 +576,21 @@ export default function ConnectionsPage() {
                                 {/* Avatar */}
                                 <div className="h-10 w-10 shrink-0 bg-indigo-500/20 border border-indigo-500/30 rounded-full flex items-center justify-center">
                                     <span className="text-indigo-300 font-semibold text-sm">
-                                        {getDisplayNameInfo(selectedConnection).primary.charAt(0).toUpperCase()}
+                                        {getDisplayNameInfo(selectedConnection.connectedUser).primary.charAt(0).toUpperCase()}
                                     </span>
                                 </div>
                                 {/* Info */}
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h2 className="text-gray-100 font-semibold text-[15px]">
-                                            {getDisplayNameInfo(selectedConnection).primary}
+                                            {getDisplayNameInfo(selectedConnection.connectedUser).primary}
                                         </h2>
                                         <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] px-1.5 py-0.5 uppercase tracking-wider rounded font-medium">
                                             Connected
                                         </span>
                                     </div>
                                     <p className="text-gray-400 text-xs mt-0.5">
-                                        {getDisplayNameInfo(selectedConnection).secondary}
+                                        {getDisplayNameInfo(selectedConnection.connectedUser).secondary}
                                     </p>
                                 </div>
                             </div>

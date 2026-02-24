@@ -46,7 +46,8 @@ export async function GET(
         }
 
         if (!receipt.imageUrl) {
-            return NextResponse.json({ error: 'No file attached to this receipt record' }, { status: 404 });
+            const pdfUrl = new URL(`/api/pdf/${receipt.id}`, request.url);
+            return NextResponse.redirect(pdfUrl);
         }
 
         // 3. Securely fetch the file server-side to obscure the raw S3 URL

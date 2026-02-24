@@ -24,7 +24,8 @@ export async function GET(request: Request) {
                     select: {
                         id: true,
                         name: true,
-                        businessName: true
+                        businessName: true,
+                        email: true
                     }
                 }
             },
@@ -33,7 +34,9 @@ export async function GET(request: Request) {
             }
         });
 
-        return NextResponse.json(incomingRequests);
+        const res = NextResponse.json(incomingRequests);
+        res.headers.set('Cache-Control', 'no-store, max-age=0');
+        return res;
     } catch (error) {
         console.error('Incoming requests error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

@@ -26,6 +26,9 @@ model User {
   name            String?
   receipts        Receipt[]
   
+  // Custom Categories
+  categories      Category[]
+
   // Connections
   sentConnections     Connection[] @relation("Requester")
   receivedConnections Connection[] @relation("Receiver")
@@ -41,10 +44,24 @@ model User {
   feedbacks           Feedback[]
 }
 
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String?  // Null for system defaults, User ID for custom
+  color     String?  // Optional hex code for UI badges
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  receipts  Receipt[]
+
+  @@unique([name, userId])
+}
+
 model Receipt {
   id            String        @id @default(cuid())
   receiptNumber String?       @unique
   userId        String
+  categoryId    String?
   imageUrl      String?
   date          DateTime
   clientName    String?
@@ -53,9 +70,17 @@ model Receipt {
   taxValue      Float?
   subtotal      Float         @default(0)
   total         Float         @default(0)
-  createdAt     DateTime      @default(now())
-  fileSize      Int?
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  fileSize        Int?
+  
+  // Finalize & Lock
+  isFinalized     Boolean       @default(false)
+  finalizedAt     DateTime?
+  parentReceiptId String?
+  versionNumber   Int           @default(1)
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category      Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   items         ReceiptItem[]
   messages      MessageReceipt[]
 }

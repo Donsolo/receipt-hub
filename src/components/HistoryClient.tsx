@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
@@ -13,17 +13,85 @@ type Receipt = {
     date?: Date;
     imageUrl?: string | null;
     createdAt: Date;
+    category?: { name: string; color: string | null } | null;
+    isFinalized?: boolean;
 };
 
 export default function HistoryClient({ initialReceipts }: { initialReceipts: Receipt[] }) {
-    const [filter, setFilter] = useState<'all' | 'generated' | 'uploaded'>('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedQuery, setDebouncedQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'generated' | 'uploaded'>('all');
+    const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'az'>('newest');
+    const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+
     const router = useRouter();
 
-    const filteredReceipts = initialReceipts.filter(receipt => {
-        if (filter === 'generated') return !!receipt.receiptNumber;
-        if (filter === 'uploaded') return !!receipt.imageUrl && !receipt.receiptNumber;
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedQuery(searchQuery);
+        }, 250);
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
+
+    const toggleCategory = (category: string) => {
+        setOpenCategories(prev => ({
+            ...prev,
+            [category]: prev[category] === false ? true : false
+        }));
+    };
+
+    const isOpen = (category: string) => openCategories[category] !== false; // default true
+
+    let filteredReceipts = initialReceipts.filter(receipt => {
+        if (statusFilter === 'generated' && !receipt.receiptNumber) return false;
+        if (statusFilter === 'uploaded' && (receipt.receiptNumber || !receipt.imageUrl)) return false;
+
+        if (debouncedQuery) {
+            const query = debouncedQuery.toLowerCase();
+            const categoryName = (receipt.category?.name || 'Uncategorized').toLowerCase();
+            const clientName = (receipt.clientName || '').toLowerCase();
+            const receiptNumber = (receipt.receiptNumber || '').toLowerCase();
+
+            if (!categoryName.includes(query) && !clientName.includes(query) && !receiptNumber.includes(query)) {
+                return false;
+            }
+        }
         return true;
     });
+
+    filteredReceipts = filteredReceipts.sort((a, b) => {
+        if (sortBy === 'newest') return new Date(b.date || b.createdAt).getTime() - new Date(a.date || a.createdAt).getTime();
+        if (sortBy === 'oldest') return new Date(a.date || a.createdAt).getTime() - new Date(b.date || b.createdAt).getTime();
+        if (sortBy === 'az') return (a.clientName || 'Unnamed').localeCompare(b.clientName || 'Unnamed');
+        return 0;
+    });
+
+    const groupedReceipts = filteredReceipts.reduce((acc, receipt) => {
+        const categoryName = receipt.category?.name || 'Uncategorized';
+        if (!acc[categoryName]) {
+            acc[categoryName] = {
+                color: receipt.category?.color || null,
+                receipts: []
+            };
+        }
+        acc[categoryName].receipts.push(receipt);
+        return acc;
+    }, {} as Record<string, { color: string | null, receipts: Receipt[] }>);
+
+    const sortedCategoryNames = Object.keys(groupedReceipts).sort((a, b) => {
+        if (a === 'Uncategorized') return 1;
+        if (b === 'Uncategorized') return -1;
+        return a.localeCompare(b);
+    });
+
+    const toggleAll = () => {
+        const allOpen = sortedCategoryNames.every(name => isOpen(name));
+        const nextState: Record<string, boolean> = {};
+        sortedCategoryNames.forEach(name => {
+            nextState[name] = !allOpen;
+        });
+        setOpenCategories(nextState);
+    };
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this receipt?')) return;
@@ -43,113 +111,266 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
     };
 
     return (
-        <div className="space-y-6">
-            {/* Tabs */}
-            <div className="border-b border-[var(--border-subtle)]">
-                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                    {['all', 'generated', 'uploaded'].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setFilter(tab as any)}
-                            className={`
-                                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize
-                                ${filter === tab
-                                    ? 'border-indigo-500 text-indigo-500'
-                                    : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)]'}
-                            `}
+        <div
+            className="min-h-screen px-4 pb-12 sm:px-6 lg:px-8 transition-opacity duration-500 ease-out"
+            style={{
+                background: `radial-gradient(circle at 20% top, rgba(99,102,241,0.08), transparent 40%), radial-gradient(circle at 80% bottom, rgba(16,185,129,0.05), transparent 50%), #020617`,
+                animation: 'fadeIn 0.5s ease-out'
+            }}
+        >
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(8px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
+
+            <div className="max-w-7xl mx-auto space-y-6 pt-6 flex flex-col min-h-[50vh]">
+
+                {/* Search + Filter + Sort Bar */}
+                <div className="flex flex-col md:flex-row gap-4 mb-2 z-10 relative">
+                    {/* Search Input */}
+                    <div className="flex-1 relative">
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Search receipts..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2 bg-[#0f172a] border border-white/10 rounded-[10px] text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm h-[40px]"
+                        />
+                    </div>
+
+                    <div className="flex gap-4 sm:w-auto">
+                        {/* Status Filter Dropdown */}
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value as any)}
+                            className="w-full sm:w-40 px-4 py-2 bg-[#0f172a] border border-white/10 rounded-[10px] text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm h-[40px] appearance-none cursor-pointer"
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em` }}
                         >
-                            {tab}
+                            <option value="all">All Statuses</option>
+                            <option value="generated">Generated</option>
+                            <option value="uploaded">Uploaded</option>
+                        </select>
+
+                        {/* Sort Dropdown */}
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as any)}
+                            className="w-full sm:w-40 px-4 py-2 bg-[#0f172a] border border-white/10 rounded-[10px] text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm h-[40px] appearance-none cursor-pointer"
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em` }}
+                        >
+                            <option value="newest">Newest</option>
+                            <option value="oldest">Oldest</option>
+                            <option value="az">A → Z</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Expand / Collapse All Toggle */}
+                {filteredReceipts.length > 0 && (
+                    <div className="flex justify-end pt-2 pb-1">
+                        <button
+                            onClick={toggleAll}
+                            className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 tracking-wide transition-colors active:scale-95 ease-out duration-150"
+                        >
+                            {sortedCategoryNames.every(name => isOpen(name)) ? 'Collapse All' : 'Expand All'}
                         </button>
-                    ))}
-                </nav>
-            </div>
+                    </div>
+                )}
 
-            {/* List */}
-            <div className="bg-[var(--bg-card)] shadow overflow-hidden sm:rounded-md border border-[var(--border-subtle)]">
-                <ul className="divide-y divide-[var(--border-subtle)]">
-                    {filteredReceipts.length === 0 ? (
-                        <li className="px-6 py-12 text-center text-[var(--text-secondary)]">No receipts found.</li>
+                {/* Main Content Area */}
+                <div className="space-y-6 flex-1">
+                    {initialReceipts.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20 mt-10">
+                            <div className="w-16 h-16 mb-6 rounded-2xl bg-[#0f172a] border border-white/5 flex items-center justify-center shadow-lg">
+                                <svg className="w-8 h-8 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <h2 className="text-xl font-semibold text-gray-200 mb-2 tracking-tight">No receipts yet.</h2>
+                            <p className="text-gray-400 font-medium tracking-wide text-sm">Create your first receipt to get started.</p>
+                        </div>
+                    ) : filteredReceipts.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20 mt-10 text-center">
+                            <svg className="w-12 h-12 text-gray-400 mb-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <h2 className="text-xl font-semibold text-gray-200 mb-2 tracking-tight">No matching receipts.</h2>
+                            <p className="text-gray-400 font-medium tracking-wide text-sm">Try adjusting your search or filters.</p>
+                        </div>
                     ) : (
-                        filteredReceipts.map((receipt) => (
-                            <li key={receipt.id}>
-                                <div className="block hover:bg-[var(--bg-surface)] transition duration-150 ease-in-out">
-                                    <div className="px-4 py-4 sm:px-6 flex items-center justify-between">
+                        sortedCategoryNames.map(categoryName => {
+                            const { color, receipts } = groupedReceipts[categoryName];
+                            const expanded = isOpen(categoryName);
 
-                                        {/* Main Content Area */}
-                                        <div className="flex items-center flex-1 min-w-0">
-
-                                            {/* Icon / Thumbnail */}
-                                            <div className="flex-shrink-0 h-12 w-12 rounded bg-[var(--bg-surface)] flex items-center justify-center overflow-hidden border border-[var(--border-subtle)]">
-                                                {receipt.imageUrl ? (
-                                                    // eslint-disable-next-line @next/next/no-img-element
-                                                    <img src={receipt.imageUrl} alt="Receipt" className="h-full w-full object-cover" />
-                                                ) : (
-                                                    <svg className="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                    </svg>
-                                                )}
-                                            </div>
-
-                                            {/* Details */}
-                                            <div className="ml-4 truncate">
-                                                <div className="flex items-center text-sm">
-                                                    <p className="font-medium text-indigo-400 truncate mr-2">
-                                                        {receipt.receiptNumber || 'Uploaded Receipt'}
-                                                    </p>
-                                                    {receipt.receiptNumber ? (
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900/50 text-blue-200 border border-blue-900">
-                                                            Generated
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-teal-900/50 text-teal-200 border border-teal-900">
-                                                            Uploaded
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <p className="mt-1 flex-shrink-0 font-normal text-[var(--text-secondary)] text-sm">
-                                                    {receipt.clientName ? `${receipt.clientName}` : ''}
-                                                </p>
-                                                <div className="mt-2 flex">
-                                                    <div className="flex items-center text-sm text-[var(--text-secondary)]">
-                                                        <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                                                        </svg>
-                                                        <p>
-                                                            {format(new Date(receipt.date || receipt.createdAt), 'MMM d, yyyy')}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                            return (
+                                <div key={categoryName} className="flex flex-col">
+                                    {/* Category Header */}
+                                    <div
+                                        onClick={() => toggleCategory(categoryName)}
+                                        className="flex items-center justify-between cursor-pointer border border-white/5 hover:bg-white/[0.05] transition-all duration-200 mb-4 shadow-sm"
+                                        style={{
+                                            background: 'rgba(255,255,255,0.03)',
+                                            backdropFilter: 'blur(6px)',
+                                            WebkitBackdropFilter: 'blur(6px)',
+                                            borderRadius: '12px',
+                                            padding: '12px 16px',
+                                        }}
+                                    >
+                                        <div className="flex items-center space-x-3">
+                                            <div
+                                                className="w-2.5 h-2.5 rounded-full shadow-sm"
+                                                style={{ backgroundColor: color || '#6b7280' }}
+                                            />
+                                            <h3 className="text-sm font-semibold text-gray-200 tracking-wide uppercase">
+                                                {categoryName}
+                                            </h3>
                                         </div>
-
-                                        {/* Actions */}
-                                        <div className="ml-5 flex-shrink-0 flex space-x-2 items-center">
-                                            {receipt.total !== undefined && receipt.total !== null && (
-                                                <span className="hidden sm:inline-flex px-2 text-xs leading-5 font-semibold rounded-full bg-green-900/50 text-green-200 border border-green-900 mr-2">
-                                                    ${Number(receipt.total).toFixed(2)}
-                                                </span>
-                                            )}
-
-                                            <Link
-                                                href={receipt.receiptNumber ? `/receipt/${receipt.id}` : receipt.imageUrl || '#'}
-                                                target={receipt.receiptNumber ? undefined : '_blank'}
-                                                className="px-3 py-1 border border-[var(--border-subtle)] shadow-sm text-sm font-medium rounded-md text-[var(--text-primary)] bg-[var(--bg-surface)] hover:bg-gray-800"
+                                        <div className="flex items-center space-x-4">
+                                            <span
+                                                className="inline-flex items-center px-[10px] py-[3px] rounded-full text-gray-300 font-semibold uppercase tracking-[0.5px]"
+                                                style={{
+                                                    background: '#0f172a',
+                                                    fontSize: '11px',
+                                                }}
                                             >
-                                                View
-                                            </Link>
-                                            <button
-                                                onClick={() => handleDelete(receipt.id)}
-                                                className="px-3 py-1 border border-transparent text-sm font-medium rounded-md text-red-400 bg-red-900/20 hover:bg-red-900/40"
+                                                {receipts.length}
+                                            </span>
+                                            <svg
+                                                className={`w-5 h-5 text-gray-400 transition-transform duration-200 ease-in-out ${expanded ? 'rotate-180' : ''}`}
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                             >
-                                                Delete
-                                            </button>
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
                                         </div>
                                     </div>
+
+                                    {/* Animated Container */}
+                                    <div
+                                        className="transition-all duration-250 ease-in-out overflow-hidden"
+                                        style={{
+                                            maxHeight: expanded ? '3500px' : '0',
+                                            opacity: expanded ? 1 : 0,
+                                        }}
+                                    >
+                                        <ul className="space-y-4 pb-4">
+                                            {receipts.length === 0 ? (
+                                                <li className="py-8 text-center bg-[#0f172a] rounded-[14px] border border-white/5 shadow-[0_6px_20px_rgba(0,0,0,0.35)]">
+                                                    <p className="text-gray-400 font-medium">No receipts in this category yet.</p>
+                                                </li>
+                                            ) : (
+                                                receipts.map((receipt, index) => (
+                                                    <li
+                                                        key={receipt.id}
+                                                        className="block relative group"
+                                                        style={{
+                                                            animationName: expanded ? 'fadeInUp' : 'none',
+                                                            animationDuration: '0.4s',
+                                                            animationTimingFunction: 'ease-out',
+                                                            animationFillMode: 'forwards',
+                                                            animationDelay: `${index * 40}ms`,
+                                                            opacity: expanded ? 0 : 1 // Prevents pop-in before animation
+                                                        }}
+                                                    >
+                                                        <div className="relative flex items-center justify-between transition-all duration-200 ease-in-out bg-[#0f172a] border border-white/5 rounded-[14px] px-[16px] py-[16px] xl:py-[18px] shadow-[0_6px_20px_rgba(0,0,0,0.35)] group-hover:-translate-y-[3px] group-hover:shadow-[0_12px_30px_rgba(0,0,0,0.5)]">
+
+                                                            {/* LEFT STATUS ACCENT BAR */}
+                                                            <div
+                                                                className="absolute left-0 top-0 bottom-0 w-[3px]"
+                                                                style={{
+                                                                    borderTopRightRadius: '6px',
+                                                                    borderBottomRightRadius: '6px',
+                                                                    background: receipt.receiptNumber ? '#6366f1' : '#10b981'
+                                                                }}
+                                                            />
+
+                                                            {/* Main Content Area */}
+                                                            <div className="flex items-center flex-1 min-w-0 pl-3">
+
+                                                                {/* Optional Icon / Thumbnail (Kept for continuity) */}
+                                                                <div className="hidden sm:flex flex-shrink-0 h-11 w-11 rounded-lg bg-black/50 items-center justify-center overflow-hidden border border-white/5 mr-4 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                                    {receipt.imageUrl ? (
+                                                                        // eslint-disable-next-line @next/next/no-img-element
+                                                                        <img src={receipt.imageUrl} alt="Receipt" className="h-full w-full object-cover" />
+                                                                    ) : (
+                                                                        <svg className="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                        </svg>
+                                                                    )}
+                                                                </div>
+
+                                                                {/* Details: Hierarchy requested */}
+                                                                <div className="truncate flex-1">
+                                                                    <div className="flex flex-col space-y-[4px]">
+                                                                        {/* Line 1: Receipt ID */}
+                                                                        <p className="text-gray-100 truncate" style={{ fontWeight: 600, fontSize: '15px' }}>
+                                                                            {receipt.receiptNumber || 'Uploaded Receipt ID'}
+                                                                        </p>
+
+                                                                        {/* Line 2: Client Name */}
+                                                                        <p className="text-gray-200 truncate" style={{ fontWeight: 500, opacity: 0.8, fontSize: '14px' }}>
+                                                                            {receipt.clientName || 'Unnamed Client'}
+                                                                        </p>
+
+                                                                        {/* Line 3: Date · Category */}
+                                                                        <p className="text-gray-300 truncate" style={{ fontSize: '13px', opacity: 0.6 }}>
+                                                                            {format(new Date(receipt.date || receipt.createdAt), 'MMM d, yyyy')}
+                                                                            {categoryName !== 'Uncategorized' && ` · ${categoryName}`}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Actions & Total */}
+                                                            <div className="ml-5 flex-shrink-0 flex items-center space-x-3">
+                                                                {receipt.total !== undefined && receipt.total !== null && (
+                                                                    <span className="hidden sm:inline-flex text-lg font-bold text-gray-200 tracking-tight mr-3">
+                                                                        ${Number(receipt.total).toFixed(2)}
+                                                                    </span>
+                                                                )}
+
+                                                                <Link
+                                                                    href={receipt.receiptNumber ? `/receipt/${receipt.id}` : receipt.imageUrl || '#'}
+                                                                    target={receipt.receiptNumber ? undefined : '_blank'}
+                                                                    className="px-[14px] py-[8px] text-sm font-medium rounded-lg text-white transition-all duration-[120ms] ease-out active:scale-[0.97]"
+                                                                    style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.1)' }}
+                                                                    onMouseEnter={(e) => e.currentTarget.style.background = '#1f2937'}
+                                                                    onMouseLeave={(e) => e.currentTarget.style.background = '#111827'}
+                                                                >
+                                                                    View
+                                                                </Link>
+                                                                {!receipt.isFinalized && (
+                                                                    <button
+                                                                        onClick={() => handleDelete(receipt.id)}
+                                                                        className="px-[14px] py-[8px] text-sm font-medium rounded-lg transition-all duration-[120ms] ease-out active:scale-[0.97]"
+                                                                        style={{ background: 'rgba(220,38,38,0.15)', color: '#ef4444' }}
+                                                                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(220,38,38,0.25)'}
+                                                                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(220,38,38,0.15)'}
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                )}
+                                                            </div>
+
+                                                        </div>
+                                                    </li>
+                                                ))
+                                            )}
+                                        </ul>
+                                    </div>
                                 </div>
-                            </li>
-                        ))
+                            );
+                        })
                     )}
-                </ul>
+                </div>
             </div>
         </div>
     );

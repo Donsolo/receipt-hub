@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import PrintButton from "@/components/PrintButton"; // Moved to components
+import FinalizeButton from "@/components/FinalizeButton";
+import DuplicateButton from "@/components/DuplicateButton";
 
 // Force dynamic to avoid build-time DB access
 export const dynamic = "force-dynamic";
@@ -30,13 +32,25 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
                 >
                     &larr; History
                 </Link>
-                <div className="flex space-x-3">
-                    <Link
-                        href={`/receipt/${receipt.id}/edit`}
-                        className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                    >
-                        Edit
-                    </Link>
+                <div className="flex space-x-3 items-center">
+                    {receipt.isFinalized ? (
+                        <>
+                            <div className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg border border-gray-200">
+                                Finalized {receipt.finalizedAt ? format(new Date(receipt.finalizedAt), 'MMM d, yyyy') : ''}
+                            </div>
+                            <DuplicateButton receiptId={receipt.id} />
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                href={`/receipt/${receipt.id}/edit`}
+                                className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                            >
+                                Edit
+                            </Link>
+                            <FinalizeButton receiptId={receipt.id} />
+                        </>
+                    )}
                     <PrintButton />
                     <a
                         href={`/api/pdf/${receipt.id}`}

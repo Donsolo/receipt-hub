@@ -42,12 +42,14 @@ export async function GET(request: Request) {
                 id: true,
                 name: true,
                 businessName: true,
-                // Explicitly excluding 'email' per requirements
+                email: true,
             },
             take: 5
         });
 
-        return NextResponse.json(results);
+        const res = NextResponse.json(results);
+        res.headers.set('Cache-Control', 'no-store, max-age=0');
+        return res;
     } catch (error) {
         console.error('Search error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

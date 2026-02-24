@@ -68,6 +68,7 @@ export async function createReceipt(formData: {
     notes?: string;
     taxType: string;
     taxValue?: number;
+    categoryId?: string | null;
     subtotal: number;
     total: number;
     items: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
@@ -86,6 +87,7 @@ export async function createReceipt(formData: {
             receiptNumber: formData.receiptNumber,
             date: formData.date,
             clientName: formData.clientName,
+            categoryId: formData.categoryId,
             notes: formData.notes,
             taxType: formData.taxType,
             taxValue: formData.taxValue,
@@ -154,6 +156,9 @@ export async function getReceipts(query: string) {
 
     return await db.receipt.findMany({
         where,
+        include: {
+            category: { select: { name: true, color: true } }
+        },
         orderBy: { createdAt: "desc" },
     });
 }
@@ -181,16 +186,24 @@ export async function updateReceipt(id: string, formData: {
     notes?: string;
     taxType: string;
     taxValue?: number;
+    categoryId?: string | null;
     subtotal: number;
     total: number;
     items: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
 }) {
+    const existing = await db.receipt.findUnique({ where: { id } });
+    if (!existing) throw new Error("Receipt not found");
+    if (existing.isFinalized) {
+        throw new Error("This receipt has been finalized and cannot be edited.");
+    }
+
     await db.receipt.update({
         where: { id },
         data: {
             receiptNumber: formData.receiptNumber,
             date: formData.date,
             clientName: formData.clientName,
+            categoryId: formData.categoryId,
             notes: formData.notes,
             taxType: formData.taxType,
             taxValue: formData.taxValue,
