@@ -107,82 +107,58 @@ export default async function Dashboard() {
                 </div>
 
                 {/* Action Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-                    {/* Row 1, Col 1: Create Receipt (Primary) */}
-                    <Link href="/create" className="block group h-full">
-                        <div className="bg-[#141E33] border border-indigo-500/30 rounded-xl px-5 py-6 sm:px-6 hover:bg-[#182339] hover:border-indigo-500/50 hover:-translate-y-0.5 hover:shadow-lg shadow-md shadow-black/20 h-full flex flex-col justify-center transition-all duration-150">
-                            <div className="flex items-center gap-3 mb-3.5">
-                                <div className="h-10 w-10 bg-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500/30 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    {/* Receipts */}
+                    <Link href="/history" className="block group h-full">
+                        <div className="bg-[#0F172A] border border-white/5 rounded-xl px-5 py-6 hover:bg-[#111A2C] hover:-translate-y-1 hover:shadow-lg shadow-md transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="flex items-start gap-4 mb-2 relative z-10">
+                                <div className="h-12 w-12 shrink-0 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 transition-colors shadow-inner border border-blue-500/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
                                 </div>
-                                <h2 className="text-[16px] font-semibold text-gray-100 group-hover:text-white transition-colors">Create Receipt</h2>
-                            </div>
-                            <p className="text-[13px] text-indigo-200/60 leading-relaxed pr-2">
-                                Generate a professional PDF receipt using the form generator with automatic calculation.
-                            </p>
-                        </div>
-                    </Link>
-
-                    {/* Row 1, Col 2: Upload Receipt */}
-                    <Link href="/uploads" className="block group h-full">
-                        <div className="bg-[#0F172A] border border-white/5 rounded-xl px-5 py-6 sm:px-6 hover:bg-[#111A2C] hover:-translate-y-0.5 hover:shadow-lg shadow-sm h-full flex flex-col justify-center transition-all duration-150">
-                            <div className="flex items-center gap-3 mb-3.5">
-                                <div className="h-9 w-9 bg-teal-500/10 rounded-lg flex items-center justify-center text-teal-400 group-hover:bg-teal-500/20 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                    </svg>
+                                <div className="flex-1 pt-1.5">
+                                    <h2 className="text-[16px] font-semibold text-gray-100 group-hover:text-white transition-colors tracking-tight">Receipt Hub</h2>
+                                    <p className="text-[13px] text-gray-500 mt-2 leading-relaxed">Create, upload, manage, and share all of your business receipts in the vault.</p>
                                 </div>
-                                <h2 className="text-[15px] font-medium text-gray-200 group-hover:text-gray-100 transition-colors">Upload Receipt</h2>
-                            </div>
-                            <p className="text-[13px] text-gray-500 leading-relaxed pr-2">
-                                Upload a photo or scan of an existing receipt for safe storage and later retrieval.
-                            </p>
-                        </div>
-                    </Link>
-
-                    {/* Row 2: Receipts (Full Width) */}
-                    <Link href="/history" className="block group md:col-span-2">
-                        <div className="bg-[#0F172A] border border-white/5 rounded-xl px-5 py-5 sm:px-6 sm:py-6 hover:bg-[#111A2C] hover:-translate-y-0.5 hover:shadow-lg shadow-sm transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex items-center gap-3">
-                                <div className="h-9 w-9 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h2 className="text-[15px] font-medium text-gray-200 group-hover:text-gray-100 transition-colors">Receipts</h2>
-                                    <p className="text-[12px] text-gray-500 mt-1">View, manage, and search all your generated and uploaded receipts.</p>
-                                </div>
-                            </div>
-                            <div className="text-gray-500 group-hover:text-gray-300 transition-transform duration-150 group-hover:translate-x-1 sm:pr-2 hidden sm:block">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
                             </div>
                         </div>
                     </Link>
 
-                    {/* Row 3: Submit Feedback (Full Width) */}
-                    <Link href="/feedback" className="block group md:col-span-2 mt-4">
-                        <div className="bg-[#0F172A] border border-white/5 rounded-xl px-5 py-4 sm:px-6 sm:py-5 hover:bg-[#111A2C] hover:-translate-y-0.5 hover:shadow-lg shadow-sm transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex items-center gap-3">
-                                <div className="h-9 w-9 bg-fuchsia-500/10 rounded-lg flex items-center justify-center text-fuchsia-400 group-hover:bg-fuchsia-500/20 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    {/* Business Network */}
+                    <Link href="/dashboard/connections" className="block group h-full">
+                        <div className="bg-[#0F172A] border border-white/5 rounded-xl px-5 py-6 hover:bg-[#111A2C] hover:-translate-y-1 hover:shadow-lg shadow-md transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="flex items-start gap-4 mb-2 relative z-10">
+                                <div className="h-12 w-12 shrink-0 bg-teal-500/10 rounded-xl flex items-center justify-center text-teal-400 group-hover:bg-teal-500/20 transition-colors shadow-inner border border-teal-500/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                 </div>
-                                <div>
-                                    <h2 className="text-[15px] font-medium text-gray-200 group-hover:text-gray-100 transition-colors">Submit Feedback</h2>
-                                    <p className="text-[12px] text-gray-500 mt-1">Help shape the future of Receipt Hub. Report bugs or request features.</p>
+                                <div className="flex-1 pt-1.5">
+                                    <h2 className="text-[16px] font-semibold text-gray-100 group-hover:text-white transition-colors tracking-tight">Business Network</h2>
+                                    <p className="text-[13px] text-gray-500 mt-2 leading-relaxed">Connect and securely message other verified early-access founders.</p>
                                 </div>
                             </div>
-                            <div className="text-gray-500 group-hover:text-gray-300 transition-transform duration-150 group-hover:translate-x-1 sm:pr-2 hidden sm:block">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
+                        </div>
+                    </Link>
+
+                    {/* Submit Feedback */}
+                    <Link href="/feedback" className="block group h-full">
+                        <div className="bg-[#0F172A] border border-white/5 rounded-xl px-5 py-6 hover:bg-[#111A2C] hover:-translate-y-1 hover:shadow-lg shadow-md transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="flex items-start gap-4 mb-2 relative z-10">
+                                <div className="h-12 w-12 shrink-0 bg-fuchsia-500/10 rounded-xl flex items-center justify-center text-fuchsia-400 group-hover:bg-fuchsia-500/20 transition-colors shadow-inner border border-fuchsia-500/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                </div>
+                                <div className="flex-1 pt-1.5">
+                                    <h2 className="text-[16px] font-semibold text-gray-100 group-hover:text-white transition-colors tracking-tight">Submit Feedback</h2>
+                                    <p className="text-[13px] text-gray-500 mt-2 leading-relaxed">Help shape the future of Receipt Hub. Share ideas or report any bugs you find.</p>
+                                </div>
                             </div>
                         </div>
                     </Link>
