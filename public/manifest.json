@@ -4,8 +4,8 @@
     "description": "Simple Receipt Generator",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#ffffff",
+    "background_color": "#0b1220",
+    "theme_color": "#0b1220",
     "icons": [
         {
             "src": "/pwa-icon.png",
