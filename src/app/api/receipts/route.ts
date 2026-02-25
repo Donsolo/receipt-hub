@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         try { await ensureActivated(user); } catch (e: any) { if (e.message === 'CORE_ACTIVATION_REQUIRED') return NextResponse.json({ error: 'Core activation required' }, { status: 403 }); throw e; }
 
         const body = await request.json();
-        const { imageUrl, items } = body;
+        const { imageUrl, items, fileSize } = body;
 
         if (!imageUrl) {
             return NextResponse.json({ error: 'Image URL required' }, { status: 400 });
@@ -25,6 +25,7 @@ export async function POST(request: Request) {
                 userId: user.userId,
                 imageUrl,
                 date: new Date(),
+                fileSize: fileSize || null,
             },
         });
 

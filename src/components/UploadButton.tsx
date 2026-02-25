@@ -94,7 +94,7 @@ export default function UploadButton({
             const saveRes = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ imageUrl: fileUrl }),
+                body: JSON.stringify({ imageUrl: fileUrl, fileSize: compressedBlob.size }),
             });
             if (!saveRes.ok) throw new Error('Failed to save receipt');
 
