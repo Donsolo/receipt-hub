@@ -41,8 +41,11 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export default function ReceiptForm({ initialData, user }: { initialData: ReceiptData, user?: any }) {
     const router = useRouter();
+    const cameraInputRef = useRef<HTMLInputElement>(null);
     const [loading, setLoading] = useState(false);
     const [ocrLoading, setOcrLoading] = useState(false);
+    const [ocrData, setOcrData] = useState<any | null>(null);
+    const [showOcrModal, setShowOcrModal] = useState(false);
     const isEdit = !!initialData.id;
 
     const features = useFeatures(user);
@@ -240,6 +243,8 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
             items: items.map(({ description, quantity, unitPrice, lineTotal }) => ({
                 description, quantity, unitPrice, lineTotal
             })),
+            ocrNormalized: ocrData || undefined,
+            sourceType: ocrData ? "ocr" : undefined
         };
 
         try {
@@ -297,42 +302,9 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                 throw new Error("Invalid response format from OCR service.");
             }
 
-            // Map standard fields
-            if (normalized.merchantName) {
-                setClientName(normalized.merchantName);
-            }
-            if (normalized.transactionDate) {
-                const parsedDate = new Date(normalized.transactionDate);
-                if (!isNaN(parsedDate.getTime())) {
-                    setDate(parsedDate.toISOString().slice(0, 10));
-                }
-            }
-            if (normalized.tax !== null) {
-                setTaxType("flat");
-                setTaxValue(normalized.tax.toString());
-            }
+            setOcrData(normalized);
+            setShowOcrModal(true);
 
-            // Map line items if they exist
-            if (normalized.lineItems && normalized.lineItems.length > 0) {
-                setItems(normalized.lineItems.map((item: any) => ({
-                    id: Math.random().toString(36).substr(2, 9),
-                    description: item.description || "Item",
-                    quantity: item.quantity || 1,
-                    unitPrice: item.price !== null ? item.price : (item.total || 0),
-                    lineTotal: item.total !== null ? item.total : (item.price || 0)
-                })));
-            } else if (normalized.total !== null) {
-                // Fallback to a single line item if none were extracted
-                setItems([{
-                    id: Math.random().toString(36).substr(2, 9),
-                    description: "Receipt Total",
-                    quantity: 1,
-                    unitPrice: normalized.total,
-                    lineTotal: normalized.total
-                }]);
-            }
-
-            alert("Receipt scanned successfully! Please review the extracted data.");
         } catch (error: any) {
             console.error("OCR Error:", error);
             alert(error.message || "An error occurred during OCR scanning.");
@@ -341,342 +313,522 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
         }
     };
 
+    const applyOcrData = () => {
+        if (!ocrData) return;
+
+        if (ocrData.merchantName) {
+            setClientName(ocrData.merchantName);
+        }
+        if (ocrData.transactionDate) {
+            const parsedDate = new Date(ocrData.transactionDate);
+            if (!isNaN(parsedDate.getTime())) {
+                setDate(parsedDate.toISOString().slice(0, 10));
+            }
+        }
+        if (ocrData.tax !== null && ocrData.tax !== undefined) {
+            setTaxType("flat");
+            setTaxValue(Number(ocrData.tax));
+        }
+
+        if (ocrData.lineItems && ocrData.lineItems.length > 0) {
+            setItems(ocrData.lineItems.map((item: any) => ({
+                id: Math.random().toString(36).substr(2, 9),
+                description: item.description || "Item",
+                quantity: item.quantity || 1,
+                unitPrice: item.price !== null && item.price !== undefined ? Number(item.price) : (item.total ? Number(item.total) : 0),
+                lineTotal: item.total !== null && item.total !== undefined ? Number(item.total) : (item.price ? Number(item.price) : 0)
+            })));
+        } else if (ocrData.total !== null && ocrData.total !== undefined) {
+            setItems([{
+                id: Math.random().toString(36).substr(2, 9),
+                description: "Receipt Total",
+                quantity: 1,
+                unitPrice: Number(ocrData.total),
+                lineTotal: Number(ocrData.total)
+            }]);
+        }
+
+        setShowOcrModal(false);
+    };
+
     return (
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column (Main Input Area) */}
-            <div className="lg:col-span-2 space-y-6">
+        <>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column (Main Input Area) */}
+                <div className="lg:col-span-2 space-y-6">
 
-                {/* OCR Scan Action (Top of Form) */}
-                <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-4 flex items-center justify-between group overflow-hidden relative">
-                    {/* Background glow for PRO */}
-                    {features.ocr && <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-transparent pointer-events-none" />}
+                    {/* OCR Scan Action (Top of Form) */}
+                    <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-4 flex items-center justify-between group overflow-hidden relative">
+                        {/* Background glow for PRO */}
+                        {features.ocr && <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-transparent pointer-events-none" />}
 
-                    <div className="flex items-center gap-4 relative z-10">
-                        <div className={`h-10 w-10 shrink-0 rounded-xl flex items-center justify-center shadow-inner border ${features.ocr ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/10' : 'bg-white/5 text-gray-500 border-white/10'}`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 className={`text-sm font-semibold tracking-tight ${features.ocr ? 'text-gray-200' : 'text-gray-400'}`}>Smart Scan (OCR)</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Upload a receipt to automatically populate fields.</p>
-                        </div>
-                    </div>
-
-                    <div className="relative z-10">
-                        {features.ocr ? (
-                            <label className={`cursor-pointer px-4 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${ocrLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-                                {ocrLoading ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-1 h-3.5 w-3.5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Scanning...
-                                    </>
-                                ) : (
-                                    "Upload Image"
-                                )}
-                                <input type="file" accept="image/*" className="hidden" onChange={handleOCRUpload} disabled={ocrLoading} />
-                            </label>
-                        ) : (
-                            <Link href="/upgrade" className="px-3 py-1.5 bg-white/5 border border-white/10 text-gray-400 text-xs font-medium rounded-lg hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5" title="Available in Professional Mode">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-yellow-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        <div className="flex items-center gap-4 relative z-10">
+                            <div className={`h-10 w-10 shrink-0 rounded-xl flex items-center justify-center shadow-inner border ${features.ocr ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/10' : 'bg-white/5 text-gray-500 border-white/10'}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                PRO Only
-                            </Link>
-                        )}
-                    </div>
-                </div>
-
-                {/* Section: Header Info */}
-                <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
-                    <div>
-                        <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Receipt Details</h3>
-                        <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
-                            <div>
-                                <label className="block text-xs font-medium text-white/60 mb-1">Receipt Number</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={receiptNumber}
-                                    onChange={e => setReceiptNumber(e.target.value)}
-                                    className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] placeholder-white/30"
-                                />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-white/60 mb-1">Date</label>
-                                <input
-                                    type="date"
-                                    required
-                                    value={date}
-                                    onChange={e => setDate(e.target.value)}
-                                    className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] [color-scheme:dark]"
-                                />
+                                <h3 className={`text-sm font-semibold tracking-tight ${features.ocr ? 'text-gray-200' : 'text-gray-400'}`}>Smart Scan (OCR)</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">Scan a physical receipt using your camera or upload an image.</p>
                             </div>
                         </div>
 
-                        <div className="mt-6">
-                            <label className="block text-xs font-medium text-white/60 mb-1">Client Name</label>
-                            <input
-                                type="text"
-                                value={clientName}
-                                onChange={e => setClientName(e.target.value)}
-                                className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] placeholder-white/30"
-                                placeholder="Client or Company Name"
-                            />
-                        </div>
-
-                        <div className="mt-6">
-                            <label className="block text-xs font-medium text-white/60 mb-1">Category</label>
-                            {!isCreatingCategory ? (
-                                <div className="flex items-center gap-2">
-                                    <select
-                                        value={categoryId}
-                                        onChange={e => {
-                                            if (e.target.value === 'CREATE_NEW') {
-                                                setIsCreatingCategory(true);
-                                            } else {
-                                                setCategoryId(e.target.value);
-                                            }
-                                        }}
-                                        className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338]"
+                        <div className="relative z-10 flex items-center justify-end">
+                            {features.ocr ? (
+                                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => cameraInputRef.current?.click()}
+                                        disabled={ocrLoading}
+                                        className={`px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-slate-900 text-sm font-bold rounded-lg transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(234,179,8,0.3)] ${ocrLoading ? 'opacity-50 pointer-events-none' : ''}`}
                                     >
-                                        <option value="">None</option>
-                                        {categories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                        ))}
-                                        <option value="CREATE_NEW" className="font-semibold text-blue-400">+ Create New Category</option>
-                                    </select>
+                                        {ocrLoading ? (
+                                            <>
+                                                <svg className="animate-spin h-4 w-4 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Analyzing receipt...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                                Scan with Camera
+                                            </>
+                                        )}
+                                    </button>
+
+                                    {!ocrLoading && (
+                                        <label className={`cursor-pointer px-3 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-sm font-medium rounded-lg transition-colors flex items-center gap-2`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                            Upload Image
+                                            <input type="file" accept="image/*" className="hidden" onChange={handleOCRUpload} disabled={ocrLoading} />
+                                        </label>
+                                    )}
+
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        capture="environment"
+                                        ref={cameraInputRef}
+                                        onChange={handleOCRUpload}
+                                        className="hidden"
+                                        disabled={ocrLoading}
+                                    />
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="text"
-                                        value={newCategoryName}
-                                        onChange={e => setNewCategoryName(e.target.value)}
-                                        placeholder="New Category Name"
-                                        className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] placeholder-white/30"
-                                        autoFocus
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                handleCreateCategory();
-                                            } else if (e.key === 'Escape') {
-                                                setIsCreatingCategory(false);
-                                            }
-                                        }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleCreateCategory}
-                                        disabled={creatingCategoryLoading}
-                                        className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-                                    >
-                                        {creatingCategoryLoading ? 'Saving...' : 'Add'}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsCreatingCategory(false)}
-                                        className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-lg transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
+                                <Link href="/upgrade" className="px-3 py-1.5 bg-white/5 border border-white/10 text-gray-400 text-xs font-medium rounded-lg hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5" title="Available in Professional Mode">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-yellow-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                    PRO Only
+                                </Link>
                             )}
                         </div>
                     </div>
+
+                    {/* Section: Header Info */}
+                    <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
+                        <div>
+                            <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Receipt Details</h3>
+                            <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-white/60 mb-1">Receipt Number</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={receiptNumber}
+                                        onChange={e => setReceiptNumber(e.target.value)}
+                                        className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] placeholder-white/30"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-white/60 mb-1">Date</label>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={date}
+                                        onChange={e => setDate(e.target.value)}
+                                        className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] [color-scheme:dark]"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mt-6">
+                                <label className="block text-xs font-medium text-white/60 mb-1">Client Name</label>
+                                <input
+                                    type="text"
+                                    value={clientName}
+                                    onChange={e => setClientName(e.target.value)}
+                                    className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] placeholder-white/30"
+                                    placeholder="Client or Company Name"
+                                />
+                            </div>
+
+                            <div className="mt-6">
+                                <label className="block text-xs font-medium text-white/60 mb-1">Category</label>
+                                {!isCreatingCategory ? (
+                                    <div className="flex items-center gap-2">
+                                        <select
+                                            value={categoryId}
+                                            onChange={e => {
+                                                if (e.target.value === 'CREATE_NEW') {
+                                                    setIsCreatingCategory(true);
+                                                } else {
+                                                    setCategoryId(e.target.value);
+                                                }
+                                            }}
+                                            className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338]"
+                                        >
+                                            <option value="">None</option>
+                                            {categories.map(cat => (
+                                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                            ))}
+                                            <option value="CREATE_NEW" className="font-semibold text-blue-400">+ Create New Category</option>
+                                        </select>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={newCategoryName}
+                                            onChange={e => setNewCategoryName(e.target.value)}
+                                            placeholder="New Category Name"
+                                            className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] placeholder-white/30"
+                                            autoFocus
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleCreateCategory();
+                                                } else if (e.key === 'Escape') {
+                                                    setIsCreatingCategory(false);
+                                                }
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleCreateCategory}
+                                            disabled={creatingCategoryLoading}
+                                            className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                        >
+                                            {creatingCategoryLoading ? 'Saving...' : 'Add'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsCreatingCategory(false)}
+                                            className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-lg transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section: Line Items */}
+                    <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6">
+                        <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Line Items</h3>
+                        <div className="bg-[#0F1725] rounded-xl border border-white/5 overflow-visible">
+                            <div className="w-full">
+                                <table className="min-w-full table-fixed divide-y divide-white/5">
+                                    <thead>
+                                        <tr>
+                                            <th className="pl-4 pr-2 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider w-auto">Description</th>
+                                            <th className="px-2 py-3 text-right text-xs font-medium text-white/40 uppercase tracking-wider w-20 sm:w-24">Qty</th>
+                                            <th className="px-2 py-3 text-right text-xs font-medium text-white/40 uppercase tracking-wider w-24 sm:w-32">Price</th>
+                                            <th className="pl-2 pr-4 py-3 text-right text-xs font-medium text-white/40 uppercase tracking-wider w-24 sm:w-32">Total</th>
+                                            <th className="px-2 py-3 w-8 sm:w-10"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {items.map((item) => (
+                                            <tr key={item.id} className="group hover:bg-[var(--bg-surface)] transition-colors">
+                                                <td className="pl-4 pr-2 py-3">
+                                                    <div className="relative w-full">
+                                                        <input
+                                                            type="text"
+                                                            required
+                                                            value={item.description}
+                                                            onChange={e => updateItem(item.id, 'description', e.target.value)}
+                                                            onFocus={() => {
+                                                                setActiveInputId(item.id);
+                                                                setSearchQuery(item.description);
+                                                            }}
+                                                            onKeyDown={e => handleKeyDown(e, item.id)}
+                                                            className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-3 text-[var(--text-primary)] bg-[var(--bg-surface)] placeholder-gray-500 relative z-10"
+                                                            placeholder="Item description"
+                                                            autoComplete="off"
+                                                        />
+
+                                                        {/* Dropdown Suggestions */}
+                                                        {activeInputId === item.id && suggestions.length > 0 && (
+                                                            <div ref={wrapperRef} className="absolute left-0 right-0 top-full mt-1 bg-[#1E293B] border border-gray-600/50 rounded-md shadow-2xl z-[100] overflow-hidden">
+                                                                <ul className="py-1">
+                                                                    {suggestions.map((suggestion, idx) => (
+                                                                        <li
+                                                                            key={idx}
+                                                                            onClick={() => handleSelectSuggestion(item.id, suggestion)}
+                                                                            onMouseEnter={() => setActiveSuggestionIndex(idx)}
+                                                                            className={`px-3 py-2 text-sm cursor-pointer transition-colors ${idx === activeSuggestionIndex
+                                                                                ? 'bg-indigo-600/20 text-indigo-300'
+                                                                                : 'text-gray-300 hover:bg-white/5'
+                                                                                }`}
+                                                                        >
+                                                                            {suggestion}
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-2 py-3">
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        required
+                                                        value={item.quantity}
+                                                        onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))}
+                                                        className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-2 text-right text-[var(--text-primary)] bg-[var(--bg-surface)]"
+                                                    />
+                                                </td>
+                                                <td className="px-2 py-3">
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        step="0.01"
+                                                        required
+                                                        value={item.unitPrice}
+                                                        onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
+                                                        className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-2 text-right text-[var(--text-primary)] bg-[var(--bg-surface)]"
+                                                    />
+                                                </td>
+                                                <td className="pl-2 pr-4 py-3 text-right text-sm font-medium text-[var(--text-primary)] truncate">
+                                                    {item.lineTotal.toFixed(2)}
+                                                </td>
+                                                <td className="px-2 py-3 text-center">
+                                                    {items.length > 1 && (
+                                                        <button type="button" onClick={() => removeItem(item.id)} className="text-gray-500 hover:text-red-500 p-1">
+                                                            &times;
+                                                        </button>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="bg-[var(--bg-surface)] px-6 py-3 border-t border-[var(--border-subtle)]">
+                                <button type="button" onClick={addItem} className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium flex items-center">
+                                    <span className="mr-1 text-lg leading-none">+</span> Add Item
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Section: Line Items */}
-                <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6">
-                    <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Line Items</h3>
-                    <div className="bg-[#0F1725] rounded-xl border border-white/5 overflow-visible">
-                        <div className="w-full">
-                            <table className="min-w-full table-fixed divide-y divide-white/5">
-                                <thead>
-                                    <tr>
-                                        <th className="pl-4 pr-2 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider w-auto">Description</th>
-                                        <th className="px-2 py-3 text-right text-xs font-medium text-white/40 uppercase tracking-wider w-20 sm:w-24">Qty</th>
-                                        <th className="px-2 py-3 text-right text-xs font-medium text-white/40 uppercase tracking-wider w-24 sm:w-32">Price</th>
-                                        <th className="pl-2 pr-4 py-3 text-right text-xs font-medium text-white/40 uppercase tracking-wider w-24 sm:w-32">Total</th>
-                                        <th className="px-2 py-3 w-8 sm:w-10"></th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5">
-                                    {items.map((item) => (
-                                        <tr key={item.id} className="group hover:bg-[var(--bg-surface)] transition-colors">
-                                            <td className="pl-4 pr-2 py-3">
-                                                <div className="relative w-full">
-                                                    <input
-                                                        type="text"
-                                                        required
-                                                        value={item.description}
-                                                        onChange={e => updateItem(item.id, 'description', e.target.value)}
-                                                        onFocus={() => {
-                                                            setActiveInputId(item.id);
-                                                            setSearchQuery(item.description);
-                                                        }}
-                                                        onKeyDown={e => handleKeyDown(e, item.id)}
-                                                        className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-3 text-[var(--text-primary)] bg-[var(--bg-surface)] placeholder-gray-500 relative z-10"
-                                                        placeholder="Item description"
-                                                        autoComplete="off"
-                                                    />
+                {/* Right Column (Sidebar Area) */}
+                <div className="lg:col-span-1 space-y-6">
 
-                                                    {/* Dropdown Suggestions */}
-                                                    {activeInputId === item.id && suggestions.length > 0 && (
-                                                        <div ref={wrapperRef} className="absolute left-0 right-0 top-full mt-1 bg-[#1E293B] border border-gray-600/50 rounded-md shadow-2xl z-[100] overflow-hidden">
-                                                            <ul className="py-1">
-                                                                {suggestions.map((suggestion, idx) => (
-                                                                    <li
-                                                                        key={idx}
-                                                                        onClick={() => handleSelectSuggestion(item.id, suggestion)}
-                                                                        onMouseEnter={() => setActiveSuggestionIndex(idx)}
-                                                                        className={`px-3 py-2 text-sm cursor-pointer transition-colors ${idx === activeSuggestionIndex
-                                                                            ? 'bg-indigo-600/20 text-indigo-300'
-                                                                            : 'text-gray-300 hover:bg-white/5'
-                                                                            }`}
-                                                                    >
-                                                                        {suggestion}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-2 py-3">
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    required
-                                                    value={item.quantity}
-                                                    onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))}
-                                                    className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-2 text-right text-[var(--text-primary)] bg-[var(--bg-surface)]"
-                                                />
-                                            </td>
-                                            <td className="px-2 py-3">
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.01"
-                                                    required
-                                                    value={item.unitPrice}
-                                                    onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
-                                                    className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-2 text-right text-[var(--text-primary)] bg-[var(--bg-surface)]"
-                                                />
-                                            </td>
-                                            <td className="pl-2 pr-4 py-3 text-right text-sm font-medium text-[var(--text-primary)] truncate">
-                                                {item.lineTotal.toFixed(2)}
-                                            </td>
-                                            <td className="px-2 py-3 text-center">
-                                                {items.length > 1 && (
-                                                    <button type="button" onClick={() => removeItem(item.id)} className="text-gray-500 hover:text-red-500 p-1">
-                                                        &times;
-                                                    </button>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                    {/* Section: Totals */}
+                    <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
+                        <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Summary</h3>
+
+                        <div className="bg-[#0F1725] rounded-xl border border-white/5 p-6 space-y-4">
+                            <div className="flex justify-between items-center text-sm text-white/70">
+                                <span>Subtotal</span>
+                                <span className="font-medium text-white">{subtotal.toFixed(2)}</span>
+                            </div>
+
+                            <div className="flex justify-between items-center text-sm text-white/70">
+                                <div className="flex items-center space-x-3">
+                                    <label htmlFor="taxType" className="font-medium">Tax:</label>
+                                    <select
+                                        id="taxType"
+                                        value={taxType}
+                                        onChange={e => setTaxType(e.target.value as any)}
+                                        className="text-sm border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 py-1 pl-2 pr-8 bg-[#182338] text-white transition-all duration-150"
+                                    >
+                                        <option value="none">None</option>
+                                        <option value="percent">%</option>
+                                        <option value="flat">Flat ($)</option>
+                                    </select>
+                                    {taxType !== 'none' && (
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            value={taxValue}
+                                            onChange={e => setTaxValue(Number(e.target.value))}
+                                            placeholder="0.00"
+                                            className="w-20 text-sm border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 py-1 px-2 text-right bg-[#182338] text-white transition-all duration-150"
+                                        />
+                                    )}
+                                </div>
+                                <span className="font-medium text-white">{calculatedTax.toFixed(2)}</span>
+                            </div>
+
+                            <div className="h-px bg-white/10 my-4" />
+
+                            <div className="flex justify-between items-center">
+                                <span className="text-base font-semibold text-white">Total</span>
+                                <span className="text-3xl font-bold text-blue-400 tracking-tight">{total.toFixed(2)}</span>
+                            </div>
                         </div>
-                        <div className="bg-[var(--bg-surface)] px-6 py-3 border-t border-[var(--border-subtle)]">
-                            <button type="button" onClick={addItem} className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium flex items-center">
-                                <span className="mr-1 text-lg leading-none">+</span> Add Item
+                    </div>
+
+                    {/* Section: Notes */}
+                    <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
+                        <div>
+                            <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Additional Info</h3>
+                            <label className="block text-xs font-medium text-white/60 mb-2">Notes</label>
+                            <textarea
+                                rows={4}
+                                value={notes}
+                                onChange={e => setNotes(e.target.value)}
+                                className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm p-3 text-white bg-[#182338] placeholder-white/30"
+                                placeholder="Payment terms, thank you message, etc."
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="pt-4">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                        >
+                            {loading ? 'Saving...' : (isEdit ? 'Save Changes' : 'Save & Prepare PDF')}
+                        </button>
+                        {isEdit && (
+                            <button
+                                type="button"
+                                onClick={() => router.push(`/history`)}
+                                className="mt-4 w-full flex justify-center py-3 px-4 border border-white/10 rounded-xl shadow-sm text-sm font-medium text-white/70 bg-transparent hover:bg-white/5 hover:text-white transition-all duration-200"
+                            >
+                                Cancel
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </form>
+
+            {/* OCR Review Modal */}
+            {showOcrModal && ocrData && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-[#111A2B] border border-white/10 shadow-2xl rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+                        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#182338]">
+                            <h2 className="text-xl font-bold text-white tracking-tight">Review Scanned Receipt</h2>
+                            <button type="button" onClick={() => { setShowOcrModal(false); setOcrData(null); }} className="text-gray-400 hover:text-white transition-colors">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto space-y-8 custom-scrollbar flex-1">
+                            {/* Merchant Details */}
+                            <div>
+                                <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-3">Merchant Info</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#0F1725] p-4 rounded-xl border border-white/5">
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Name</p>
+                                        <p className="text-sm text-gray-200 font-medium">{ocrData.merchantName || "Unknown Merchant"}</p>
+                                    </div>
+                                    <div className="sm:row-span-2">
+                                        <p className="text-xs text-gray-500 mb-1">Address</p>
+                                        <p className="text-sm text-gray-300">{ocrData.merchantAddress || "N/A"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Phone</p>
+                                        <p className="text-sm text-gray-300">{ocrData.phone || "N/A"}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Transaction Details */}
+                            <div>
+                                <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-3">Transaction Info</h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#0F1725] p-4 rounded-xl border border-white/5">
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Date</p>
+                                        <p className="text-sm text-gray-200">{ocrData.transactionDate || "N/A"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Method</p>
+                                        <p className="text-sm text-gray-200">
+                                            {ocrData.paymentMethod ? `${ocrData.paymentMethod} ${ocrData.last4 ? '(*' + ocrData.last4 + ')' : ''}` : "N/A"}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Tax</p>
+                                        <p className="text-sm text-gray-200">{ocrData.tax !== null ? `$${Number(ocrData.tax).toFixed(2)}` : "N/A"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Total</p>
+                                        <p className="text-base text-white font-bold tracking-tight">{ocrData.total !== null ? `$${Number(ocrData.total).toFixed(2)}` : "N/A"}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Items Table */}
+                            {ocrData.lineItems && ocrData.lineItems.length > 0 && (
+                                <div>
+                                    <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-3">Extracted Items</h3>
+                                    <div className="bg-[#0F1725] rounded-xl border border-white/5 overflow-hidden">
+                                        <table className="min-w-full divide-y divide-white/10">
+                                            <thead className="bg-[#182338]">
+                                                <tr>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400">Description</th>
+                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-400">Qty</th>
+                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-400">Price</th>
+                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-400">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-white/5">
+                                                {ocrData.lineItems.map((item: any, idx: number) => (
+                                                    <tr key={idx}>
+                                                        <td className="px-4 py-3 text-sm text-gray-300">{item.description || "N/A"}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-300 text-right">{item.quantity || 1}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-300 text-right">{item.price !== null ? `$${Number(item.price).toFixed(2)}` : "-"}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-200 font-medium text-right">{item.total !== null ? `$${Number(item.total).toFixed(2)}` : "-"}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="px-6 py-4 border-t border-white/10 bg-[#182338] flex flex-col sm:flex-row gap-3 sm:justify-end">
+                            <button
+                                type="button"
+                                onClick={() => { setShowOcrModal(false); setOcrData(null); }}
+                                className="px-4 py-2 border border-white/10 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/5 transition-colors order-3 sm:order-1"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowOcrModal(false)}
+                                className="px-4 py-2 border border-blue-500/30 bg-blue-500/10 text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-500/20 transition-colors order-2"
+                            >
+                                Edit Before Applying
+                            </button>
+                            <button
+                                type="button"
+                                onClick={applyOcrData}
+                                className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold shadow-[0_4px_14px_rgba(37,99,235,0.39)] transition-all order-1 sm:order-3"
+                            >
+                                Apply to Form
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Right Column (Sidebar Area) */}
-            <div className="lg:col-span-1 space-y-6">
-
-                {/* Section: Totals */}
-                <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
-                    <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Summary</h3>
-
-                    <div className="bg-[#0F1725] rounded-xl border border-white/5 p-6 space-y-4">
-                        <div className="flex justify-between items-center text-sm text-white/70">
-                            <span>Subtotal</span>
-                            <span className="font-medium text-white">{subtotal.toFixed(2)}</span>
-                        </div>
-
-                        <div className="flex justify-between items-center text-sm text-white/70">
-                            <div className="flex items-center space-x-3">
-                                <label htmlFor="taxType" className="font-medium">Tax:</label>
-                                <select
-                                    id="taxType"
-                                    value={taxType}
-                                    onChange={e => setTaxType(e.target.value as any)}
-                                    className="text-sm border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 py-1 pl-2 pr-8 bg-[#182338] text-white transition-all duration-150"
-                                >
-                                    <option value="none">None</option>
-                                    <option value="percent">%</option>
-                                    <option value="flat">Flat ($)</option>
-                                </select>
-                                {taxType !== 'none' && (
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        value={taxValue}
-                                        onChange={e => setTaxValue(Number(e.target.value))}
-                                        placeholder="0.00"
-                                        className="w-20 text-sm border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 py-1 px-2 text-right bg-[#182338] text-white transition-all duration-150"
-                                    />
-                                )}
-                            </div>
-                            <span className="font-medium text-white">{calculatedTax.toFixed(2)}</span>
-                        </div>
-
-                        <div className="h-px bg-white/10 my-4" />
-
-                        <div className="flex justify-between items-center">
-                            <span className="text-base font-semibold text-white">Total</span>
-                            <span className="text-3xl font-bold text-blue-400 tracking-tight">{total.toFixed(2)}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Section: Notes */}
-                <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
-                    <div>
-                        <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Additional Info</h3>
-                        <label className="block text-xs font-medium text-white/60 mb-2">Notes</label>
-                        <textarea
-                            rows={4}
-                            value={notes}
-                            onChange={e => setNotes(e.target.value)}
-                            className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm p-3 text-white bg-[#182338] placeholder-white/30"
-                            placeholder="Payment terms, thank you message, etc."
-                        ></textarea>
-                    </div>
-                </div>
-
-                {/* Actions */}
-                <div className="pt-4">
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
-                    >
-                        {loading ? 'Saving...' : (isEdit ? 'Save Changes' : 'Save & Prepare PDF')}
-                    </button>
-                    {isEdit && (
-                        <button
-                            type="button"
-                            onClick={() => router.push(`/history`)}
-                            className="mt-4 w-full flex justify-center py-3 px-4 border border-white/10 rounded-xl shadow-sm text-sm font-medium text-white/70 bg-transparent hover:bg-white/5 hover:text-white transition-all duration-200"
-                        >
-                            Cancel
-                        </button>
-                    )}
-                </div>
-            </div>
-        </form>
+            )}
+        </>
     );
 }

@@ -92,6 +92,8 @@ model Receipt {
   finalizedAt     DateTime?
   parentReceiptId String?
   versionNumber   Int       @default(1)
+  ocrNormalized   Json?
+  sourceType      String?   @default("manual")
 
   user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   category Category?           @relation(fields: [categoryId], references: [id], onDelete: SetNull)

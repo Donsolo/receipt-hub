@@ -72,6 +72,8 @@ export async function createReceipt(formData: {
     subtotal: number;
     total: number;
     items: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
+    ocrNormalized?: any;
+    sourceType?: string;
 }) {
     const { cookies } = require("next/headers");
     const cookieStore = await cookies();
@@ -96,6 +98,8 @@ export async function createReceipt(formData: {
             items: {
                 create: formData.items, // Prisma handles the array
             },
+            ocrNormalized: formData.ocrNormalized ? formData.ocrNormalized : undefined,
+            sourceType: formData.sourceType ? formData.sourceType : undefined,
         },
     });
 
@@ -197,6 +201,8 @@ export async function updateReceipt(id: string, formData: {
     subtotal: number;
     total: number;
     items: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
+    ocrNormalized?: any;
+    sourceType?: string;
 }) {
     const existing = await db.receipt.findUnique({ where: { id } });
     if (!existing) throw new Error("Receipt not found");
@@ -220,6 +226,8 @@ export async function updateReceipt(id: string, formData: {
                 deleteMany: {},
                 create: formData.items,
             },
+            ocrNormalized: formData.ocrNormalized ? formData.ocrNormalized : undefined,
+            sourceType: formData.sourceType ? formData.sourceType : undefined,
         },
     });
 
