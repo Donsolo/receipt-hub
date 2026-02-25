@@ -14,6 +14,7 @@ type UserProfile = {
     businessLogoPath: string | null;
     name?: string | null;
     role: string;
+    timezone: string;
 };
 
 export default function ProfilePage() {
@@ -45,6 +46,7 @@ export default function ProfilePage() {
     const [businessAddress, setBusinessAddress] = useState('');
     const [businessLogoPath, setBusinessLogoPath] = useState<string | null>(null);
     const [role, setRole] = useState<string>('USER');
+    const [timezone, setTimezone] = useState('America/New_York');
     const [showBanner, setShowBanner] = useState(true);
 
     async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -104,6 +106,7 @@ export default function ProfilePage() {
                     setBusinessPhone(data.businessPhone || '');
                     setBusinessAddress(data.businessAddress || '');
                     setBusinessLogoPath(data.businessLogoPath || null);
+                    setTimezone(data.timezone || 'America/New_York');
                 } else if (profileRes.status === 404) {
                     // User exists in cookie but not in database (ghost session due to DB swap)
                     await fetch('/api/auth/logout', { method: 'POST', cache: 'no-store' });
@@ -137,6 +140,7 @@ export default function ProfilePage() {
                     businessPhone: businessPhone.trim() || null,
                     businessAddress: businessAddress.trim() || null,
                     businessLogoPath: businessLogoPath,
+                    timezone: timezone,
                 })
             });
 
@@ -149,6 +153,7 @@ export default function ProfilePage() {
                     businessPhone: updated.businessPhone,
                     businessAddress: updated.businessAddress,
                     businessLogoPath: updated.businessLogoPath,
+                    timezone: updated.timezone || 'America/New_York',
                     role: updated.role || role // retain role in UI state
                 } : null);
 
@@ -169,12 +174,12 @@ export default function ProfilePage() {
 
     const needsBusinessName = !profile.businessName;
 
-    // Determine if form is dirty
     const isDirty = name !== (profile.name || '') ||
         businessName !== (profile.businessName || '') ||
         businessPhone !== (profile.businessPhone || '') ||
         businessAddress !== (profile.businessAddress || '') ||
-        businessLogoPath !== profile.businessLogoPath;
+        businessLogoPath !== profile.businessLogoPath ||
+        timezone !== (profile.timezone || 'America/New_York');
 
     return (
         <div className="min-h-screen bg-[var(--bg)] p-4 sm:p-8 relative">
@@ -245,6 +250,31 @@ export default function ProfilePage() {
                                         Dark
                                     </button>
                                 </div>
+                            </div>
+                        </section>
+
+                        {/* TIMEZONE PREFERENCE */}
+                        <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8">
+                            <div className="mb-4">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">Timezone</h2>
+                                <p className="text-sm text-[var(--muted)] mt-1">Set your local timezone for greetings and metrics.</p>
+                            </div>
+
+                            <div>
+                                <select
+                                    value={timezone}
+                                    onChange={(e) => setTimezone(e.target.value)}
+                                    className="block w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-[var(--text)] focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
+                                >
+                                    <option value="America/New_York">Eastern Time (EST/EDT) - Detroit/NY</option>
+                                    <option value="America/Chicago">Central Time (CST/CDT) - Chicago</option>
+                                    <option value="America/Denver">Mountain Time (MST/MDT) - Denver</option>
+                                    <option value="America/Los_Angeles">Pacific Time (PST/PDT) - LA</option>
+                                    <option value="America/Anchorage">Alaska Time (AKST/AKDT) - Anchorage</option>
+                                    <option value="Pacific/Honolulu">Hawaii-Aleutian Time (HST) - Honolulu</option>
+                                    <option value="UTC">Coordinated Universal Time (UTC)</option>
+                                    {/* Feel free to add more as needed explicitly */}
+                                </select>
                             </div>
                         </section>
 

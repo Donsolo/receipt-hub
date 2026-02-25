@@ -20,7 +20,7 @@ export default async function Dashboard() {
     // Fetch user details for the greeting
     const user = await db.user.findUnique({
         where: { id: authUser.userId },
-        select: { email: true, lastSeenChangelogVersion: true, isEarlyAccess: true, ...({ name: true, businessName: true } as any) }
+        select: { email: true, lastSeenChangelogVersion: true, isEarlyAccess: true, ...({ name: true, businessName: true, timezone: true } as any) }
     }) as any;
 
     const showChangelog = user?.lastSeenChangelogVersion !== CURRENT_CHANGELOG_VERSION;
@@ -31,7 +31,10 @@ export default async function Dashboard() {
     const receipts = await getReceipts("");
 
     // --- Smart Greeting Logic ---
-    const currentHour = new Date().getHours();
+    const tzTimeStr = new Date().toLocaleString("en-US", { timeZone: user?.timezone || 'America/New_York', hour: 'numeric', hour12: false });
+    let currentHour = parseInt(tzTimeStr, 10);
+    if (currentHour === 24) currentHour = 0;
+
     let timeGreeting = "Good evening";
     if (currentHour >= 5 && currentHour < 12) {
         timeGreeting = "Good morning";

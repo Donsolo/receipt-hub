@@ -30,6 +30,7 @@ model User {
   businessLogoPath         String?
   name                     String?
   theme                    String    @default("dark")
+  timezone                 String    @default("America/New_York")
   plan                     Plan      @default(CORE)
   planStatus               String?
   planExpiresAt            DateTime?
