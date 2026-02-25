@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -21,6 +21,36 @@ export default function AdminUsersPage() {
     const [users, setUsers] = useState<UnifiedUser[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+
+    const topScrollRef = useRef<HTMLDivElement>(null);
+    const tableScrollRef = useRef<HTMLDivElement>(null);
+    const [tableWidth, setTableWidth] = useState(1100);
+
+    const handleTopScroll = () => {
+        if (tableScrollRef.current && topScrollRef.current) {
+            tableScrollRef.current.scrollLeft = topScrollRef.current.scrollLeft;
+        }
+    };
+
+    const handleTableScroll = () => {
+        if (topScrollRef.current && tableScrollRef.current) {
+            topScrollRef.current.scrollLeft = tableScrollRef.current.scrollLeft;
+        }
+    };
+
+    useEffect(() => {
+        const tableElement = tableScrollRef.current?.querySelector('table');
+        if (!tableElement) return;
+
+        const observer = new ResizeObserver(() => {
+            if (tableElement) {
+                setTableWidth(tableElement.offsetWidth);
+            }
+        });
+
+        observer.observe(tableElement);
+        return () => observer.disconnect();
+    }, [users, loading, searchQuery]);
 
     const fetchData = async () => {
         try {
@@ -127,9 +157,23 @@ export default function AdminUsersPage() {
                 </div>
 
                 {/* Table */}
-                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
-                    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
-                        <table className="min-w-full divide-y divide-[#1F2937]">
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm flex flex-col">
+                    {/* Top Scrollbar Container */}
+                    <div
+                        ref={topScrollRef}
+                        onScroll={handleTopScroll}
+                        className="overflow-x-auto persistent-scrollbar border-b border-[var(--border)]"
+                    >
+                        {/* Dynamic width to match the table content to ensure perfectly synced overflow */}
+                        <div style={{ width: `${tableWidth}px`, height: '1px' }}></div>
+                    </div>
+
+                    <div
+                        ref={tableScrollRef}
+                        onScroll={handleTableScroll}
+                        className="overflow-x-auto persistent-scrollbar"
+                    >
+                        <table className="min-w-full divide-y divide-[var(--border)]" style={{ minWidth: '1100px' }}>
                             <thead className="bg-[var(--bg)]/50">
                                 <tr>
                                     <th className="px-6 py-4 text-left text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap">Name</th>
@@ -142,7 +186,7 @@ export default function AdminUsersPage() {
                                     <th className="px-6 py-4 text-right text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#1F2937]">
+                            <tbody className="divide-y divide-[var(--border)]">
                                 {loading ? (
                                     <tr>
                                         <td colSpan={8} className="px-6 py-8 text-center text-sm text-[var(--muted)] animate-pulse">Loading list...</td>

@@ -45,3 +45,19 @@ body {
   border-color: var(--border);
   transition: background-color 0.25s ease, border-color 0.25s ease;
 }
+
+/* Persistent Horizontal Scrollbar for Desktop Tables */
+.persistent-scrollbar::-webkit-scrollbar {
+  height: 12px;
+  background-color: transparent;
+}
+
+.persistent-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 6px;
+  border: 3px solid var(--card);
+}
+
+.persistent-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: var(--muted);
+}
