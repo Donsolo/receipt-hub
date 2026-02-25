@@ -3,7 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { createReceipt, updateReceipt } from "@/lib/actions";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { clsx } from "clsx";
+import { useFeatures } from "@/hooks/useFeatures";
 
 interface ReceiptItem {
     id: string; // temp id for key
@@ -37,10 +39,13 @@ function useDebounce<T>(value: T, delay: number): T {
     return debouncedValue;
 }
 
-export default function ReceiptForm({ initialData }: { initialData: ReceiptData }) {
+export default function ReceiptForm({ initialData, user }: { initialData: ReceiptData, user?: any }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [ocrLoading, setOcrLoading] = useState(false);
     const isEdit = !!initialData.id;
+
+    const features = useFeatures(user);
 
     // Header Fields
     const [receiptNumber, setReceiptNumber] = useState(initialData.receiptNumber);
@@ -253,10 +258,123 @@ export default function ReceiptForm({ initialData }: { initialData: ReceiptData 
         }
     };
 
+    const handleOCRUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Reset input so the same file can be selected again if needed
+        e.target.value = '';
+
+        if (!features.ocr) {
+            alert("OCR Scanning is only available in Professional Mode.");
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Image size must be less than 5MB.");
+            return;
+        }
+
+        setOcrLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch('/api/pro/ocr', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Failed to process receipt');
+            }
+
+            const data = await res.json();
+
+            // Populate Form
+            if (data.merchant) setClientName(data.merchant);
+            if (data.date) {
+                // simple date validation
+                const parsedDate = new Date(data.date);
+                if (!isNaN(parsedDate.getTime())) {
+                    setDate(parsedDate.toISOString().slice(0, 10));
+                }
+            }
+
+            // For now, put the total as a single line item
+            if (data.total) {
+                setItems([
+                    { id: Date.now().toString(), description: "OCR Extracted Receipt", quantity: 1, unitPrice: data.total, lineTotal: data.total }
+                ]);
+            }
+
+            /* If tax data exists, maybe log or apply it. 
+               We're merging it into the total currently to keep parsing robust
+               since line items aren't perfectly extracted yet. */
+            if (data.tax) {
+                setTaxType("flat");
+                setTaxValue(data.tax);
+            }
+
+        } catch (error: any) {
+            console.error("OCR Error:", error);
+            alert(error.message || "An error occurred during OCR scanning.");
+        } finally {
+            setOcrLoading(false);
+        }
+    };
+
     return (
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column (Main Input Area) */}
             <div className="lg:col-span-2 space-y-6">
+
+                {/* OCR Scan Action (Top of Form) */}
+                <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-4 flex items-center justify-between group overflow-hidden relative">
+                    {/* Background glow for PRO */}
+                    {features.ocr && <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-transparent pointer-events-none" />}
+
+                    <div className="flex items-center gap-4 relative z-10">
+                        <div className={`h-10 w-10 shrink-0 rounded-xl flex items-center justify-center shadow-inner border ${features.ocr ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/10' : 'bg-white/5 text-gray-500 border-white/10'}`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 className={`text-sm font-semibold tracking-tight ${features.ocr ? 'text-gray-200' : 'text-gray-400'}`}>Smart Scan (OCR)</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Upload a receipt to automatically populate fields.</p>
+                        </div>
+                    </div>
+
+                    <div className="relative z-10">
+                        {features.ocr ? (
+                            <label className={`cursor-pointer px-4 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${ocrLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                {ocrLoading ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-1 h-3.5 w-3.5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Scanning...
+                                    </>
+                                ) : (
+                                    "Upload Image"
+                                )}
+                                <input type="file" accept="image/*" className="hidden" onChange={handleOCRUpload} disabled={ocrLoading} />
+                            </label>
+                        ) : (
+                            <Link href="/upgrade" className="px-3 py-1.5 bg-white/5 border border-white/10 text-gray-400 text-xs font-medium rounded-lg hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5" title="Available in Professional Mode">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-yellow-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                PRO Only
+                            </Link>
+                        )}
+                    </div>
+                </div>
+
                 {/* Section: Header Info */}
                 <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
                     <div>

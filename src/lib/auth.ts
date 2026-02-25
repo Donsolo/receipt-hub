@@ -7,6 +7,8 @@ export interface JWTPayload {
     userId: string;
     email: string;
     role: string;
+    plan?: string;
+    planStatus?: string | null;
     isActivated?: boolean;
     isEarlyAccess?: boolean;
     activationSource?: string | null;

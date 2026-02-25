@@ -116,15 +116,19 @@ export async function PATCH(
         }
 
         const body = await request.json();
-        const { role } = body;
+        const { role, plan, planStatus, planExpiresAt } = body;
 
-        // Validate requested role
-        if (!['ADMIN', 'USER', 'SUPER_ADMIN'].includes(role)) {
+        // Validate requested role if provided
+        if (role && !['ADMIN', 'USER', 'SUPER_ADMIN'].includes(role)) {
             return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
         }
 
+        // Validate requested plan if provided
+        if (plan && !['CORE', 'PRO'].includes(plan)) {
+            return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
+        }
+
         // Prevent assigning SUPER_ADMIN if not enough permission
-        // "Block any attempt to: Assign SUPER_ADMIN role" (Implies by Admin)
         if (authUser.role === 'ADMIN' && role === 'SUPER_ADMIN') {
             return NextResponse.json({ error: 'Insufficient permissions to promote to Super Admin' }, { status: 403 });
         }
@@ -142,9 +146,15 @@ export async function PATCH(
             }
         }
 
+        const dataToUpdate: any = {};
+        if (role) dataToUpdate.role = role;
+        if (plan) dataToUpdate.plan = plan;
+        if (planStatus !== undefined) dataToUpdate.planStatus = planStatus;
+        if (planExpiresAt !== undefined) dataToUpdate.planExpiresAt = planExpiresAt ? new Date(planExpiresAt) : null;
+
         const updatedUser = await db.user.update({
             where: { id: params.id },
-            data: { role },
+            data: dataToUpdate,
         });
 
         return NextResponse.json(updatedUser);

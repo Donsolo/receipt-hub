@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         });
 
         // AUTO-LOGIN: Generate Token & Set Cookie
-        const token = await signToken({ userId: newUser.id, email: newUser.email, role: newUser.role, isActivated, isEarlyAccess, activationSource });
+        const token = await signToken({ userId: newUser.id, email: newUser.email, role: newUser.role, plan: (newUser as any).plan, planStatus: (newUser as any).planStatus, isActivated, isEarlyAccess, activationSource });
         const cookie = createAuthCookie(token);
 
         const response = NextResponse.json({ success: true, message: 'User created successfully', user: { email: newUser.email, role: newUser.role } });

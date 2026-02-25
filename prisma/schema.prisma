@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Plan {
+  CORE
+  PRO
+}
+
 model User {
   id                       String    @id @default(cuid())
   email                    String    @unique
@@ -24,6 +29,9 @@ model User {
   businessPhone            String?
   businessLogoPath         String?
   name                     String?
+  plan                     Plan      @default(CORE)
+  planStatus               String?
+  planExpiresAt            DateTime?
   receipts                 Receipt[]
 
   // Custom Categories

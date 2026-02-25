@@ -25,6 +25,8 @@ export default async function Dashboard() {
 
     const showChangelog = user?.lastSeenChangelogVersion !== CURRENT_CHANGELOG_VERSION;
 
+    const isPro = (authUser.plan === "PRO" && authUser.planStatus !== "inactive") || authUser.role === "ADMIN" || authUser.role === "SUPER_ADMIN";
+
     // Fetch receipts for stats
     const receipts = await getReceipts("");
 
@@ -78,17 +80,35 @@ export default async function Dashboard() {
                             <span>{timeGreeting},</span>
                             {displayName ? <span className="font-semibold">{displayName}.</span> : <span>.</span>}
                         </h1>
-                        {user?.isEarlyAccess && (
+                        {user?.isEarlyAccess && !isPro && (
                             <span className="inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-900/40 text-indigo-300 border border-indigo-800/50 mt-1 sm:mt-0">
                                 Core (Early Access Founder)
                             </span>
                         )}
+                        {isPro && (
+                            <span className="inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 mt-1 sm:mt-0 shadow-sm shadow-yellow-500/10">
+                                PRO
+                            </span>
+                        )}
                     </div>
-                    <p className="text-sm text-gray-400 mt-2">Here’s your receipt workspace.</p>
+                    <div className="flex items-center gap-3 mt-2">
+                        <p className="text-sm text-gray-400">Here’s your receipt workspace.</p>
+                        {!isPro && (
+                            <div className="flex items-center gap-2">
+                                <span className="text-gray-600 text-xs">•</span>
+                                <Link href="/upgrade" className="text-xs text-yellow-500/80 hover:text-yellow-400 transition-colors flex items-center gap-1 group">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                    </svg>
+                                    Professional Mode Available
+                                </Link>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Quick Stats Strip */}
-                <div className="bg-[#0F172A] border border-white/5 rounded-xl flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-white/5 overflow-hidden shadow-sm mb-6">
+                <div className={`bg-[#0F172A] border ${isPro ? 'border-yellow-500/20 shadow-sm shadow-yellow-500/5' : 'border-white/5'} rounded-xl flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-white/5 overflow-hidden mb-6 transition-all`}>
                     <div className="flex-1 p-4 sm:p-6 flex flex-col justify-center hover:bg-white/[0.02] transition-colors">
                         <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mb-1.5">Total Receipts</span>
                         <span className="text-2xl font-semibold text-gray-100">{totalReceipts}</span>
