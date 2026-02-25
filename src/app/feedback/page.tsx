@@ -136,7 +136,7 @@ export default function FeedbackPage() {
 
                     <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden relative">
                         {/* Header */}
-                        <div className="px-6 py-8 sm:p-10 border-b border-[var(--border)] bg-gradient-to-br from-[#111827] to-[#0F172A] relative overflow-hidden">
+                        <div className="px-6 py-8 sm:p-10 border-b border-[var(--border)] bg-[var(--card)] relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                             <h2 className="text-2xl font-bold text-[var(--text)] mb-2 relative z-10">Share Your Feedback</h2>
                             <p className="text-sm text-[var(--muted)] relative z-10">
@@ -168,7 +168,7 @@ export default function FeedbackPage() {
                                     <select
                                         value={type}
                                         onChange={(e) => setType(e.target.value)}
-                                        className="block w-full rounded-md border-0 bg-[var(--card)] ring-1 ring-inset ring-[#2D3748] focus:ring-2 focus:ring-inset focus:ring-indigo-500 py-3 pl-4 pr-10 text-[var(--text)] sm:text-sm sm:leading-6"
+                                        className="block w-full rounded-md border-0 bg-[var(--card)] ring-1 ring-inset ring-[var(--border)] focus:ring-2 focus:ring-inset focus:ring-indigo-500 py-3 pl-4 pr-10 text-[var(--text)] sm:text-sm sm:leading-6"
                                     >
                                         <option value="positive">Positive / Love It (Review)</option>
                                         <option value="suggestion">Feature Suggestion</option>
@@ -182,7 +182,7 @@ export default function FeedbackPage() {
                                         <select
                                             value={rating}
                                             onChange={(e) => setRating(e.target.value)}
-                                            className="block w-full rounded-md border-0 bg-[var(--card)] ring-1 ring-inset ring-[#2D3748] focus:ring-2 focus:ring-inset focus:ring-indigo-500 py-3 pl-4 pr-10 text-[var(--text)] sm:text-sm sm:leading-6"
+                                            className="block w-full rounded-md border-0 bg-[var(--card)] ring-1 ring-inset ring-[var(--border)] focus:ring-2 focus:ring-inset focus:ring-indigo-500 py-3 pl-4 pr-10 text-[var(--text)] sm:text-sm sm:leading-6"
                                         >
                                             <option value="5">⭐⭐⭐⭐⭐ - Exceptional</option>
                                             <option value="4">⭐⭐⭐⭐ - Great</option>
@@ -201,7 +201,7 @@ export default function FeedbackPage() {
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         placeholder={type === 'bug' ? "What went wrong?" : type === 'suggestion' ? "What should we add or change?" : "What do you like best about Receipt Hub?"}
-                                        className="block w-full rounded-md border-0 bg-[var(--card)] ring-1 ring-inset ring-[#2D3748] focus:ring-2 focus:ring-inset focus:ring-indigo-500 py-3 px-4 text-[var(--text)] sm:text-sm sm:leading-6"
+                                        className="block w-full rounded-md border-0 bg-[var(--card)] ring-1 ring-inset ring-[var(--border)] focus:ring-2 focus:ring-inset focus:ring-indigo-500 py-3 px-4 text-[var(--text)] sm:text-sm sm:leading-6"
                                     />
                                 </div>
 
@@ -285,7 +285,7 @@ export default function FeedbackPage() {
                                                         </div>
                                                         <div className={`absolute inset-0 rounded-lg border ${isMyVote ? 'border-indigo-500/30 bg-[var(--bg)]/50' : 'border-[var(--border)] bg-[var(--bg)]'} overflow-hidden`}>
                                                             <div
-                                                                className={`h-full transition-all duration-1000 ease-out ${isMyVote ? 'bg-indigo-500/20' : 'bg-white/5'}`}
+                                                                className={`h-full transition-all duration-1000 ease-out ${isMyVote ? 'bg-indigo-500/20' : 'bg-[var(--card-hover)]'}`}
                                                                 style={{ width: `${percentage}%` }}
                                                             />
                                                         </div>
@@ -299,7 +299,7 @@ export default function FeedbackPage() {
                                                     key={opt.id}
                                                     onClick={() => handleVote(poll.id, opt.id)}
                                                     disabled={votingPollId === poll.id}
-                                                    className="w-full text-left px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg)] hover:bg-[var(--card-hover)] hover:border-white/20 transition-all text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+                                                    className="w-full text-left px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg)] hover:bg-[var(--card-hover)] hover:border-[var(--border)] transition-all text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
                                                 >
                                                     {opt.text}
                                                 </button>
