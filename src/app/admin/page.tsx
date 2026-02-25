@@ -225,37 +225,37 @@ export default function AdminPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0B1220] p-4 sm:p-8">
+        <div className="min-h-screen bg-[var(--bg)] p-4 sm:p-8">
             <div className="max-w-7xl mx-auto space-y-12">
                 <div className="flex flex-col gap-1 mb-8">
-                    <h1 className="text-2xl font-bold text-gray-100">Admin Dashboard</h1>
-                    <p className="text-sm text-gray-400">Platform control and operational overview.</p>
+                    <h1 className="text-2xl font-bold text-[var(--text)]">Admin Dashboard</h1>
+                    <p className="text-sm text-[var(--muted)]">Platform control and operational overview.</p>
                 </div>
 
                 {/* Activation Overview Section */}
                 <section>
                     {loading ? (
-                        <div className="text-sm text-gray-400 animate-pulse">Loading overview...</div>
+                        <div className="text-sm text-[var(--muted)] animate-pulse">Loading overview...</div>
                     ) : activationStats ? (
                         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                            <div className="bg-[#111827] border-t-2 border-t-indigo-500 rounded-b-md p-4 shadow-sm flex flex-col justify-center">
-                                <div className="text-xs font-medium text-gray-400 mb-1 uppercase tracking-wider">Total Users</div>
-                                <div className="text-2xl font-bold text-gray-100">{activationStats.totalUsers.toLocaleString()}</div>
+                            <div className="bg-[var(--card)] border-t-2 border-t-indigo-500 rounded-b-md p-4 shadow-sm flex flex-col justify-center">
+                                <div className="text-xs font-medium text-[var(--muted)] mb-1 uppercase tracking-wider">Total Users</div>
+                                <div className="text-2xl font-bold text-[var(--text)]">{activationStats.totalUsers.toLocaleString()}</div>
                             </div>
-                            <div className="bg-[#111827] border-t-2 border-t-emerald-500 rounded-b-md p-4 shadow-sm flex flex-col justify-center">
-                                <div className="text-xs font-medium text-gray-400 mb-1 uppercase tracking-wider">Paid Activations</div>
-                                <div className="text-2xl font-bold text-gray-100">{activationStats.activatedUsers.toLocaleString()}</div>
+                            <div className="bg-[var(--card)] border-t-2 border-t-emerald-500 rounded-b-md p-4 shadow-sm flex flex-col justify-center">
+                                <div className="text-xs font-medium text-[var(--muted)] mb-1 uppercase tracking-wider">Paid Activations</div>
+                                <div className="text-2xl font-bold text-[var(--text)]">{activationStats.activatedUsers.toLocaleString()}</div>
                             </div>
-                            <div className="bg-[#111827] border-t-2 border-t-amber-500 rounded-b-md p-4 shadow-sm flex flex-col justify-center">
-                                <div className="text-xs font-medium text-gray-400 mb-1 uppercase tracking-wider">Early Access</div>
-                                <div className="text-2xl font-bold text-gray-100">{activationStats.earlyAccessUsers.toLocaleString()}</div>
+                            <div className="bg-[var(--card)] border-t-2 border-t-amber-500 rounded-b-md p-4 shadow-sm flex flex-col justify-center">
+                                <div className="text-xs font-medium text-[var(--muted)] mb-1 uppercase tracking-wider">Early Access</div>
+                                <div className="text-2xl font-bold text-[var(--text)]">{activationStats.earlyAccessUsers.toLocaleString()}</div>
                             </div>
-                            <div className="bg-[#111827] border-t-2 border-t-gray-600 rounded-b-md p-4 shadow-sm flex flex-col justify-center">
-                                <div className="text-xs font-medium text-gray-400 mb-1 uppercase tracking-wider">Inactive Accounts</div>
-                                <div className="text-2xl font-bold text-gray-100">{activationStats.inactiveUsers.toLocaleString()}</div>
+                            <div className="bg-[var(--card)] border-t-2 border-t-gray-600 rounded-b-md p-4 shadow-sm flex flex-col justify-center">
+                                <div className="text-xs font-medium text-[var(--muted)] mb-1 uppercase tracking-wider">Inactive Accounts</div>
+                                <div className="text-2xl font-bold text-[var(--text)]">{activationStats.inactiveUsers.toLocaleString()}</div>
                             </div>
-                            <div className="bg-[#111827] border-t-2 border-t-emerald-400 rounded-b-md p-4 shadow-sm flex flex-col justify-center">
-                                <div className="text-xs font-medium text-gray-400 mb-1 uppercase tracking-wider">Estimated Revenue</div>
+                            <div className="bg-[var(--card)] border-t-2 border-t-emerald-400 rounded-b-md p-4 shadow-sm flex flex-col justify-center">
+                                <div className="text-xs font-medium text-[var(--muted)] mb-1 uppercase tracking-wider">Estimated Revenue</div>
                                 <div className="text-2xl font-bold text-emerald-400">
                                     ${activationStats.estimatedRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </div>
@@ -267,18 +267,18 @@ export default function AdminPage() {
                 </section>
 
                 {/* System Controls Section */}
-                <section className="bg-[#111827] border border-[#1F2937] rounded-xl overflow-hidden shadow-sm">
-                    <div className="px-6 py-4 border-b border-[#1F2937] bg-white/[0.02]">
-                        <h2 className="text-lg font-semibold text-gray-100">System Controls</h2>
+                <section className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+                    <div className="px-6 py-4 border-b border-[var(--border)] bg-white/[0.02]">
+                        <h2 className="text-lg font-semibold text-[var(--text)]">System Controls</h2>
                     </div>
                     <div className="divide-y divide-[#1F2937]">
                         <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.01] transition-colors">
                             <div>
-                                <h3 className="text-sm font-medium text-gray-200">Require Workspace Activation</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">If enabled, standard users must pay or be early access to use the platform.</p>
+                                <h3 className="text-sm font-medium text-[var(--text)]">Require Workspace Activation</h3>
+                                <p className="text-xs text-[var(--muted)] mt-0.5">If enabled, standard users must pay or be early access to use the platform.</p>
                             </div>
                             <div className="flex items-center gap-4 shrink-0">
-                                <span className={`text-xs font-medium ${settings?.REQUIRE_ACTIVATION ? 'text-indigo-400' : 'text-gray-500'}`}>
+                                <span className={`text-xs font-medium ${settings?.REQUIRE_ACTIVATION ? 'text-indigo-400' : 'text-[var(--muted)]'}`}>
                                     {settings?.REQUIRE_ACTIVATION ? 'Active Payload Gateway' : 'Free Access Mode'}
                                 </span>
                                 <button
@@ -293,8 +293,8 @@ export default function AdminPage() {
 
                         <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.01] transition-colors">
                             <div>
-                                <h3 className="text-sm font-medium text-gray-200">Early Access Window</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">If open, new signups automatically bypass the activation paywall forever.</p>
+                                <h3 className="text-sm font-medium text-[var(--text)]">Early Access Window</h3>
+                                <p className="text-xs text-[var(--muted)] mt-0.5">If open, new signups automatically bypass the activation paywall forever.</p>
                             </div>
                             <div className="flex items-center gap-4 shrink-0">
                                 <span className={`text-xs font-medium ${settings?.EARLY_ACCESS_OPEN ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -314,37 +314,37 @@ export default function AdminPage() {
 
                 {/* Platform Usage Metrics Section */}
                 <section>
-                    <h2 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">Platform Usage</h2>
+                    <h2 className="text-sm font-semibold text-[var(--muted)] mb-3 uppercase tracking-wider">Platform Usage</h2>
                     {loading ? (
-                        <div className="text-sm text-gray-400 animate-pulse">Loading usage statistics...</div>
+                        <div className="text-sm text-[var(--muted)] animate-pulse">Loading usage statistics...</div>
                     ) : usageData ? (
                         <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-                            <div className="bg-[#111827]/80 rounded p-3 flex flex-col justify-center border border-transparent hover:border-[#1F2937] transition-colors">
-                                <div className="text-[11px] text-gray-500 mb-0.5 uppercase tracking-wider font-medium">Total Users</div>
-                                <div className="text-lg font-semibold text-gray-300">{usageData.totalUsers.toLocaleString()}</div>
+                            <div className="bg-[var(--card)] rounded p-3 flex flex-col justify-center border border-transparent hover:border-[var(--border)] transition-colors">
+                                <div className="text-[11px] text-[var(--muted)] mb-0.5 uppercase tracking-wider font-medium">Total Users</div>
+                                <div className="text-lg font-semibold text-[var(--text)]">{usageData.totalUsers.toLocaleString()}</div>
                             </div>
-                            <div className="bg-[#111827]/80 rounded p-3 flex flex-col justify-center border border-transparent hover:border-[#1F2937] transition-colors">
-                                <div className="text-[11px] text-gray-500 mb-0.5 uppercase tracking-wider font-medium">Active (7d)</div>
-                                <div className="text-lg font-semibold text-gray-300">
+                            <div className="bg-[var(--card)] rounded p-3 flex flex-col justify-center border border-transparent hover:border-[var(--border)] transition-colors">
+                                <div className="text-[11px] text-[var(--muted)] mb-0.5 uppercase tracking-wider font-medium">Active (7d)</div>
+                                <div className="text-lg font-semibold text-[var(--text)]">
                                     {usageData.activeUsers7d.toLocaleString()}
-                                    <span className="text-[10px] text-gray-600 ml-1 font-normal">({usageData.totalUsers > 0 ? ((usageData.activeUsers7d / usageData.totalUsers) * 100).toFixed(0) : 0}%)</span>
+                                    <span className="text-[10px] text-[var(--muted)] ml-1 font-normal">({usageData.totalUsers > 0 ? ((usageData.activeUsers7d / usageData.totalUsers) * 100).toFixed(0) : 0}%)</span>
                                 </div>
                             </div>
-                            <div className="bg-[#111827]/80 rounded p-3 flex flex-col justify-center border border-transparent hover:border-[#1F2937] transition-colors">
-                                <div className="text-[11px] text-gray-500 mb-0.5 uppercase tracking-wider font-medium">Receipts</div>
-                                <div className="text-lg font-semibold text-gray-300">{usageData.totalReceipts.toLocaleString()}</div>
+                            <div className="bg-[var(--card)] rounded p-3 flex flex-col justify-center border border-transparent hover:border-[var(--border)] transition-colors">
+                                <div className="text-[11px] text-[var(--muted)] mb-0.5 uppercase tracking-wider font-medium">Receipts</div>
+                                <div className="text-lg font-semibold text-[var(--text)]">{usageData.totalReceipts.toLocaleString()}</div>
                             </div>
-                            <div className="bg-[#111827]/80 rounded p-3 flex flex-col justify-center border border-transparent hover:border-[#1F2937] transition-colors">
-                                <div className="text-[11px] text-gray-500 mb-0.5 uppercase tracking-wider font-medium">Storage</div>
-                                <div className="text-lg font-semibold text-gray-300">{usageData.totalStorageMB.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span className="text-[10px] text-gray-600 font-normal">MB</span></div>
+                            <div className="bg-[var(--card)] rounded p-3 flex flex-col justify-center border border-transparent hover:border-[var(--border)] transition-colors">
+                                <div className="text-[11px] text-[var(--muted)] mb-0.5 uppercase tracking-wider font-medium">Storage</div>
+                                <div className="text-lg font-semibold text-[var(--text)]">{usageData.totalStorageMB.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span className="text-[10px] text-[var(--muted)] font-normal">MB</span></div>
                             </div>
-                            <div className="bg-[#111827]/80 rounded p-3 flex flex-col justify-center border border-transparent hover:border-[#1F2937] transition-colors">
-                                <div className="text-[11px] text-gray-500 mb-0.5 uppercase tracking-wider font-medium">Uploads 24h</div>
-                                <div className="text-lg font-semibold text-gray-300">{usageData.uploads24h.toLocaleString()}</div>
+                            <div className="bg-[var(--card)] rounded p-3 flex flex-col justify-center border border-transparent hover:border-[var(--border)] transition-colors">
+                                <div className="text-[11px] text-[var(--muted)] mb-0.5 uppercase tracking-wider font-medium">Uploads 24h</div>
+                                <div className="text-lg font-semibold text-[var(--text)]">{usageData.uploads24h.toLocaleString()}</div>
                             </div>
-                            <div className="bg-[#111827]/80 rounded p-3 flex flex-col justify-center border border-transparent hover:border-[#1F2937] transition-colors">
-                                <div className="text-[11px] text-gray-500 mb-0.5 uppercase tracking-wider font-medium">Uploads 7d</div>
-                                <div className="text-lg font-semibold text-gray-300">{usageData.uploads7d.toLocaleString()}</div>
+                            <div className="bg-[var(--card)] rounded p-3 flex flex-col justify-center border border-transparent hover:border-[var(--border)] transition-colors">
+                                <div className="text-[11px] text-[var(--muted)] mb-0.5 uppercase tracking-wider font-medium">Uploads 7d</div>
+                                <div className="text-lg font-semibold text-[var(--text)]">{usageData.uploads7d.toLocaleString()}</div>
                             </div>
                         </div>
                     ) : (
@@ -353,41 +353,41 @@ export default function AdminPage() {
                 </section>
 
                 {/* Community & Users Container */}
-                <section className="bg-[#111827] border border-[#1F2937] rounded-xl overflow-hidden shadow-sm">
-                    <div className="px-6 py-4 border-b border-[#1F2937] bg-white/[0.02]">
-                        <h2 className="text-lg font-semibold text-gray-100">Community & Users</h2>
+                <section className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+                    <div className="px-6 py-4 border-b border-[var(--border)] bg-white/[0.02]">
+                        <h2 className="text-lg font-semibold text-[var(--text)]">Community & Users</h2>
                     </div>
 
                     <div className="divide-y divide-[#1F2937]">
                         {/* Feedback Management Sub-section */}
                         <div className="p-6">
-                            <h3 className="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">Feedback Management</h3>
-                            <div className="border border-[#1F2937] rounded-md overflow-x-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
+                            <h3 className="text-sm font-semibold text-[var(--muted)] mb-4 uppercase tracking-wider">Feedback Management</h3>
+                            <div className="border border-[var(--border)] rounded-md overflow-x-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
                                 <table className="min-w-full divide-y divide-[#1F2937]">
-                                    <thead className="bg-[#0B1220]/50">
+                                    <thead className="bg-[var(--bg)]/50">
                                         <tr>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap w-[20%]">User</th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap w-[15%]">Type / Rating</th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[40%]">Message</th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap w-[10%]">Date</th>
-                                            <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap w-[15%]">Actions</th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap w-[20%]">User</th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap w-[15%]">Type / Rating</th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider w-[40%]">Message</th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap w-[10%]">Date</th>
+                                            <th className="px-4 py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap w-[15%]">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[#1F2937]">
                                         {loading ? (
                                             <tr>
-                                                <td colSpan={5} className="px-4 py-6 text-center text-sm text-gray-400 animate-pulse">Loading feedback...</td>
+                                                <td colSpan={5} className="px-4 py-6 text-center text-sm text-[var(--muted)] animate-pulse">Loading feedback...</td>
                                             </tr>
                                         ) : feedbacks.length === 0 ? (
                                             <tr>
-                                                <td colSpan={5} className="px-4 py-6 text-center text-sm text-gray-400">No feedback submitted yet.</td>
+                                                <td colSpan={5} className="px-4 py-6 text-center text-sm text-[var(--muted)]">No feedback submitted yet.</td>
                                             </tr>
                                         ) : (
                                             feedbacks.map((fb) => (
-                                                <tr key={fb.id} className="hover:bg-white/[0.02] transition-colors">
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                                                <tr key={fb.id} className="hover:bg-[var(--card-hover)] transition-colors">
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-[var(--text)]">
                                                         <div className="font-medium max-w-[150px] truncate" title={fb.user?.businessName || fb.user?.name || 'Unknown'}>{fb.user?.businessName || fb.user?.name || 'Unknown'}</div>
-                                                        <div className="text-xs text-gray-500 max-w-[150px] truncate" title={fb.user?.email}>{fb.user?.email}</div>
+                                                        <div className="text-xs text-[var(--muted)] max-w-[150px] truncate" title={fb.user?.email}>{fb.user?.email}</div>
                                                     </td>
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm">
                                                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border uppercase tracking-wider ${fb.type === 'positive' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
@@ -402,12 +402,12 @@ export default function AdminPage() {
                                                             </div>
                                                         )}
                                                     </td>
-                                                    <td className="px-4 py-3 text-sm text-gray-300">
+                                                    <td className="px-4 py-3 text-sm text-[var(--text)]">
                                                         <div className="max-w-[200px] md:max-w-xs xl:max-w-md truncate" title={fb.message}>
                                                             {fb.message}
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
+                                                    <td className="px-4 py-3 whitespace-nowrap text-xs text-[var(--muted)]">
                                                         {new Date(fb.createdAt).toLocaleDateString()}
                                                     </td>
                                                     <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium space-x-2">
@@ -415,7 +415,7 @@ export default function AdminPage() {
                                                             onClick={() => handleFeedbackAction(fb.id, 'approve', fb.isApproved)}
                                                             className={`px-2.5 py-1 rounded text-xs transition-colors border ${fb.isApproved
                                                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
-                                                                : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:text-white'
+                                                                : 'bg-white/5 text-[var(--muted)] border-[var(--border)] hover:bg-[var(--card-hover)] hover:text-[var(--text)]'
                                                                 }`}
                                                         >
                                                             {fb.isApproved ? 'Approved' : 'Approve'}
@@ -426,7 +426,7 @@ export default function AdminPage() {
                                                                 onClick={() => handleFeedbackAction(fb.id, 'showcase', fb.isShowcased)}
                                                                 className={`px-2.5 py-1 rounded text-xs transition-colors border ${fb.isShowcased
                                                                     ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 hover:bg-indigo-500/20'
-                                                                    : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:text-white'
+                                                                    : 'bg-white/5 text-[var(--muted)] border-[var(--border)] hover:bg-[var(--card-hover)] hover:text-[var(--text)]'
                                                                     }`}
                                                             >
                                                                 {fb.isShowcased ? 'Showcased' : 'Showcase'}
@@ -443,11 +443,11 @@ export default function AdminPage() {
 
                         {/* Polls Management Sub-section */}
                         <div className="p-6">
-                            <h3 className="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">Community Polls</h3>
+                            <h3 className="text-sm font-semibold text-[var(--muted)] mb-4 uppercase tracking-wider">Community Polls</h3>
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                 {/* Create Poll Form */}
-                                <div className="lg:col-span-1 bg-[#0B1220]/50 border border-[#1F2937] rounded-md p-5 h-fit">
-                                    <h4 className="text-sm font-medium text-gray-200 mb-4">Create New Poll</h4>
+                                <div className="lg:col-span-1 bg-[var(--bg)]/50 border border-[var(--border)] rounded-md p-5 h-fit">
+                                    <h4 className="text-sm font-medium text-[var(--text)] mb-4">Create New Poll</h4>
                                     <form onSubmit={handleCreatePoll} className="space-y-3">
                                         <div>
                                             <input
@@ -455,7 +455,7 @@ export default function AdminPage() {
                                                 required
                                                 value={pollQuestion}
                                                 onChange={(e) => setPollQuestion(e.target.value)}
-                                                className="w-full bg-[#111827] border border-[#2D3748] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                                className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:border-indigo-500"
                                                 placeholder="Question (e.g. Next feature?)"
                                             />
                                         </div>
@@ -464,7 +464,7 @@ export default function AdminPage() {
                                                 type="text"
                                                 value={pollDescription}
                                                 onChange={(e) => setPollDescription(e.target.value)}
-                                                className="w-full bg-[#111827] border border-[#2D3748] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                                className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:border-indigo-500"
                                                 placeholder="Optional context..."
                                             />
                                         </div>
@@ -477,7 +477,7 @@ export default function AdminPage() {
                                                             required
                                                             value={opt}
                                                             onChange={(e) => handlePollOptionChange(i, e.target.value)}
-                                                            className="flex-1 bg-[#111827] border border-[#2D3748] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                                            className="flex-1 bg-[var(--card)] border border-[var(--border)] rounded px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:border-indigo-500"
                                                             placeholder={`Option ${i + 1}`}
                                                         />
                                                         {pollOptions.length > 2 && (
@@ -501,7 +501,7 @@ export default function AdminPage() {
                                         <button
                                             type="submit"
                                             disabled={isSubmittingPoll || !pollQuestion.trim()}
-                                            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium py-2 rounded transition-colors disabled:opacity-50 mt-1"
+                                            className="w-full bg-indigo-600 hover:bg-indigo-500 text-[var(--text)] text-sm font-medium py-2 rounded transition-colors disabled:opacity-50 mt-1"
                                         >
                                             {isSubmittingPoll ? 'Creating...' : 'Create Poll'}
                                         </button>
@@ -511,22 +511,22 @@ export default function AdminPage() {
                                 {/* Polls List */}
                                 <div className="lg:col-span-2 space-y-3">
                                     {polls.length === 0 ? (
-                                        <div className="bg-[#0B1220]/50 border border-[#1F2937] rounded-md p-6 text-center text-sm text-gray-500">
+                                        <div className="bg-[var(--bg)]/50 border border-[var(--border)] rounded-md p-6 text-center text-sm text-[var(--muted)]">
                                             No polls created yet.
                                         </div>
                                     ) : (
                                         polls.map(poll => (
-                                            <div key={poll.id} className={`bg-[#0B1220]/50 border ${poll.isActive ? 'border-indigo-500/30' : 'border-[#1F2937]'} rounded-md p-4 flex flex-col transition-colors`}>
+                                            <div key={poll.id} className={`bg-[var(--bg)]/50 border ${poll.isActive ? 'border-indigo-500/30' : 'border-[var(--border)]'} rounded-md p-4 flex flex-col transition-colors`}>
                                                 <div className="flex justify-between items-start mb-3">
                                                     <div>
                                                         <div className="flex items-center gap-2">
-                                                            <h5 className="text-sm font-medium text-gray-200">{poll.question}</h5>
-                                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium border uppercase tracking-wider ${poll.isActive ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-gray-800/50 text-gray-500 border-gray-700'}`}>
+                                                            <h5 className="text-sm font-medium text-[var(--text)]">{poll.question}</h5>
+                                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium border uppercase tracking-wider ${poll.isActive ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-[var(--card)]/50 text-[var(--muted)] border-[var(--border)]'}`}>
                                                                 {poll.isActive ? 'Active' : 'Closed'}
                                                             </span>
                                                         </div>
                                                         {poll.description && (
-                                                            <p className="text-xs text-gray-500 mt-1">{poll.description}</p>
+                                                            <p className="text-xs text-[var(--muted)] mt-1">{poll.description}</p>
                                                         )}
                                                     </div>
                                                     <div className="flex items-center gap-2">
@@ -557,10 +557,10 @@ export default function AdminPage() {
                                                         return (
                                                             <div key={opt.id} className="relative">
                                                                 <div className="flex justify-between items-center relative z-10 px-2.5 py-1.5">
-                                                                    <span className="text-xs text-gray-300">{opt.text}</span>
-                                                                    <span className="text-xs text-gray-500">{optVotes} ({percentage}%)</span>
+                                                                    <span className="text-xs text-[var(--text)]">{opt.text}</span>
+                                                                    <span className="text-xs text-[var(--muted)]">{optVotes} ({percentage}%)</span>
                                                                 </div>
-                                                                <div className="absolute inset-0 bg-[#111827] rounded border border-[#1F2937] overflow-hidden">
+                                                                <div className="absolute inset-0 bg-[var(--card)] rounded border border-[var(--border)] overflow-hidden">
                                                                     <div
                                                                         className="h-full bg-indigo-500/10 transition-all duration-500"
                                                                         style={{ width: `${percentage}%` }}
@@ -580,17 +580,17 @@ export default function AdminPage() {
                         {/* User Directory Link Sub-section */}
                         <div className="p-6">
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">User Directory</h3>
+                                <h3 className="text-sm font-semibold text-[var(--muted)] uppercase tracking-wider">User Directory</h3>
                             </div>
-                            <div className="bg-[#0B1220]/50 border border-[#1F2937] rounded-md p-6 flex flex-col items-center justify-center text-center">
+                            <div className="bg-[var(--bg)]/50 border border-[var(--border)] rounded-md p-6 flex flex-col items-center justify-center text-center">
                                 <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center mb-3">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                     </svg>
                                 </div>
-                                <h4 className="text-gray-200 font-medium mb-1">Manage All Users</h4>
-                                <p className="text-sm text-gray-500 mb-5 max-w-sm">View, search, and manage user accounts, subscriptions, and receipts.</p>
-                                <Link href="/admin/users" className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-6 py-2 rounded-md transition-colors">
+                                <h4 className="text-[var(--text)] font-medium mb-1">Manage All Users</h4>
+                                <p className="text-sm text-[var(--muted)] mb-5 max-w-sm">View, search, and manage user accounts, subscriptions, and receipts.</p>
+                                <Link href="/admin/users" className="bg-indigo-600 hover:bg-indigo-500 text-[var(--text)] text-sm font-medium px-6 py-2 rounded-md transition-colors">
                                     Open User Directory
                                 </Link>
                             </div>

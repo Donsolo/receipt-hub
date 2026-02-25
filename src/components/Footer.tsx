@@ -26,7 +26,7 @@ export default function Footer() {
                         <p className="text-xs text-[var(--text-secondary)]">
                             &copy; {currentYear} Tektriq LLC. All rights reserved.
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-[var(--muted)]">
                             Powered by Tektriq LLC
                         </p>
                     </div>
@@ -51,7 +51,7 @@ export default function Footer() {
                         <div className="hidden md:block w-px h-4 bg-[var(--border-subtle)]"></div>
 
                         <div className="flex flex-col">
-                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Support</span>
+                            <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Support</span>
                             <a href="mailto:support@tektriq.com" className="text-sm font-medium text-[var(--text-primary)] hover:text-[var(--accent-primary)] transition-colors">
                                 support@tektriq.com
                             </a>

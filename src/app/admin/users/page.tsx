@@ -95,21 +95,21 @@ export default function AdminUsersPage() {
     );
 
     return (
-        <div className="min-h-screen bg-[#0B1220] p-4 sm:p-8">
+        <div className="min-h-screen bg-[var(--bg)] p-4 sm:p-8">
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2 mb-2">
-                            <Link href="/admin" className="text-gray-400 hover:text-white transition-colors text-sm flex items-center gap-1">
+                            <Link href="/admin" className="text-[var(--muted)] hover:text-[var(--text)] transition-colors text-sm flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>
                                 Back to Dashboard
                             </Link>
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-100">User Directory</h1>
-                        <p className="text-sm text-gray-400">Total Users: {users.length}</p>
+                        <h1 className="text-2xl font-bold text-[var(--text)]">User Directory</h1>
+                        <p className="text-sm text-[var(--muted)]">Total Users: {users.length}</p>
                     </div>
 
                     <div className="w-full md:w-96 relative">
@@ -118,38 +118,38 @@ export default function AdminUsersPage() {
                             placeholder="Search by name or email..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-[#111827] border border-[#2D3748] rounded-md py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
+                            className="w-full bg-[var(--card)] border border-[var(--border)] rounded-md py-2 pl-10 pr-4 text-sm text-[var(--text)] focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
                         />
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[var(--muted)] absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="bg-[#111827] border border-[#1F2937] rounded-xl overflow-hidden shadow-sm">
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
                     <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
                         <table className="min-w-full divide-y divide-[#1F2937]">
-                            <thead className="bg-[#0B1220]/50">
+                            <thead className="bg-[var(--bg)]/50">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Name</th>
-                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Email</th>
-                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Role</th>
-                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Plan</th>
-                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Receipts</th>
-                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Storage</th>
-                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Activity</th>
-                                    <th className="px-6 py-4 text-right text-[11px] font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Actions</th>
+                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap">Name</th>
+                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap">Email</th>
+                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap">Role</th>
+                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap">Plan</th>
+                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap">Receipts</th>
+                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap">Storage</th>
+                                    <th className="px-6 py-4 text-left text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap">Activity</th>
+                                    <th className="px-6 py-4 text-right text-[11px] font-medium text-[var(--muted)] uppercase tracking-wider whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#1F2937]">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={8} className="px-6 py-8 text-center text-sm text-gray-400 animate-pulse">Loading list...</td>
+                                        <td colSpan={8} className="px-6 py-8 text-center text-sm text-[var(--muted)] animate-pulse">Loading list...</td>
                                     </tr>
                                 ) : filteredUsers.length === 0 ? (
                                     <tr>
-                                        <td colSpan={8} className="px-6 py-8 text-center text-sm text-gray-400">
+                                        <td colSpan={8} className="px-6 py-8 text-center text-sm text-[var(--muted)]">
                                             {searchQuery ? 'No users found matching your search.' : 'No users found.'}
                                         </td>
                                     </tr>
@@ -158,18 +158,18 @@ export default function AdminUsersPage() {
                                         <tr
                                             key={user.id}
                                             onClick={() => router.push(`/admin/users/${user.id}`)}
-                                            className={`hover:bg-white/[0.02] transition-colors cursor-pointer ${user.role === 'SUPER_ADMIN' ? 'border-l-2 border-l-yellow-600/50' : ''}`}
+                                            className={`hover:bg-[var(--card-hover)] transition-colors cursor-pointer ${user.role === 'SUPER_ADMIN' ? 'border-l-2 border-l-yellow-600/50' : ''}`}
                                         >
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text)]">
                                                 <div className="max-w-[150px] md:max-w-[200px] truncate" title={user.name}>{user.name}</div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted)]">
                                                 <div className="max-w-[180px] md:max-w-[250px] truncate" title={user.email}>{user.email}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-xs">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-medium border uppercase tracking-wider ${user.role === 'SUPER_ADMIN' ? 'bg-yellow-500/10 text-yellow-500/90 border-yellow-500/20' :
                                                     user.role === 'ADMIN' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                                        'bg-white/5 text-gray-400 border-white/10'
+                                                        'bg-white/5 text-[var(--muted)] border-[var(--border)]'
                                                     }`}>
                                                     {user.role}
                                                 </span>
@@ -177,20 +177,20 @@ export default function AdminUsersPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-xs">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-medium border uppercase tracking-wider ${user.plan === 'Pro' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
                                                     user.plan === 'Business' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                                        'bg-white/5 text-gray-400 border-white/10'
+                                                        'bg-white/5 text-[var(--muted)] border-[var(--border)]'
                                                     }`}>
                                                     {user.plan}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text)]">
                                                 {user.receiptCount.toLocaleString()}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                                {user.storageMB.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span className="text-gray-600 text-xs">MB</span>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text)]">
+                                                {user.storageMB.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span className="text-[var(--muted)] text-xs">MB</span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-400">{user.lastUploadDate ? new Date(user.lastUploadDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }) : '—'}</div>
-                                                <div className="text-[10px] text-gray-600 mt-0.5">Joined {new Date(user.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' })}</div>
+                                                <div className="text-sm text-[var(--muted)]">{user.lastUploadDate ? new Date(user.lastUploadDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }) : '—'}</div>
+                                                <div className="text-[10px] text-[var(--muted)] mt-0.5">Joined {new Date(user.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' })}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                                                 <button

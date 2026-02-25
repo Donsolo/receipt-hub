@@ -13,22 +13,22 @@ export default function ReceiptTemplate({ receipt, business }: { receipt: any, b
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">{business.businessName}</h1>
                         {business.businessAddress && (
-                            <p className="mt-1 text-sm text-gray-500 whitespace-pre-wrap">{business.businessAddress}</p>
+                            <p className="mt-1 text-sm text-[var(--muted)] whitespace-pre-wrap">{business.businessAddress}</p>
                         )}
-                        {business.businessPhone && <p className="text-sm text-gray-500">{business.businessPhone}</p>}
-                        {business.businessEmail && <p className="text-sm text-gray-500">{business.businessEmail}</p>}
+                        {business.businessPhone && <p className="text-sm text-[var(--muted)]">{business.businessPhone}</p>}
+                        {business.businessEmail && <p className="text-sm text-[var(--muted)]">{business.businessEmail}</p>}
                     </div>
                 </div>
                 <div className="text-right">
                     <h2 className="text-xl font-bold text-gray-900">RECEIPT</h2>
-                    <p className="mt-1 text-sm text-gray-500">#{receipt.receiptNumber}</p>
-                    <p className="mt-1 text-sm text-gray-500">{format(new Date(receipt.date), "MMMM d, yyyy")}</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">#{receipt.receiptNumber}</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">{format(new Date(receipt.date), "MMMM d, yyyy")}</p>
                 </div>
             </div>
 
             {/* Client Info */}
             <div className="mt-8 border-t border-gray-200 pt-8 mb-8">
-                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Bill To</h3>
+                <h3 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wider">Bill To</h3>
                 <div className="mt-2 text-lg text-gray-900">
                     {receipt.clientName || "Guest Client"}
                 </div>
@@ -39,18 +39,18 @@ export default function ReceiptTemplate({ receipt, business }: { receipt: any, b
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr className="border-b border-gray-200">
-                            <th className="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                            <th className="py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
-                            <th className="py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                            <th className="py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th className="py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Item</th>
+                            <th className="py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Qty</th>
+                            <th className="py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Price</th>
+                            <th className="py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Total</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {receipt.items.map((item: any) => (
                             <tr key={item.id}>
                                 <td className="py-4 text-sm text-gray-900">{item.description}</td>
-                                <td className="py-4 text-right text-sm text-gray-500">{item.quantity}</td>
-                                <td className="py-4 text-right text-sm text-gray-500">{Number(item.unitPrice).toFixed(2)}</td>
+                                <td className="py-4 text-right text-sm text-[var(--muted)]">{item.quantity}</td>
+                                <td className="py-4 text-right text-sm text-[var(--muted)]">{Number(item.unitPrice).toFixed(2)}</td>
                                 <td className="py-4 text-right text-sm text-gray-900">{Number(item.lineTotal).toFixed(2)}</td>
                             </tr>
                         ))}
@@ -62,12 +62,12 @@ export default function ReceiptTemplate({ receipt, business }: { receipt: any, b
             <div className="mt-8 border-t border-gray-200 pt-8 flex justify-end">
                 <div className="w-1/2">
                     <div className="flex justify-between py-2">
-                        <span className="text-sm font-medium text-gray-500">Subtotal</span>
+                        <span className="text-sm font-medium text-[var(--muted)]">Subtotal</span>
                         <span className="text-sm text-gray-900">{Number(receipt.subtotal).toFixed(2)}</span>
                     </div>
                     {receipt.taxType !== 'none' && (
                         <div className="flex justify-between py-2">
-                            <span className="text-sm font-medium text-gray-500">
+                            <span className="text-sm font-medium text-[var(--muted)]">
                                 Tax {receipt.taxType === 'percent' ? `(${receipt.taxValue}%)` : '(Flat)'}
                             </span>
                             <span className="text-sm text-gray-900">
@@ -85,13 +85,13 @@ export default function ReceiptTemplate({ receipt, business }: { receipt: any, b
             {/* Notes */}
             {receipt.notes && (
                 <div className="mt-8 border-t border-gray-200 pt-8">
-                    <h4 className="text-sm font-medium text-gray-500">Notes</h4>
-                    <p className="mt-2 text-sm text-gray-600">{receipt.notes}</p>
+                    <h4 className="text-sm font-medium text-[var(--muted)]">Notes</h4>
+                    <p className="mt-2 text-sm text-[var(--muted)]">{receipt.notes}</p>
                 </div>
             )}
 
             {/* Footer */}
-            <div className="mt-12 text-center text-sm text-gray-500">
+            <div className="mt-12 text-center text-sm text-[var(--muted)]">
                 <p>Thank you for your business!</p>
             </div>
         </div>

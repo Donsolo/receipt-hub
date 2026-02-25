@@ -15,8 +15,8 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
   const itemsRows = receipt.items.map((item: any) => `
     <tr>
       <td class="py-4 text-sm text-gray-900">${item.description}</td>
-      <td class="py-4 text-right text-sm text-gray-500">${item.quantity}</td>
-      <td class="py-4 text-right text-sm text-gray-500">${formatMoney(item.unitPrice)}</td>
+      <td class="py-4 text-right text-sm text-[var(--muted)]">${item.quantity}</td>
+      <td class="py-4 text-right text-sm text-[var(--muted)]">${formatMoney(item.unitPrice)}</td>
       <td class="py-4 text-right text-sm text-gray-900">${formatMoney(item.lineTotal)}</td>
     </tr>
   `).join('');
@@ -34,7 +34,7 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
 
   const taxInfo = receipt.taxType !== 'none' ? `
   <div class="flex justify-between py-2">
-         <span class="text-sm font-medium text-gray-500">
+         <span class="text-sm font-medium text-[var(--muted)]">
             Tax ${receipt.taxType === 'percent' ? `(${receipt.taxValue}%)` : '(Flat)'}
          </span>
          <span class="text-sm text-gray-900">
@@ -44,8 +44,8 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
   ` : '';
   const notesHtml = receipt.notes ? `
   <div class="mt-8 border-t border-gray-200 pt-8">
-         <h4 class="text-sm font-medium text-gray-500">Notes</h4>
-         <p class="mt-2 text-sm text-gray-600">${receipt.notes}</p>
+         <h4 class="text-sm font-medium text-[var(--muted)]">Notes</h4>
+         <p class="mt-2 text-sm text-[var(--muted)]">${receipt.notes}</p>
       </div>
   ` : '';
 
@@ -70,20 +70,20 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
                 <h1 class="text-xl font-bold text-gray-900">
                   ${receipt.user?.businessName || receipt.user?.email?.split('@')[0] || business.businessName}
                 </h1>
-                ${receipt.user?.businessAddress || business.businessAddress ? `<p class="mt-1 text-sm text-gray-500 whitespace-pre-wrap">${receipt.user?.businessAddress || business.businessAddress}</p>` : ''}
-                ${receipt.user?.businessPhone || business.businessPhone ? `<p class="text-sm text-gray-500">${receipt.user?.businessPhone || business.businessPhone}</p>` : ''}
+                ${receipt.user?.businessAddress || business.businessAddress ? `<p class="mt-1 text-sm text-[var(--muted)] whitespace-pre-wrap">${receipt.user?.businessAddress || business.businessAddress}</p>` : ''}
+                ${receipt.user?.businessPhone || business.businessPhone ? `<p class="text-sm text-[var(--muted)]">${receipt.user?.businessPhone || business.businessPhone}</p>` : ''}
               </div>
             </div>
             <div class="text-right shrink-0 ml-4">
-              <h2 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-1">Receipt</h2>
+              <h2 class="text-xs uppercase tracking-widest text-[var(--muted)] font-bold mb-1">Receipt</h2>
               <p class="text-base sm:text-lg font-mono text-gray-900 whitespace-nowrap">#${receipt.receiptNumber}</p>
-              <p class="text-sm text-gray-500 mt-1 whitespace-nowrap">${formatDate(receipt.date)}</p>
+              <p class="text-sm text-[var(--muted)] mt-1 whitespace-nowrap">${formatDate(receipt.date)}</p>
             </div>
           </div>
 
           <!-- Client Info -->
           <div class="mt-8 border-t border-gray-200 pt-8 mb-8">
-            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Bill To</h3>
+            <h3 class="text-sm font-medium text-[var(--muted)] uppercase tracking-wider">Bill To</h3>
             <div class="mt-2 text-lg text-gray-900">
               ${receipt.clientName || "Guest Client"}
             </div>
@@ -94,10 +94,10 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
             <table class="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr class="border-b border-gray-200">
-                  <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                  <th class="py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
-                  <th class="py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                  <th class="py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                  <th class="py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Item</th>
+                  <th class="py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Qty</th>
+                  <th class="py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Price</th>
+                  <th class="py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Total</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -110,7 +110,7 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
           <div class="mt-8 border-t border-gray-200 pt-8 flex justify-end">
             <div class="w-1/2">
               <div class="flex justify-between py-2">
-                <span class="text-sm font-medium text-gray-500">Subtotal</span>
+                <span class="text-sm font-medium text-[var(--muted)]">Subtotal</span>
                 <span class="text-sm text-gray-900">${formatMoney(receipt.subtotal)}</span>
               </div>
               ${taxInfo}
@@ -125,11 +125,11 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
 
           <!-- Footer -->
           <div class="mt-12 text-center border-t border-gray-100 pt-8">
-            <p class="text-sm text-gray-400 mb-4">Thank you for your business!</p>
+            <p class="text-sm text-[var(--muted)] mb-4">Thank you for your business!</p>
             <div class="flex items-center justify-center gap-1.5 opacity-60 grayscale">
-              <span class="text-[10px] uppercase tracking-wider text-gray-400 font-medium">Receipt Hub is powered by</span>
+              <span class="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Receipt Hub is powered by</span>
               <img src="data:image/png;base64,${tektriqLogoBase64}" alt="Tektriq LLC" class="h-3 w-auto object-contain" />
-              <span class="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Tektriq LLC</span>
+              <span class="text-[10px] uppercase tracking-wider text-[var(--muted)] font-bold">Tektriq LLC</span>
             </div>
           </div>
         </div>

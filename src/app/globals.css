@@ -1,32 +1,47 @@
 @import "tailwindcss";
 
 :root {
-  /* Dark Theme Palette */
-  --bg-primary: #0B1220;
-  --bg-surface: #111827;
-  --bg-card: #1F2937;
-  --border-subtle: #2D3748;
+  /* Dark Theme Palette (Default) */
+  --bg: #0B1220;
+  --card: #111A2B;
+  --card-hover: #182338;
+  --text: #F9FAFB;
+  --muted: #9CA3AF;
+  --border: rgba(255, 255, 255, 0.05);
+  /* or #1E293B */
+  --accent: #6366F1;
+}
 
-  --text-primary: #F9FAFB;
-  --text-secondary: #9CA3AF;
-
-  --accent-primary: #6366F1;
-  --accent-secondary: #14B8A6;
+[data-theme="light"] {
+  /* Light Theme Palette */
+  --bg: #F9FAFB;
+  --card: #FFFFFF;
+  --card-hover: #F3F4F6;
+  --text: #111827;
+  --muted: #6B7280;
+  --border: #E5E7EB;
+  --accent: #4F46E5;
 }
 
 @theme inline {
-  --color-bg-primary: var(--bg-primary);
-  --color-bg-surface: var(--bg-surface);
-  --color-bg-card: var(--bg-card);
-  --color-border-subtle: var(--border-subtle);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-accent-primary: var(--accent-primary);
-  --color-accent-secondary: var(--accent-secondary);
+  --color-bg-primary: var(--bg);
+  --color-bg-card: var(--card);
+  --color-bg-card-hover: var(--card-hover);
+  --color-text-primary: var(--text);
+  --color-text-muted: var(--muted);
+  --color-border-subtle: var(--border);
+  --color-accent-primary: var(--accent);
 }
 
 body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: var(--bg);
+  color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.card {
+  background: var(--card);
+  border-color: var(--border);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }

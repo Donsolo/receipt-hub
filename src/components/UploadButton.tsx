@@ -141,7 +141,7 @@ export default function UploadButton({
                 className={clsx(
                     "inline-flex items-center justify-center gap-2 px-5 h-11 rounded-lg whitespace-nowrap transition-colors",
                     uploading ? "bg-indigo-600/50 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-500",
-                    "text-white shadow-sm"
+                    "text-[var(--text)] shadow-sm"
                 )}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -156,7 +156,7 @@ export default function UploadButton({
                 disabled={uploading}
                 className={clsx(
                     "inline-flex items-center justify-center gap-2 px-5 h-11 rounded-lg whitespace-nowrap transition-colors",
-                    uploading ? "bg-[#1F2937] text-gray-500 cursor-not-allowed border-[#2D3748]" : "bg-[#1F2937] border border-[#2D3748] text-gray-200 hover:bg-[#243043]",
+                    uploading ? "bg-[var(--card)] text-[var(--muted)] cursor-not-allowed border-[var(--border)]" : "bg-[var(--card)] border border-[var(--border)] text-[var(--text)] hover:bg-[var(--card-hover)]",
                     "shadow-sm"
                 )}
             >

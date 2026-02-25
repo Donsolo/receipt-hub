@@ -29,6 +29,7 @@ model User {
   businessPhone            String?
   businessLogoPath         String?
   name                     String?
+  theme                    String    @default("dark")
   plan                     Plan      @default(CORE)
   planStatus               String?
   planExpiresAt            DateTime?

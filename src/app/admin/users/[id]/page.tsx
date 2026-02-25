@@ -115,21 +115,21 @@ export default function AdminUserDetailsPage({ params }: { params: Promise<{ id:
         }
     };
 
-    if (loading) return <div className="p-8 text-gray-500">Loading...</div>;
-    if (!user) return <div className="p-8 text-gray-500">User not found</div>;
+    if (loading) return <div className="p-8 text-[var(--muted)]">Loading...</div>;
+    if (!user) return <div className="p-8 text-[var(--muted)]">User not found</div>;
 
     return (
-        <div className="min-h-screen bg-[#0B1220] p-8">
+        <div className="min-h-screen bg-[var(--bg)] p-8">
             <div className="max-w-7xl mx-auto">
                 <Link href="/admin" className="text-indigo-400 hover:text-indigo-300 mb-4 inline-block">
                     &larr; Back to Dashboard
                 </Link>
 
-                <h1 className="text-2xl font-bold text-gray-100 mb-8">User Details</h1>
+                <h1 className="text-2xl font-bold text-[var(--text)] mb-8">User Details</h1>
 
-                <div className="bg-[#1F2937] p-6 rounded-lg shadow border border-[#2D3748] mb-8">
+                <div className="bg-[var(--card)] p-6 rounded-lg shadow border border-[var(--border)] mb-8">
                     <div className="flex justify-between items-start mb-6">
-                        <h2 className="text-lg font-medium text-gray-100">Profile & Stats</h2>
+                        <h2 className="text-lg font-medium text-[var(--text)]">Profile & Stats</h2>
                         <div className="flex space-x-3">
                             {/* Action Buttons Logic */}
                             {(() => {
@@ -148,7 +148,7 @@ export default function AdminUserDetailsPage({ params }: { params: Promise<{ id:
                                 // "Admin cannot demote other Admins" -> Admin can only act on USER.
                                 // "Admin: Can manage USERS only"
 
-                                if (user.id === currentUser.id) return <span className="text-gray-500 text-sm">You cannot delete yourself</span>;
+                                if (user.id === currentUser.id) return <span className="text-[var(--muted)] text-sm">You cannot delete yourself</span>;
 
                                 return (
                                     <>
@@ -179,61 +179,61 @@ export default function AdminUserDetailsPage({ params }: { params: Promise<{ id:
 
                     <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-4">
                         <div className="sm:col-span-1">
-                            <dt className="text-sm font-medium text-gray-400">Email</dt>
-                            <dd className="mt-1 text-sm text-gray-100">{user.email}</dd>
+                            <dt className="text-sm font-medium text-[var(--muted)]">Email</dt>
+                            <dd className="mt-1 text-sm text-[var(--text)]">{user.email}</dd>
                         </div>
                         <div className="sm:col-span-1">
-                            <dt className="text-sm font-medium text-gray-400">Role</dt>
+                            <dt className="text-sm font-medium text-[var(--muted)]">Role</dt>
                             <dd className="mt-1">
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.role === 'SUPER_ADMIN' ? 'bg-yellow-600 text-black' :
-                                    user.role === 'ADMIN' ? 'bg-indigo-600 text-white' :
-                                        'bg-gray-600 text-white'
+                                    user.role === 'ADMIN' ? 'bg-indigo-600 text-[var(--text)]' :
+                                        'bg-gray-600 text-[var(--text)]'
                                     }`}>
                                     {user.role}
                                 </span>
                             </dd>
                         </div>
                         <div className="sm:col-span-1">
-                            <dt className="text-sm font-medium text-gray-400">Joined</dt>
-                            <dd className="mt-1 text-sm text-gray-100">{new Date(user.createdAt).toLocaleDateString()}</dd>
+                            <dt className="text-sm font-medium text-[var(--muted)]">Joined</dt>
+                            <dd className="mt-1 text-sm text-[var(--text)]">{new Date(user.createdAt).toLocaleDateString()}</dd>
                         </div>
                         <div className="sm:col-span-1">
-                            <dt className="text-sm font-medium text-gray-400">Total Receipts</dt>
+                            <dt className="text-sm font-medium text-[var(--muted)]">Total Receipts</dt>
                             <dd className="mt-1 text-2xl font-semibold text-indigo-400">{user.receipts.length}</dd>
                         </div>
                     </dl>
 
-                    <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[#2D3748] pt-6">
+                    <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[var(--border)] pt-6">
                         <div>
-                            <dt className="text-xs font-medium text-gray-500 uppercase">Generated</dt>
-                            <dd className="mt-1 text-xl font-semibold text-gray-200">
+                            <dt className="text-xs font-medium text-[var(--muted)] uppercase">Generated</dt>
+                            <dd className="mt-1 text-xl font-semibold text-[var(--text)]">
                                 {user.receipts.filter(r => !!r.receiptNumber).length}
                             </dd>
                         </div>
                         <div>
-                            <dt className="text-xs font-medium text-gray-500 uppercase">Uploaded</dt>
-                            <dd className="mt-1 text-xl font-semibold text-gray-200">
+                            <dt className="text-xs font-medium text-[var(--muted)] uppercase">Uploaded</dt>
+                            <dd className="mt-1 text-xl font-semibold text-[var(--text)]">
                                 {user.receipts.filter(r => !!r.imageUrl).length}
                             </dd>
                         </div>
                     </div>
                 </div>
 
-                <h2 className="text-xl font-bold text-gray-100 mb-4">Receipts</h2>
-                <div className="bg-[#1F2937] rounded-lg shadow overflow-x-auto border border-[#2D3748]">
+                <h2 className="text-xl font-bold text-[var(--text)] mb-4">Receipts</h2>
+                <div className="bg-[var(--card)] rounded-lg shadow overflow-x-auto border border-[var(--border)]">
                     <table className="min-w-full divide-y divide-[#2D3748]">
-                        <thead className="bg-[#1F2937]">
+                        <thead className="bg-[var(--card)]">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Identifier</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Date</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Type</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Identifier</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-[#1F2937] divide-y divide-[#2D3748]">
+                        <tbody className="bg-[var(--card)] divide-y divide-[#2D3748]">
                             {user.receipts.length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-4 text-center text-gray-400">No receipts found.</td>
+                                    <td colSpan={4} className="px-6 py-4 text-center text-[var(--muted)]">No receipts found.</td>
                                 </tr>
                             ) : user.receipts.map((receipt) => {
                                 const isGenerated = !!receipt.receiptNumber;
@@ -242,8 +242,8 @@ export default function AdminUserDetailsPage({ params }: { params: Promise<{ id:
                                 const link = isGenerated ? `/receipt/${receipt.id}` : receipt.imageUrl;
 
                                 return (
-                                    <tr key={receipt.id} className="hover:bg-[#243043] transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-100">
+                                    <tr key={receipt.id} className="hover:bg-[var(--card-hover)] transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text)]">
                                             {new Date(receipt.createdAt).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -251,13 +251,13 @@ export default function AdminUserDetailsPage({ params }: { params: Promise<{ id:
                                                 {typeLabel}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-100">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text)]">
                                             {link ? (
                                                 <a href={link || '#'} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-900 hover:underline">
                                                     {identifier}
                                                 </a>
                                             ) : (
-                                                <span className="text-gray-400">N/A</span>
+                                                <span className="text-[var(--muted)]">N/A</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

@@ -10,7 +10,7 @@ export default async function SettingsPage() {
         <div className="space-y-6">
             <div className="pb-5 border-b border-gray-200">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">Business Settings</h3>
-                <p className="mt-2 max-w-4xl text-sm text-gray-500">
+                <p className="mt-2 max-w-4xl text-sm text-[var(--muted)]">
                     Manage your business details and logo. These will appear on all receipts.
                 </p>
             </div>

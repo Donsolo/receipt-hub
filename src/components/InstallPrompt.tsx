@@ -59,7 +59,7 @@ export default function InstallPrompt() {
 
     return (
         <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-5 duration-500">
-            <div className="bg-[#1F2937]/90 backdrop-blur-md border border-[#2D3748] shadow-xl rounded-2xl p-4 flex items-center justify-between max-w-md mx-auto">
+            <div className="bg-[var(--card)]/90 backdrop-blur-md border border-[var(--border)] shadow-xl rounded-2xl p-4 flex items-center justify-between max-w-md mx-auto">
                 <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0 shadow-sm rounded-xl overflow-hidden">
                         <Image
@@ -71,8 +71,8 @@ export default function InstallPrompt() {
                         />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-100">Install Receipt Hub</p>
-                        <p className="text-xs text-gray-400 truncate">Add to Home Screen for quick access</p>
+                        <p className="text-sm font-medium text-[var(--text)]">Install Receipt Hub</p>
+                        <p className="text-xs text-[var(--muted)] truncate">Add to Home Screen for quick access</p>
                     </div>
                 </div>
 
@@ -80,14 +80,14 @@ export default function InstallPrompt() {
                     {!isIOS && (
                         <button
                             onClick={handleInstallClick}
-                            className="bg-gray-900 hover:bg-black text-white text-xs font-bold py-2 px-3 rounded-lg transition-colors"
+                            className="bg-[var(--bg)] hover:bg-[var(--bg)] text-[var(--text)] text-xs font-bold py-2 px-3 rounded-lg transition-colors"
                         >
                             Install
                         </button>
                     )}
                     <button
                         onClick={dismissPrompt}
-                        className="p-2 text-gray-400 hover:text-gray-200 rounded-full hover:bg-[#243043] transition-colors"
+                        className="p-2 text-[var(--muted)] hover:text-[var(--text)] rounded-full hover:bg-[var(--card-hover)] transition-colors"
                         aria-label="Dismiss"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

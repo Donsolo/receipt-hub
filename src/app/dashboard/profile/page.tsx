@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTheme } from '@/components/ThemeProvider';
 
 type UserProfile = {
     email: string;
@@ -17,10 +18,25 @@ type UserProfile = {
 
 export default function ProfilePage() {
     const router = useRouter();
+    const { theme, setTheme } = useTheme();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+    const handleThemeChange = async (newTheme: 'light' | 'dark') => {
+        if (newTheme === theme) return;
+        setTheme(newTheme);
+        try {
+            await fetch('/api/user/theme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ theme: newTheme })
+            });
+        } catch (error) {
+            console.error('Failed to save theme setting');
+        }
+    };
 
     // Form state
     const [name, setName] = useState('');
@@ -148,8 +164,8 @@ export default function ProfilePage() {
         }
     };
 
-    if (loading) return <div className="p-8 text-gray-500 min-h-screen bg-[#0B1220]">Loading profile...</div>;
-    if (!profile) return <div className="p-8 text-red-500 min-h-screen bg-[#0B1220]">Profile not found.</div>;
+    if (loading) return <div className="p-8 text-[var(--muted)] min-h-screen bg-[var(--bg)]">Loading profile...</div>;
+    if (!profile) return <div className="p-8 text-red-500 min-h-screen bg-[var(--bg)]">Profile not found.</div>;
 
     const needsBusinessName = !profile.businessName;
 
@@ -161,11 +177,11 @@ export default function ProfilePage() {
         businessLogoPath !== profile.businessLogoPath;
 
     return (
-        <div className="min-h-screen bg-[#0B1220] p-4 sm:p-8 relative">
+        <div className="min-h-screen bg-[var(--bg)] p-4 sm:p-8 relative">
 
             {/* Toast Notification */}
             {toastMessage && (
-                <div className="fixed top-4 right-4 bg-gray-800 text-gray-100 px-4 py-2 rounded shadow-lg border border-gray-700 z-50 animate-fade-in">
+                <div className="fixed top-4 right-4 bg-[var(--card)] text-[var(--text)] px-4 py-2 rounded shadow-lg border border-[var(--border)] z-50 animate-fade-in">
                     {toastMessage}
                 </div>
             )}
@@ -173,7 +189,7 @@ export default function ProfilePage() {
             <div className="max-w-6xl mx-auto space-y-6">
 
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-3xl font-bold text-gray-100">Profile Settings</h1>
+                    <h1 className="text-3xl font-bold text-[var(--text)]">Profile Settings</h1>
                 </div>
 
                 {needsBusinessName && showBanner && (
@@ -195,30 +211,67 @@ export default function ProfilePage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
-                    {/* LEFT COLUMN (40%): Account Information */}
-                    <div className="lg:col-span-2">
-                        <section className="bg-[#0F172A] border border-white/5 rounded-xl shadow-sm p-6 sm:p-8">
+                    {/* LEFT COLUMN (40%): Settings & Account Info */}
+                    <div className="lg:col-span-2 space-y-6">
+
+                        {/* APPEARANCE (THEME TOGGLE) */}
+                        <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8">
+                            <div className="mb-4">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">Appearance</h2>
+                                <p className="text-sm text-[var(--muted)] mt-1">Customize the interface theme.</p>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-700 dark:text-[var(--text)]">Theme Preference</span>
+                                <div className="flex items-center bg-gray-100 dark:bg-[var(--bg)]/50 border border-gray-200 dark:border-[var(--border)] p-1 rounded-lg">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleThemeChange('light')}
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${theme === 'light'
+                                            ? 'bg-white dark:bg-[var(--card-hover)] text-gray-900 dark:text-[var(--text)] shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+                                            : 'text-[var(--muted)] hover:text-gray-900 dark:hover:text-[var(--text)]'
+                                            }`}
+                                    >
+                                        Light
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleThemeChange('dark')}
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${theme === 'dark'
+                                            ? 'bg-white dark:bg-[var(--card-hover)] text-gray-900 dark:text-[var(--text)] shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+                                            : 'text-[var(--muted)] hover:text-gray-900 dark:hover:text-[var(--text)]'
+                                            }`}
+                                    >
+                                        Dark
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+
+                        {/* ACCOUNT INFORMATION */}
+                        <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8">
                             <div className="mb-6">
-                                <h2 className="text-lg font-semibold text-gray-100">Account Information</h2>
-                                <p className="text-sm text-gray-500 mt-1">System read-only details.</p>
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">Account Information</h2>
+                                <p className="text-sm text-[var(--muted)] mt-1">System read-only details.</p>
                             </div>
 
                             <div className="space-y-4">
-                                <div className="flex flex-col border-b border-white/5 pb-3">
-                                    <span className="text-xs font-medium text-gray-500/80 uppercase tracking-wider mb-1">Email Address</span>
-                                    <span className="text-[15px] font-medium text-gray-200">{profile.email}</span>
+                                <div className="flex flex-col border-b border-gray-200 dark:border-[var(--border)] pb-3">
+                                    <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-1">Email Address</span>
+                                    <span className="text-[15px] font-medium text-gray-900 dark:text-[var(--text)]">{profile.email}</span>
                                 </div>
-                                <div className="flex flex-col border-b border-white/5 pb-3">
-                                    <span className="text-xs font-medium text-gray-500/80 uppercase tracking-wider mb-1">Current Plan</span>
+                                <div className="flex flex-col border-b border-gray-200 dark:border-[var(--border)] pb-3">
+                                    <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-1">Current Plan</span>
                                     <div className="flex items-center">
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-[#1E293B] text-gray-300 border border-white/5">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-[var(--card-hover)] text-gray-700 dark:text-[var(--text)] border border-gray-200 dark:border-[var(--border)]">
                                             Core (Early Access)
                                         </span>
                                     </div>
                                 </div>
                                 <div className="flex flex-col pt-1">
-                                    <span className="text-xs font-medium text-gray-500/80 uppercase tracking-wider mb-1">Joined Date</span>
-                                    <span className="text-[15px] font-medium text-gray-200">
+                                    <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-1">Joined Date</span>
+                                    <span className="text-[15px] font-medium text-gray-900 dark:text-[var(--text)]">
                                         {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </span>
                                 </div>
@@ -228,10 +281,10 @@ export default function ProfilePage() {
 
                     {/* RIGHT COLUMN (60%): Business Identity */}
                     <div className="lg:col-span-3">
-                        <section className="bg-[#0B101D] border border-white/5 border-l-4 border-l-indigo-500/30 rounded-xl shadow-xl shadow-black/20 flex flex-col h-full relative overflow-hidden">
-                            <div className="px-6 sm:px-8 pt-6 pb-5 border-b border-white/5 flex items-center justify-between">
+                        <section className="bg-[var(--bg)] border border-[var(--border)] border-l-4 border-l-indigo-500/30 rounded-xl shadow-xl shadow-black/20 flex flex-col h-full relative overflow-hidden">
+                            <div className="px-6 sm:px-8 pt-6 pb-5 border-b border-[var(--border)] flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-xl font-semibold text-gray-100 flex items-center gap-3">
+                                    <h2 className="text-xl font-semibold text-[var(--text)] flex items-center gap-3">
                                         Business Identity
                                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-indigo-500/5 text-indigo-300 border border-transparent align-middle">
                                             Used on receipts
@@ -246,7 +299,7 @@ export default function ProfilePage() {
                                     {/* 1. Business Logo (Admins Only) */}
                                     {(role === 'ADMIN' || role === 'SUPER_ADMIN') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-200 mb-2">
+                                            <label className="block text-sm font-medium text-[var(--text)] mb-2">
                                                 Business Logo <span className="inline-flex items-center ml-1.5 px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">Pro</span>
                                             </label>
                                             <p className="text-xs text-indigo-300/80 mb-3">Upload your corporate logo to seamlessly brand all generated PDFs.</p>
@@ -254,7 +307,7 @@ export default function ProfilePage() {
                                                 {businessLogoPath ? (
                                                     <div className="relative group">
                                                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                        <img src={businessLogoPath} alt="Business Logo" className="h-20 w-20 object-contain border border-[#2D3748] rounded-lg bg-[#111827] p-2" />
+                                                        <img src={businessLogoPath} alt="Business Logo" className="h-20 w-20 object-contain border border-[var(--border)] rounded-lg bg-[var(--card)] p-2" />
                                                         <button
                                                             type="button"
                                                             onClick={() => setBusinessLogoPath(null)}
@@ -267,16 +320,16 @@ export default function ProfilePage() {
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <div className="h-20 w-20 bg-[#111827] flex items-center justify-center border border-[#2D3748] rounded-lg text-gray-500 text-[10px] font-bold uppercase tracking-wide">No Logo</div>
+                                                    <div className="h-20 w-20 bg-[var(--card)] flex items-center justify-center border border-[var(--border)] rounded-lg text-[var(--muted)] text-[10px] font-bold uppercase tracking-wide">No Logo</div>
                                                 )}
                                                 <div className="flex-1">
                                                     <input
                                                         type="file"
                                                         accept="image/png, image/jpeg, image/webp"
                                                         onChange={handleLogoUpload}
-                                                        className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 transition-colors cursor-pointer"
+                                                        className="block w-full text-sm text-[var(--muted)] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-[var(--text)] hover:file:bg-indigo-500 transition-colors cursor-pointer"
                                                     />
-                                                    <p className="mt-2 text-xs text-gray-500">PNG, JPG, WEBP up to 2MB.</p>
+                                                    <p className="mt-2 text-xs text-[var(--muted)]">PNG, JPG, WEBP up to 2MB.</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -284,7 +337,7 @@ export default function ProfilePage() {
 
                                     {/* 2. Business Name (Primary) */}
                                     <div>
-                                        <label htmlFor="businessName" className="block text-sm font-medium text-gray-200">
+                                        <label htmlFor="businessName" className="block text-sm font-medium text-[var(--text)]">
                                             Business Name
                                         </label>
                                         <p className="text-xs text-indigo-300/80 mb-2">Displayed in receipt header</p>
@@ -294,18 +347,18 @@ export default function ProfilePage() {
                                             name="businessName"
                                             value={businessName}
                                             onChange={(e) => setBusinessName(e.target.value)}
-                                            className="block w-full rounded-md border border-white/10 shadow-inner bg-[#1A2234] px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[#1E293B] transition-colors text-[15px]"
+                                            className="block w-full rounded-md border border-[var(--border)] shadow-inner bg-[var(--card)] px-4 py-2.5 text-[var(--text)] placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[var(--card-hover)] transition-colors text-[15px]"
                                             placeholder="e.g. Acme Corp"
                                         />
-                                        <p className="mt-2 text-[12px] text-gray-500">
+                                        <p className="mt-2 text-[12px] text-[var(--muted)]">
                                             Preview text will reflect this name on PDFs.
                                         </p>
                                     </div>
 
                                     {/* 2. Business Phone */}
                                     <div>
-                                        <label htmlFor="businessPhone" className="block text-sm font-medium text-gray-300">
-                                            Business Phone <span className="text-gray-500 font-normal ml-1">(optional)</span>
+                                        <label htmlFor="businessPhone" className="block text-sm font-medium text-[var(--text)]">
+                                            Business Phone <span className="text-[var(--muted)] font-normal ml-1">(optional)</span>
                                         </label>
                                         <div className="mt-1.5">
                                             <input
@@ -314,7 +367,7 @@ export default function ProfilePage() {
                                                 name="businessPhone"
                                                 value={businessPhone}
                                                 onChange={(e) => setBusinessPhone(e.target.value)}
-                                                className="block w-full rounded-md border border-white/10 shadow-inner bg-[#1A2234] px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[#1E293B] transition-colors text-[15px]"
+                                                className="block w-full rounded-md border border-[var(--border)] shadow-inner bg-[var(--card)] px-4 py-2.5 text-[var(--text)] placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[var(--card-hover)] transition-colors text-[15px]"
                                                 placeholder="(555) 123-4567"
                                             />
                                         </div>
@@ -322,8 +375,8 @@ export default function ProfilePage() {
 
                                     {/* 3. Business Address */}
                                     <div>
-                                        <label htmlFor="businessAddress" className="block text-sm font-medium text-gray-300">
-                                            Business Address <span className="text-gray-500 font-normal ml-1">(optional)</span>
+                                        <label htmlFor="businessAddress" className="block text-sm font-medium text-[var(--text)]">
+                                            Business Address <span className="text-[var(--muted)] font-normal ml-1">(optional)</span>
                                         </label>
                                         <div className="mt-1.5">
                                             <input
@@ -332,7 +385,7 @@ export default function ProfilePage() {
                                                 name="businessAddress"
                                                 value={businessAddress}
                                                 onChange={(e) => setBusinessAddress(e.target.value)}
-                                                className="block w-full rounded-md border border-white/10 shadow-inner bg-[#1A2234] px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[#1E293B] transition-colors text-[15px]"
+                                                className="block w-full rounded-md border border-[var(--border)] shadow-inner bg-[var(--card)] px-4 py-2.5 text-[var(--text)] placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[var(--card-hover)] transition-colors text-[15px]"
                                                 placeholder="123 Main St, City, ST 12345"
                                             />
                                         </div>
@@ -340,8 +393,8 @@ export default function ProfilePage() {
 
                                     {/* 4. Full Name */}
                                     <div className="pt-2">
-                                        <label htmlFor="name" className="block text-sm font-medium text-gray-300">
-                                            Personal Name <span className="text-gray-500 font-normal ml-1">(optional)</span>
+                                        <label htmlFor="name" className="block text-sm font-medium text-[var(--text)]">
+                                            Personal Name <span className="text-[var(--muted)] font-normal ml-1">(optional)</span>
                                         </label>
                                         <div className="mt-1.5">
                                             <input
@@ -350,7 +403,7 @@ export default function ProfilePage() {
                                                 name="name"
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
-                                                className="block w-full rounded-md border border-white/10 shadow-inner bg-[#1A2234] px-4 py-2.5 text-gray-100 placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[#1E293B] transition-colors text-[15px]"
+                                                className="block w-full rounded-md border border-[var(--border)] shadow-inner bg-[var(--card)] px-4 py-2.5 text-[var(--text)] placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[var(--card-hover)] transition-colors text-[15px]"
                                                 placeholder="e.g. John Doe"
                                             />
                                         </div>
@@ -359,7 +412,7 @@ export default function ProfilePage() {
                                 </div>
 
                                 {/* ACTION ROW */}
-                                <div className="px-6 sm:px-8 py-5 border-t border-white/5 bg-[#0F1523] flex items-center justify-between">
+                                <div className="px-6 sm:px-8 py-5 border-t border-[var(--border)] bg-[var(--bg)] flex items-center justify-between">
                                     <div className="text-sm font-medium">
                                         {isDirty ? (
                                             <span className="text-amber-500/90 flex items-center gap-2">
@@ -376,7 +429,7 @@ export default function ProfilePage() {
                                     <button
                                         type="submit"
                                         disabled={saving || !isDirty}
-                                        className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-[#0F1523] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                        className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-[var(--text)] bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-[var(--bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                     >
                                         {saving ? 'Saving...' : 'Save Changes'}
                                     </button>

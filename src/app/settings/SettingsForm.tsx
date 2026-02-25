@@ -66,15 +66,15 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
     }
 
     return (
-        <form action={handleSubmit} className="bg-[#1F2937] shadow-sm border border-[#2D3748] rounded-xl p-8 space-y-8 max-w-2xl">
+        <form action={handleSubmit} className="bg-[var(--card)] shadow-sm border border-[var(--border)] rounded-xl p-8 space-y-8 max-w-2xl">
             {/* Logo Section */}
             <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Business Logo</label>
+                <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">Business Logo</label>
                 <div className="flex items-center space-x-6">
                     {logo ? (
                         <div className="relative group">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={logo} alt="Business Logo" className="h-24 w-24 object-contain border border-[#2D3748] rounded-lg bg-[#111827] p-2" />
+                            <img src={logo} alt="Business Logo" className="h-24 w-24 object-contain border border-[var(--border)] rounded-lg bg-[var(--card)] p-2" />
                             <button
                                 type="button"
                                 onClick={() => setLogo(null)}
@@ -87,23 +87,23 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                             </button>
                         </div>
                     ) : (
-                        <div className="h-24 w-24 bg-[#111827] flex items-center justify-center border border-[#2D3748] rounded-lg text-gray-500 text-xs uppercase tracking-wide">No Logo</div>
+                        <div className="h-24 w-24 bg-[var(--card)] flex items-center justify-center border border-[var(--border)] rounded-lg text-[var(--muted)] text-xs uppercase tracking-wide">No Logo</div>
                     )}
                     <div className="flex-1">
                         <input
                             type="file"
                             accept="image/png, image/jpeg, image/webp"
                             onChange={handleLogoUpload}
-                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-900 file:text-white hover:file:bg-gray-800 transition-colors"
+                            className="block w-full text-sm text-[var(--muted)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[var(--bg)] file:text-[var(--text)] hover:file:bg-[var(--card)] transition-colors"
                         />
-                        <p className="mt-2 text-xs text-gray-400">PNG, JPG, WEBP up to 2MB.</p>
+                        <p className="mt-2 text-xs text-[var(--muted)]">PNG, JPG, WEBP up to 2MB.</p>
                     </div>
                 </div>
             </div>
 
             {/* Business Name */}
             <div>
-                <label htmlFor="businessName" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <label htmlFor="businessName" className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">
                     Business Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -112,13 +112,13 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                     id="businessName"
                     required
                     defaultValue={initialData.businessName}
-                    className="block w-full border-[#2D3748] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-gray-100 bg-[#111827]"
+                    className="block w-full border-[var(--border)] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)]"
                 />
             </div>
 
             {/* Address */}
             <div>
-                <label htmlFor="businessAddress" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <label htmlFor="businessAddress" className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">
                     Address
                 </label>
                 <textarea
@@ -126,13 +126,13 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                     id="businessAddress"
                     rows={3}
                     defaultValue={initialData.businessAddress || ""}
-                    className="block w-full border-[#2D3748] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-gray-100 bg-[#111827]"
+                    className="block w-full border-[var(--border)] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)]"
                 />
             </div>
 
             {/* Phone */}
             <div>
-                <label htmlFor="businessPhone" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <label htmlFor="businessPhone" className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">
                     Phone
                 </label>
                 <input
@@ -140,13 +140,13 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                     name="businessPhone"
                     id="businessPhone"
                     defaultValue={initialData.businessPhone || ""}
-                    className="block w-full border-[#2D3748] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-gray-100 bg-[#111827]"
+                    className="block w-full border-[var(--border)] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)]"
                 />
             </div>
 
             {/* Email */}
             <div>
-                <label htmlFor="businessEmail" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <label htmlFor="businessEmail" className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">
                     Email
                 </label>
                 <input
@@ -154,17 +154,17 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                     name="businessEmail"
                     id="businessEmail"
                     defaultValue={initialData.businessEmail || ""}
-                    className="block w-full border-[#2D3748] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-gray-100 bg-[#111827]"
+                    className="block w-full border-[var(--border)] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)]"
                 />
             </div>
 
             {/* Submit */}
-            <div className="pt-4 border-t border-[#2D3748] flex items-center justify-between">
+            <div className="pt-4 border-t border-[var(--border)] flex items-center justify-between">
                 <button
                     type="submit"
                     disabled={loading}
                     className={clsx(
-                        "inline-flex justify-center py-2.5 px-6 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors",
+                        "inline-flex justify-center py-2.5 px-6 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-[var(--text)] bg-[var(--bg)] hover:bg-[var(--card)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors",
                         loading && "opacity-50 cursor-not-allowed"
                     )}
                 >

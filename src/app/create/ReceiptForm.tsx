@@ -358,10 +358,10 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                 <div className="lg:col-span-2 space-y-6">
 
                     {/* OCR Scan Action (Top of Form) */}
-                    <div className={`bg-[#111A2B] rounded-2xl border ${features.ocr ? 'border-yellow-500/20' : 'border-white/5'} shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 mb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 overflow-hidden relative`}>
+                    <div className={`bg-[var(--card)] rounded-2xl border ${features.ocr ? 'border-yellow-500/20' : 'border-[var(--border)]'} shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 mb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 overflow-hidden relative`}>
 
                         <div className="flex items-start gap-4 relative z-10 w-full sm:w-auto">
-                            <div className={`h-10 w-10 shrink-0 rounded-xl flex items-center justify-center shadow-inner border ${features.ocr ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 'bg-white/5 text-gray-500 border-white/10'}`}>
+                            <div className={`h-10 w-10 shrink-0 rounded-xl flex items-center justify-center shadow-inner border ${features.ocr ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 'bg-white/5 text-[var(--muted)] border-[var(--border)]'}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -369,14 +369,14 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                             </div>
                             <div className="flex flex-col items-start mt-0.5">
                                 <div className="flex flex-wrap items-center gap-2 mb-1">
-                                    <h3 className={`text-sm font-semibold tracking-tight ${features.ocr ? 'text-gray-200' : 'text-gray-400'}`}>Smart Scan (OCR)</h3>
+                                    <h3 className={`text-sm font-semibold tracking-tight ${features.ocr ? 'text-[var(--text)]' : 'text-[var(--muted)]'}`}>Smart Scan (OCR)</h3>
                                     {features.ocr && (
                                         <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
                                             PRO Feature
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-xs text-gray-500 leading-relaxed max-w-sm">Scan a physical receipt using your camera or upload an image.</p>
+                                <p className="text-xs text-[var(--muted)] leading-relaxed max-w-sm">Scan a physical receipt using your camera or upload an image.</p>
                             </div>
                         </div>
 
@@ -406,7 +406,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                     </button>
 
                                     {!ocrLoading && (
-                                        <label className={`w-full sm:w-auto cursor-pointer px-5 py-2.5 bg-transparent border border-white/10 hover:border-white/20 hover:bg-white/5 text-gray-400 hover:text-gray-300 text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2`}>
+                                        <label className={`w-full sm:w-auto cursor-pointer px-5 py-2.5 bg-transparent border border-[var(--border)] hover:border-white/20 hover:bg-[var(--card-hover)] text-[var(--muted)] hover:text-[var(--text)] text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                                             Upload Image
                                             <input type="file" accept="image/*" className="hidden" onChange={handleOCRUpload} disabled={ocrLoading} />
@@ -424,7 +424,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                     />
                                 </div>
                             ) : (
-                                <Link href="/upgrade" className="px-3 py-1.5 bg-white/5 border border-white/10 text-gray-400 text-xs font-medium rounded-lg hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5" title="Available in Professional Mode">
+                                <Link href="/upgrade" className="px-3 py-1.5 bg-white/5 border border-[var(--border)] text-[var(--muted)] text-xs font-medium rounded-lg hover:text-[var(--text)] hover:bg-[var(--card-hover)] transition-colors flex items-center gap-1.5" title="Available in Professional Mode">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-yellow-500/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                     </svg>
@@ -435,7 +435,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                     </div>
 
                     {/* Section: Header Info */}
-                    <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
+                    <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
                         <div>
                             <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Receipt Details</h3>
                             <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
@@ -446,7 +446,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                         required
                                         value={receiptNumber}
                                         onChange={e => setReceiptNumber(e.target.value)}
-                                        className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] placeholder-white/30"
+                                        className="block w-full border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)] placeholder-white/30"
                                     />
                                 </div>
                                 <div>
@@ -456,7 +456,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                         required
                                         value={date}
                                         onChange={e => setDate(e.target.value)}
-                                        className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] [color-scheme:dark]"
+                                        className="block w-full border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)] [color-scheme:dark]"
                                     />
                                 </div>
                             </div>
@@ -467,7 +467,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                     type="text"
                                     value={clientName}
                                     onChange={e => setClientName(e.target.value)}
-                                    className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] placeholder-white/30"
+                                    className="block w-full border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)] placeholder-white/30"
                                     placeholder="Client or Company Name"
                                 />
                             </div>
@@ -485,7 +485,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                                     setCategoryId(e.target.value);
                                                 }
                                             }}
-                                            className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338]"
+                                            className="block w-full border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)]"
                                         >
                                             <option value="">None</option>
                                             {categories.map(cat => (
@@ -501,7 +501,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                             value={newCategoryName}
                                             onChange={e => setNewCategoryName(e.target.value)}
                                             placeholder="New Category Name"
-                                            className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-white bg-[#182338] placeholder-white/30"
+                                            className="block w-full border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500/40 transition-all duration-150 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)] placeholder-white/30"
                                             autoFocus
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter') {
@@ -516,14 +516,14 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                             type="button"
                                             onClick={handleCreateCategory}
                                             disabled={creatingCategoryLoading}
-                                            className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                            className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-[var(--text)] text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
                                         >
                                             {creatingCategoryLoading ? 'Saving...' : 'Add'}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setIsCreatingCategory(false)}
-                                            className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-lg transition-colors"
+                                            className="px-3 py-2 bg-white/10 hover:bg-white/20 text-[var(--text)] text-sm font-medium rounded-lg transition-colors"
                                         >
                                             Cancel
                                         </button>
@@ -534,9 +534,9 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                     </div>
 
                     {/* Section: Line Items */}
-                    <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6">
+                    <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6">
                         <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Line Items</h3>
-                        <div className="bg-[#0F1725] rounded-xl border border-white/5 overflow-visible">
+                        <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] overflow-visible">
                             <div className="w-full">
                                 <table className="min-w-full table-fixed divide-y divide-white/5">
                                     <thead>
@@ -570,7 +570,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
 
                                                         {/* Dropdown Suggestions */}
                                                         {activeInputId === item.id && suggestions.length > 0 && (
-                                                            <div ref={wrapperRef} className="absolute left-0 right-0 top-full mt-1 bg-[#1E293B] border border-gray-600/50 rounded-md shadow-2xl z-[100] overflow-hidden">
+                                                            <div ref={wrapperRef} className="absolute left-0 right-0 top-full mt-1 bg-[var(--card-hover)] border border-gray-600/50 rounded-md shadow-2xl z-[100] overflow-hidden">
                                                                 <ul className="py-1">
                                                                     {suggestions.map((suggestion, idx) => (
                                                                         <li
@@ -579,7 +579,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                                                             onMouseEnter={() => setActiveSuggestionIndex(idx)}
                                                                             className={`px-3 py-2 text-sm cursor-pointer transition-colors ${idx === activeSuggestionIndex
                                                                                 ? 'bg-indigo-600/20 text-indigo-300'
-                                                                                : 'text-gray-300 hover:bg-white/5'
+                                                                                : 'text-[var(--text)] hover:bg-[var(--card-hover)]'
                                                                                 }`}
                                                                         >
                                                                             {suggestion}
@@ -616,7 +616,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                                 </td>
                                                 <td className="px-2 py-3 text-center">
                                                     {items.length > 1 && (
-                                                        <button type="button" onClick={() => removeItem(item.id)} className="text-gray-500 hover:text-red-500 p-1">
+                                                        <button type="button" onClick={() => removeItem(item.id)} className="text-[var(--muted)] hover:text-red-500 p-1">
                                                             &times;
                                                         </button>
                                                     )}
@@ -639,13 +639,13 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                 <div className="lg:col-span-1 space-y-6">
 
                     {/* Section: Totals */}
-                    <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
+                    <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
                         <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Summary</h3>
 
-                        <div className="bg-[#0F1725] rounded-xl border border-white/5 p-6 space-y-4">
+                        <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6 space-y-4">
                             <div className="flex justify-between items-center text-sm text-white/70">
                                 <span>Subtotal</span>
-                                <span className="font-medium text-white">{subtotal.toFixed(2)}</span>
+                                <span className="font-medium text-[var(--text)]">{subtotal.toFixed(2)}</span>
                             </div>
 
                             <div className="flex justify-between items-center text-sm text-white/70">
@@ -655,7 +655,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                         id="taxType"
                                         value={taxType}
                                         onChange={e => setTaxType(e.target.value as any)}
-                                        className="text-sm border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 py-1 pl-2 pr-8 bg-[#182338] text-white transition-all duration-150"
+                                        className="text-sm border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500/40 py-1 pl-2 pr-8 bg-[var(--card)] text-[var(--text)] transition-all duration-150"
                                     >
                                         <option value="none">None</option>
                                         <option value="percent">%</option>
@@ -669,24 +669,24 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                             value={taxValue}
                                             onChange={e => setTaxValue(Number(e.target.value))}
                                             placeholder="0.00"
-                                            className="w-20 text-sm border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 py-1 px-2 text-right bg-[#182338] text-white transition-all duration-150"
+                                            className="w-20 text-sm border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500/40 py-1 px-2 text-right bg-[var(--card)] text-[var(--text)] transition-all duration-150"
                                         />
                                     )}
                                 </div>
-                                <span className="font-medium text-white">{calculatedTax.toFixed(2)}</span>
+                                <span className="font-medium text-[var(--text)]">{calculatedTax.toFixed(2)}</span>
                             </div>
 
                             <div className="h-px bg-white/10 my-4" />
 
                             <div className="flex justify-between items-center">
-                                <span className="text-base font-semibold text-white">Total</span>
+                                <span className="text-base font-semibold text-[var(--text)]">Total</span>
                                 <span className="text-3xl font-bold text-blue-400 tracking-tight">{total.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Section: Notes */}
-                    <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
+                    <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
                         <div>
                             <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Additional Info</h3>
                             <label className="block text-xs font-medium text-white/60 mb-2">Notes</label>
@@ -694,7 +694,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                 rows={4}
                                 value={notes}
                                 onChange={e => setNotes(e.target.value)}
-                                className="block w-full border border-white/5 rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm p-3 text-white bg-[#182338] placeholder-white/30"
+                                className="block w-full border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-150 sm:text-sm p-3 text-[var(--text)] bg-[var(--card)] placeholder-white/30"
                                 placeholder="Payment terms, thank you message, etc."
                             ></textarea>
                         </div>
@@ -705,7 +705,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] text-sm font-medium text-[var(--text)] bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
                         >
                             {loading ? 'Saving...' : (isEdit ? 'Save Changes' : 'Save & Prepare PDF')}
                         </button>
@@ -713,7 +713,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                             <button
                                 type="button"
                                 onClick={() => router.push(`/history`)}
-                                className="mt-4 w-full flex justify-center py-3 px-4 border border-white/10 rounded-xl shadow-sm text-sm font-medium text-white/70 bg-transparent hover:bg-white/5 hover:text-white transition-all duration-200"
+                                className="mt-4 w-full flex justify-center py-3 px-4 border border-[var(--border)] rounded-xl shadow-sm text-sm font-medium text-white/70 bg-transparent hover:bg-[var(--card-hover)] hover:text-[var(--text)] transition-all duration-200"
                             >
                                 Cancel
                             </button>
@@ -724,11 +724,11 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
 
             {/* OCR Review Modal */}
             {showOcrModal && ocrData && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-[#111A2B] border border-white/10 shadow-2xl rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#182338]">
-                            <h2 className="text-xl font-bold text-white tracking-tight">Review Scanned Receipt</h2>
-                            <button type="button" onClick={() => { setShowOcrModal(false); setOcrData(null); }} className="text-gray-400 hover:text-white transition-colors">
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[var(--bg)]/60 backdrop-blur-sm">
+                    <div className="bg-[var(--card)] border border-[var(--border)] shadow-2xl rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+                        <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)]">
+                            <h2 className="text-xl font-bold text-[var(--text)] tracking-tight">Review Scanned Receipt</h2>
+                            <button type="button" onClick={() => { setShowOcrModal(false); setOcrData(null); }} className="text-[var(--muted)] hover:text-[var(--text)] transition-colors">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
@@ -737,18 +737,18 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                             {/* Merchant Details */}
                             <div>
                                 <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-3">Merchant Info</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#0F1725] p-4 rounded-xl border border-white/5">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[var(--card)] p-4 rounded-xl border border-[var(--border)]">
                                     <div>
-                                        <p className="text-xs text-gray-500 mb-1">Name</p>
-                                        <p className="text-sm text-gray-200 font-medium">{ocrData.merchantName || "Unknown Merchant"}</p>
+                                        <p className="text-xs text-[var(--muted)] mb-1">Name</p>
+                                        <p className="text-sm text-[var(--text)] font-medium">{ocrData.merchantName || "Unknown Merchant"}</p>
                                     </div>
                                     <div className="sm:row-span-2">
-                                        <p className="text-xs text-gray-500 mb-1">Address</p>
-                                        <p className="text-sm text-gray-300">{ocrData.merchantAddress || "N/A"}</p>
+                                        <p className="text-xs text-[var(--muted)] mb-1">Address</p>
+                                        <p className="text-sm text-[var(--text)]">{ocrData.merchantAddress || "N/A"}</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-500 mb-1">Phone</p>
-                                        <p className="text-sm text-gray-300">{ocrData.phone || "N/A"}</p>
+                                        <p className="text-xs text-[var(--muted)] mb-1">Phone</p>
+                                        <p className="text-sm text-[var(--text)]">{ocrData.phone || "N/A"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -756,24 +756,24 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                             {/* Transaction Details */}
                             <div>
                                 <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-3">Transaction Info</h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#0F1725] p-4 rounded-xl border border-white/5">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[var(--card)] p-4 rounded-xl border border-[var(--border)]">
                                     <div>
-                                        <p className="text-xs text-gray-500 mb-1">Date</p>
-                                        <p className="text-sm text-gray-200">{ocrData.transactionDate || "N/A"}</p>
+                                        <p className="text-xs text-[var(--muted)] mb-1">Date</p>
+                                        <p className="text-sm text-[var(--text)]">{ocrData.transactionDate || "N/A"}</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-500 mb-1">Method</p>
-                                        <p className="text-sm text-gray-200">
+                                        <p className="text-xs text-[var(--muted)] mb-1">Method</p>
+                                        <p className="text-sm text-[var(--text)]">
                                             {ocrData.paymentMethod ? `${ocrData.paymentMethod} ${ocrData.last4 ? '(*' + ocrData.last4 + ')' : ''}` : "N/A"}
                                         </p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-500 mb-1">Tax</p>
-                                        <p className="text-sm text-gray-200">{ocrData.tax !== null ? `$${Number(ocrData.tax).toFixed(2)}` : "N/A"}</p>
+                                        <p className="text-xs text-[var(--muted)] mb-1">Tax</p>
+                                        <p className="text-sm text-[var(--text)]">{ocrData.tax !== null ? `$${Number(ocrData.tax).toFixed(2)}` : "N/A"}</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-500 mb-1">Total</p>
-                                        <p className="text-base text-white font-bold tracking-tight">{ocrData.total !== null ? `$${Number(ocrData.total).toFixed(2)}` : "N/A"}</p>
+                                        <p className="text-xs text-[var(--muted)] mb-1">Total</p>
+                                        <p className="text-base text-[var(--text)] font-bold tracking-tight">{ocrData.total !== null ? `$${Number(ocrData.total).toFixed(2)}` : "N/A"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -782,23 +782,23 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                             {ocrData.lineItems && ocrData.lineItems.length > 0 && (
                                 <div>
                                     <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-3">Extracted Items</h3>
-                                    <div className="bg-[#0F1725] rounded-xl border border-white/5 overflow-hidden">
+                                    <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] overflow-hidden">
                                         <table className="min-w-full divide-y divide-white/10">
-                                            <thead className="bg-[#182338]">
+                                            <thead className="bg-[var(--card)]">
                                                 <tr>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400">Description</th>
-                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-400">Qty</th>
-                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-400">Price</th>
-                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-400">Total</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--muted)]">Description</th>
+                                                    <th className="px-4 py-2 text-right text-xs font-medium text-[var(--muted)]">Qty</th>
+                                                    <th className="px-4 py-2 text-right text-xs font-medium text-[var(--muted)]">Price</th>
+                                                    <th className="px-4 py-2 text-right text-xs font-medium text-[var(--muted)]">Total</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-white/5">
                                                 {ocrData.lineItems.map((item: any, idx: number) => (
                                                     <tr key={idx}>
-                                                        <td className="px-4 py-3 text-sm text-gray-300">{item.description || "N/A"}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-300 text-right">{item.quantity || 1}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-300 text-right">{item.price !== null ? `$${Number(item.price).toFixed(2)}` : "-"}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-200 font-medium text-right">{item.total !== null ? `$${Number(item.total).toFixed(2)}` : "-"}</td>
+                                                        <td className="px-4 py-3 text-sm text-[var(--text)]">{item.description || "N/A"}</td>
+                                                        <td className="px-4 py-3 text-sm text-[var(--text)] text-right">{item.quantity || 1}</td>
+                                                        <td className="px-4 py-3 text-sm text-[var(--text)] text-right">{item.price !== null ? `$${Number(item.price).toFixed(2)}` : "-"}</td>
+                                                        <td className="px-4 py-3 text-sm text-[var(--text)] font-medium text-right">{item.total !== null ? `$${Number(item.total).toFixed(2)}` : "-"}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -808,11 +808,11 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                             )}
                         </div>
 
-                        <div className="px-6 py-4 border-t border-white/10 bg-[#182338] flex flex-col sm:flex-row gap-3 sm:justify-end">
+                        <div className="px-6 py-4 border-t border-[var(--border)] bg-[var(--card)] flex flex-col sm:flex-row gap-3 sm:justify-end">
                             <button
                                 type="button"
                                 onClick={() => { setShowOcrModal(false); setOcrData(null); }}
-                                className="px-4 py-2 border border-white/10 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/5 transition-colors order-3 sm:order-1"
+                                className="px-4 py-2 border border-[var(--border)] rounded-lg text-sm font-medium text-[var(--text)] hover:bg-[var(--card-hover)] transition-colors order-3 sm:order-1"
                             >
                                 Cancel
                             </button>
@@ -826,7 +826,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                             <button
                                 type="button"
                                 onClick={applyOcrData}
-                                className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold shadow-[0_4px_14px_rgba(37,99,235,0.39)] transition-all order-1 sm:order-3"
+                                className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-[var(--text)] rounded-lg text-sm font-bold shadow-[0_4px_14px_rgba(37,99,235,0.39)] transition-all order-1 sm:order-3"
                             >
                                 Apply to Form
                             </button>

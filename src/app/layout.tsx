@@ -48,12 +48,12 @@ export const metadata: Metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0B1220',
+  themeColor: 'var(--bg-primary)',
 };
 
 import { verifyToken } from '@/lib/auth';
-
-// ... (existing imports)
+import { db } from '@/lib/db';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 export default async function RootLayout({
   children,
@@ -65,49 +65,57 @@ export default async function RootLayout({
   let isAuthenticated = false;
   let userRole: string | undefined;
 
+  let initialTheme: "dark" | "light" = "dark";
+
   if (token) {
     const payload = await verifyToken(token);
     if (payload) {
       isAuthenticated = true;
       userRole = payload.role as string;
-      console.log('RootLayout: User Authenticated', { userId: payload.userId, role: userRole });
-    } else {
-      console.log('RootLayout: Invalid Token');
+
+      // Extract theme from DB
+      const dbUser = await db.user.findUnique({
+        where: { id: payload.userId as string },
+        select: { theme: true }
+      });
+      if (dbUser?.theme === "light") {
+        initialTheme = "light";
+      }
     }
-  } else {
-    console.log('RootLayout: No Token Found');
   }
 
   return (
-    <html lang="en" className="h-full">
-      <body className={`${inter.className} h-full`}>
-        <div className="min-h-screen bg-[#0B1220] text-gray-100 flex flex-col">
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                '@context': 'https://schema.org',
-                '@type': 'Organization',
-                name: 'Tektriq LLC',
-                url: 'https://tektriq.com',
-                logo: 'https://receipthub.tektriq.com/tektriq-logo.png',
-                contactPoint: {
-                  '@type': 'ContactPoint',
-                  telephone: '',
-                  contactType: 'customer support',
-                  email: 'support@tektriq.com',
-                },
-              }),
-            }}
-          />
-          <Navbar isAuthenticated={isAuthenticated} role={userRole} />
-          <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
-            {children}
-          </main>
-          <InstallPrompt />
-          <Footer />
-        </div>
-      </body>
+    <html lang="en" className="h-full" data-theme={initialTheme}>
+      <ThemeProvider initialTheme={initialTheme}>
+        <body className={`${inter.className} h-full bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
+          <div className="min-h-screen flex flex-col">
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Organization',
+                  name: 'Tektriq LLC',
+                  url: 'https://tektriq.com',
+                  logo: 'https://receipthub.tektriq.com/tektriq-logo.png',
+                  contactPoint: {
+                    '@type': 'ContactPoint',
+                    telephone: '',
+                    contactType: 'customer support',
+                    email: 'support@tektriq.com',
+                  },
+                }),
+              }}
+            />
+            <Navbar isAuthenticated={isAuthenticated} role={userRole} />
+            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
+              {children}
+            </main>
+            <InstallPrompt />
+            <Footer />
+          </div>
+        </body>
+      </ThemeProvider>
     </html>
   );
 }

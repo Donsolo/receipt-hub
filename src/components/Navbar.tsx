@@ -32,12 +32,12 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
     const links = isAuthenticated ? authLinks : guestLinks;
 
     return (
-        <nav className="border-b border-gray-800 bg-[#0B1220] relative z-50">
+        <nav className="border-b border-[var(--border)] bg-[var(--bg)] relative z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex">
                         <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex-shrink-0 flex items-center">
-                            <span className="text-xl font-bold text-gray-100">Receipt Hub</span>
+                            <span className="text-xl font-bold text-[var(--text)]">Receipt Hub</span>
                         </Link>
                     </div>
 
@@ -49,7 +49,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                                     <Link
                                         key={link.href}
                                         href={link.href}
-                                        className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                        className="text-[var(--text)] hover:text-[var(--text)] px-3 py-2 rounded-md text-sm font-medium"
                                     >
                                         {link.label}
                                     </Link>
@@ -57,14 +57,14 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                                 {role === 'ADMIN' || role === 'SUPER_ADMIN' ? (
                                     <Link
                                         href="/admin"
-                                        className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                        className="text-[var(--text)] hover:text-[var(--text)] px-3 py-2 rounded-md text-sm font-medium"
                                     >
                                         Admin
                                     </Link>
                                 ) : null}
                                 <button
                                     onClick={handleLogout}
-                                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                    className="text-[var(--text)] hover:text-[var(--text)] px-3 py-2 rounded-md text-sm font-medium"
                                 >
                                     Sign Out
                                 </button>
@@ -77,7 +77,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                         {isAuthenticated && (
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                                className="inline-flex items-center justify-center p-2 rounded-md text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
                             >
                                 <span className="sr-only">Open main menu</span>
                                 {!isMenuOpen ? (
@@ -97,14 +97,14 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
 
             {/* Mobile Menu Dropdown */}
             {isAuthenticated && isMenuOpen && (
-                <div className="md:hidden absolute top-16 left-0 w-full bg-[#0B1220] border-b border-gray-800 shadow-xl">
+                <div className="md:hidden absolute top-16 left-0 w-full bg-[var(--bg)] border-b border-[var(--border)] shadow-xl">
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                         {authLinks.map((link) => (
                             <Link
                                 key={link.href}
                                 href={link.href}
                                 onClick={() => setIsMenuOpen(false)}
-                                className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800"
+                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--card)]"
                             >
                                 {link.label}
                             </Link>
@@ -113,7 +113,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                             <Link
                                 href="/admin"
                                 onClick={() => setIsMenuOpen(false)}
-                                className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800"
+                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--card)]"
                             >
                                 Admin
                             </Link>
@@ -123,7 +123,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                                 setIsMenuOpen(false);
                                 handleLogout();
                             }}
-                            className="text-gray-300 hover:text-white block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-gray-800"
+                            className="text-[var(--text)] hover:text-[var(--text)] block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--card)]"
                         >
                             Sign Out
                         </button>

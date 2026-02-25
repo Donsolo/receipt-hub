@@ -23,8 +23,8 @@ export default function ActivatePage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0B1220] flex items-center justify-center p-4">
-            <div className="bg-[#111A2C] border border-white/5 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
+        <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center p-4">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
                 <div className="p-8 text-center space-y-6">
                     <div className="mx-auto h-16 w-16 bg-indigo-500/10 rounded-full flex items-center justify-center mb-6 border border-indigo-500/20">
                         <svg className="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -33,15 +33,15 @@ export default function ActivatePage() {
                     </div>
 
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-100 mb-2">Activate Your Core Workspace</h1>
-                        <p className="text-[15px] text-gray-400 leading-relaxed">
+                        <h1 className="text-2xl font-bold text-[var(--text)] mb-2">Activate Your Core Workspace</h1>
+                        <p className="text-[15px] text-[var(--muted)] leading-relaxed">
                             Core access requires a one-time activation fee.
                         </p>
                     </div>
 
                     <div className="pt-4">
                         <button
-                            className={`w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-lg shadow-indigo-500/20 transition-all duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-[var(--text)] font-medium rounded-xl shadow-lg shadow-indigo-500/20 transition-all duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                             onClick={handleActivate}
                             disabled={loading}
                         >

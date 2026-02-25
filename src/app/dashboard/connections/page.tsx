@@ -403,9 +403,9 @@ export default function ConnectionsPage() {
     }, [messages]);
 
     return (
-        <div className="min-h-screen bg-[#0B1220] p-4 sm:p-8">
+        <div className="min-h-screen bg-[var(--bg)] p-4 sm:p-8">
             {toastMessage && (
-                <div className="fixed top-4 right-4 bg-gray-800 text-gray-100 px-4 py-2 rounded shadow-lg border border-gray-700 z-50 transition-opacity">
+                <div className="fixed top-4 right-4 bg-[var(--card)] text-[var(--text)] px-4 py-2 rounded shadow-lg border border-[var(--border)] z-50 transition-opacity">
                     {toastMessage}
                 </div>
             )}
@@ -415,17 +415,17 @@ export default function ConnectionsPage() {
                 {/* SECTION 1: Header & Pill Badges */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-100 mb-1">Business Network</h1>
-                        <p className="text-gray-400 text-sm">Manage your private business connections.</p>
+                        <h1 className="text-2xl font-bold text-[var(--text)] mb-1">Business Network</h1>
+                        <p className="text-[var(--muted)] text-sm">Manage your private business connections.</p>
                     </div>
                     <div className="flex gap-2">
-                        <div className="bg-[#1F2937]/40 border border-[#374151]/40 rounded-full px-3 py-1 flex items-center">
-                            <span className="text-xs text-gray-400 mr-2">Connections</span>
-                            <span className="text-xs font-medium text-gray-200">{connections.length}</span>
+                        <div className="bg-[var(--card)]/40 border border-[var(--border)] rounded-full px-3 py-1 flex items-center">
+                            <span className="text-xs text-[var(--muted)] mr-2">Connections</span>
+                            <span className="text-xs font-medium text-[var(--text)]">{connections.length}</span>
                         </div>
-                        <div className="bg-[#1F2937]/40 border border-[#374151]/40 rounded-full px-3 py-1 flex items-center">
-                            <span className="text-xs text-gray-400 mr-2">Pending</span>
-                            <span className="text-xs font-medium text-gray-200">{incomingRequests.length}</span>
+                        <div className="bg-[var(--card)]/40 border border-[var(--border)] rounded-full px-3 py-1 flex items-center">
+                            <span className="text-xs text-[var(--muted)] mr-2">Pending</span>
+                            <span className="text-xs font-medium text-[var(--text)]">{incomingRequests.length}</span>
                         </div>
                     </div>
                 </div>
@@ -435,14 +435,14 @@ export default function ConnectionsPage() {
 
                     {/* LEFT COLUMN (60%): Search Module */}
                     <div className="lg:col-span-3">
-                        <section className="bg-[#0F172A] border border-white/5 shadow-sm rounded-lg p-5 sm:p-6 space-y-8">
+                        <section className="bg-[var(--bg)] border border-[var(--border)] shadow-sm rounded-lg p-5 sm:p-6 space-y-8">
 
                             {/* Search by Name/Business */}
                             <div className="relative">
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Search by Name or Business</label>
+                                <label className="block text-sm font-medium text-[var(--text)] mb-2">Search by Name or Business</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg className="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="h-4 w-4 text-[var(--muted)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                         </svg>
                                     </div>
@@ -451,29 +451,29 @@ export default function ConnectionsPage() {
                                         placeholder="Enter name..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="block w-full pl-9 pr-3 py-2 bg-[#1E293B]/50 border border-white/10 rounded-md text-gray-100 text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 hover:bg-[#1E293B] transition-colors"
+                                        className="block w-full pl-9 pr-3 py-2 bg-[var(--card-hover)]/50 border border-[var(--border)] rounded-md text-[var(--text)] text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 hover:bg-[var(--card-hover)] transition-colors"
                                     />
                                 </div>
 
                                 {/* Floating Dropdown */}
                                 {searchQuery.length >= 2 && (
-                                    <div className="absolute z-10 mt-1 w-full bg-[#1E293B] border border-white/10 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                    <div className="absolute z-10 mt-1 w-full bg-[var(--card-hover)] border border-[var(--border)] rounded-md shadow-lg max-h-60 overflow-y-auto">
                                         {isSearching ? (
-                                            <div className="px-4 py-3 text-sm text-gray-400">Searching...</div>
+                                            <div className="px-4 py-3 text-sm text-[var(--muted)]">Searching...</div>
                                         ) : searchResults.length > 0 ? (
                                             <ul className="divide-y divide-white/5">
                                                 {searchResults.map(user => {
                                                     const { primary, secondary } = getDisplayNameInfo(user);
                                                     return (
-                                                        <li key={user.id} className="p-3 hover:bg-[#334155]/50 transition-colors flex items-center justify-between group">
+                                                        <li key={user.id} className="p-3 hover:bg-[var(--card)] transition-colors flex items-center justify-between group">
                                                             <div>
-                                                                <p className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors">{primary}</p>
-                                                                <p className="text-xs text-gray-500">{secondary}</p>
+                                                                <p className="text-sm font-medium text-[var(--text)] group-hover:text-[var(--text)] transition-colors">{primary}</p>
+                                                                <p className="text-xs text-[var(--muted)]">{secondary}</p>
                                                             </div>
                                                             <button
                                                                 onClick={() => handleConnect(user.id)}
                                                                 disabled={actionLoading === user.id}
-                                                                className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-full disabled:opacity-50 transition-colors"
+                                                                className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-[var(--text)] px-3 py-1.5 rounded-full disabled:opacity-50 transition-colors"
                                                             >
                                                                 Connect
                                                             </button>
@@ -482,7 +482,7 @@ export default function ConnectionsPage() {
                                                 })}
                                             </ul>
                                         ) : (
-                                            <div className="px-4 py-3 text-sm text-gray-400">No available users found.</div>
+                                            <div className="px-4 py-3 text-sm text-[var(--muted)]">No available users found.</div>
                                         )}
                                     </div>
                                 )}
@@ -490,7 +490,7 @@ export default function ConnectionsPage() {
 
                             {/* Search by Exact Email */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Search by Full Email</label>
+                                <label className="block text-sm font-medium text-[var(--text)] mb-2">Search by Full Email</label>
                                 <form onSubmit={handleEmailSearch} className="flex gap-2">
                                     <input
                                         type="email"
@@ -498,11 +498,11 @@ export default function ConnectionsPage() {
                                         placeholder="exact@email.com"
                                         value={emailQuery}
                                         onChange={(e) => setEmailQuery(e.target.value)}
-                                        className="flex-1 bg-[#1E293B]/50 border border-white/10 rounded-md px-3 py-2 text-gray-100 text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 hover:bg-[#1E293B] transition-colors"
+                                        className="flex-1 bg-[var(--card-hover)]/50 border border-[var(--border)] rounded-md px-3 py-2 text-[var(--text)] text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 hover:bg-[var(--card-hover)] transition-colors"
                                     />
                                     <button
                                         type="submit"
-                                        className="bg-[#334155] hover:bg-[#475569] text-gray-200 px-4 py-2 rounded-md text-sm border border-transparent transition-colors shadow-sm"
+                                        className="bg-[var(--card)] hover:bg-[var(--card-hover)] text-[var(--text)] px-4 py-2 rounded-md text-sm border border-transparent transition-colors shadow-sm"
                                     >
                                         Search
                                     </button>
@@ -511,19 +511,19 @@ export default function ConnectionsPage() {
                                 {/* Inline Email Result */}
                                 {emailSearchStatus !== 'idle' && (
                                     <div className="mt-3">
-                                        {emailSearchStatus === 'searching' && <p className="text-sm text-gray-400">Searching...</p>}
-                                        {emailSearchStatus === 'not-found' && <p className="text-sm text-gray-400 text-red-400/80">No user found.</p>}
+                                        {emailSearchStatus === 'searching' && <p className="text-sm text-[var(--muted)]">Searching...</p>}
+                                        {emailSearchStatus === 'not-found' && <p className="text-sm text-[var(--muted)] text-red-400/80">No user found.</p>}
                                         {emailSearchStatus === 'found' && emailResult && (
-                                            <div className="bg-[#1E293B] border border-white/5 p-3 rounded-md flex items-center justify-between">
+                                            <div className="bg-[var(--card-hover)] border border-[var(--border)] p-3 rounded-md flex items-center justify-between">
                                                 <div>
-                                                    {emailResult.businessName && <p className="text-sm font-medium text-gray-200">{emailResult.businessName}</p>}
-                                                    {emailResult.name && <p className="text-sm font-medium text-gray-200">{emailResult.name}</p>}
+                                                    {emailResult.businessName && <p className="text-sm font-medium text-[var(--text)]">{emailResult.businessName}</p>}
+                                                    {emailResult.name && <p className="text-sm font-medium text-[var(--text)]">{emailResult.name}</p>}
                                                     <p className="text-xs text-indigo-400/90 mt-0.5">{emailResult.email}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => handleConnect(emailResult.id)}
                                                     disabled={actionLoading === emailResult.id}
-                                                    className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-full disabled:opacity-50 transition-colors"
+                                                    className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-[var(--text)] px-3 py-1.5 rounded-full disabled:opacity-50 transition-colors"
                                                 >
                                                     Connect
                                                 </button>
@@ -539,35 +539,35 @@ export default function ConnectionsPage() {
                     <div className="lg:col-span-2 space-y-6">
 
                         {/* Incoming Requests */}
-                        <section className="bg-[#0F172A] border border-white/5 shadow-sm rounded-lg p-5 flex flex-col">
-                            <h2 className="text-[15px] font-medium text-gray-200 mb-3">Incoming Requests</h2>
+                        <section className="bg-[var(--bg)] border border-[var(--border)] shadow-sm rounded-lg p-5 flex flex-col">
+                            <h2 className="text-[15px] font-medium text-[var(--text)] mb-3">Incoming Requests</h2>
                             <div className="flex-1 space-y-2">
                                 {incomingRequests.length === 0 ? (
                                     <div className="pt-2">
-                                        <p className="text-sm font-medium text-gray-300">No pending requests</p>
-                                        <p className="text-xs text-gray-500 mt-0.5">When someone connects with you, they’ll appear here.</p>
+                                        <p className="text-sm font-medium text-[var(--text)]">No pending requests</p>
+                                        <p className="text-xs text-[var(--muted)] mt-0.5">When someone connects with you, they’ll appear here.</p>
                                     </div>
                                 ) : (
                                     incomingRequests.map(req => {
                                         const { primary, secondary } = getDisplayNameInfo(req.requester);
                                         return (
-                                            <div key={req.id} className="bg-[#1E293B]/60 hover:bg-[#1E293B] transition-colors border border-white/5 p-3 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
+                                            <div key={req.id} className="bg-[var(--card-hover)]/60 hover:bg-[var(--card-hover)] transition-colors border border-[var(--border)] p-3 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
                                                 <div>
-                                                    <p className="text-[13px] font-medium text-gray-200 group-hover:text-white transition-colors">{primary}</p>
-                                                    <p className="text-[11px] text-gray-500 mt-0.5">{secondary}</p>
+                                                    <p className="text-[13px] font-medium text-[var(--text)] group-hover:text-[var(--text)] transition-colors">{primary}</p>
+                                                    <p className="text-[11px] text-[var(--muted)] mt-0.5">{secondary}</p>
                                                 </div>
                                                 <div className="flex gap-2 shrink-0">
                                                     <button
                                                         onClick={() => handleRespond(req.id, 'accepted')}
                                                         disabled={actionLoading === req.id}
-                                                        className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-white px-3 py-1 rounded transition-colors"
+                                                        className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-[var(--text)] px-3 py-1 rounded transition-colors"
                                                     >
                                                         Accept
                                                     </button>
                                                     <button
                                                         onClick={() => handleRespond(req.id, 'declined')}
                                                         disabled={actionLoading === req.id}
-                                                        className="text-[11px] font-medium bg-transparent border border-white/10 text-gray-400 hover:text-gray-200 hover:bg-white/5 px-3 py-1 rounded transition-colors"
+                                                        className="text-[11px] font-medium bg-transparent border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] px-3 py-1 rounded transition-colors"
                                                     >
                                                         Decline
                                                     </button>
@@ -580,13 +580,13 @@ export default function ConnectionsPage() {
                         </section>
 
                         {/* My Connections */}
-                        <section className="bg-[#0F172A] border border-white/5 shadow-sm rounded-lg p-5 flex flex-col">
-                            <h2 className="text-[15px] font-medium text-gray-200 mb-3">My Connections</h2>
+                        <section className="bg-[var(--bg)] border border-[var(--border)] shadow-sm rounded-lg p-5 flex flex-col">
+                            <h2 className="text-[15px] font-medium text-[var(--text)] mb-3">My Connections</h2>
                             <div className="flex-1 space-y-2">
                                 {connections.length === 0 ? (
                                     <div className="pt-2">
-                                        <p className="text-sm font-medium text-gray-300">No connections yet</p>
-                                        <p className="text-xs text-gray-500 mt-0.5">Search for a business to start building your network.</p>
+                                        <p className="text-sm font-medium text-[var(--text)]">No connections yet</p>
+                                        <p className="text-xs text-[var(--muted)] mt-0.5">Search for a business to start building your network.</p>
                                     </div>
                                 ) : (
                                     connections.map(conn => {
@@ -596,13 +596,13 @@ export default function ConnectionsPage() {
                                             <div
                                                 key={conn.connectionId}
                                                 onClick={() => handleOpenMessages(conn)}
-                                                className="bg-[#1E293B]/60 hover:bg-[#1E293B] cursor-pointer transition-colors border border-white/5 p-3 rounded-md flex justify-between items-center group"
+                                                className="bg-[var(--card-hover)]/60 hover:bg-[var(--card-hover)] cursor-pointer transition-colors border border-[var(--border)] p-3 rounded-md flex justify-between items-center group"
                                             >
                                                 <div>
-                                                    <p className="text-[13px] font-medium text-gray-200 group-hover:text-white transition-colors">{primary}</p>
-                                                    <p className="text-[11px] text-gray-500 mt-0.5">{secondary}</p>
+                                                    <p className="text-[13px] font-medium text-[var(--text)] group-hover:text-[var(--text)] transition-colors">{primary}</p>
+                                                    <p className="text-[11px] text-[var(--muted)] mt-0.5">{secondary}</p>
                                                 </div>
-                                                <div className="text-gray-500 group-hover:text-white/80 transition-transform duration-150 group-hover:translate-x-1">
+                                                <div className="text-[var(--muted)] group-hover:text-white/80 transition-transform duration-150 group-hover:translate-x-1">
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                     </svg>
@@ -624,15 +624,15 @@ export default function ConnectionsPage() {
                 <>
                     {/* Backdrop */}
                     <div
-                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
+                        className="fixed inset-0 bg-[var(--bg)]/40 backdrop-blur-sm z-40 transition-opacity"
                         onClick={handleCloseMessages}
                     />
 
                     {/* Panel */}
-                    <div className="fixed inset-y-0 right-0 z-50 w-full md:w-[60%] bg-[#0B1220] shadow-2xl shadow-black/50 border-l border-white/5 flex flex-col transform transition-transform duration-200 ease-out translate-x-0">
+                    <div className="fixed inset-y-0 right-0 z-50 w-full md:w-[60%] bg-[var(--bg)] shadow-2xl shadow-black/50 border-l border-[var(--border)] flex flex-col transform transition-transform duration-200 ease-out translate-x-0">
 
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 shrink-0 bg-[#0F172A]">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] shrink-0 bg-[var(--bg)]">
                             <div className="flex items-center gap-3">
                                 {/* Avatar */}
                                 <div className="h-10 w-10 shrink-0 bg-indigo-500/20 border border-indigo-500/30 rounded-full flex items-center justify-center">
@@ -643,14 +643,14 @@ export default function ConnectionsPage() {
                                 {/* Info */}
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <h2 className="text-gray-100 font-semibold text-[15px]">
+                                        <h2 className="text-[var(--text)] font-semibold text-[15px]">
                                             {getDisplayNameInfo(selectedConnection.connectedUser).primary}
                                         </h2>
                                         <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] px-1.5 py-0.5 uppercase tracking-wider rounded font-medium">
                                             Connected
                                         </span>
                                     </div>
-                                    <p className="text-gray-400 text-xs mt-0.5">
+                                    <p className="text-[var(--muted)] text-xs mt-0.5">
                                         {getDisplayNameInfo(selectedConnection.connectedUser).secondary}
                                     </p>
                                 </div>
@@ -658,7 +658,7 @@ export default function ConnectionsPage() {
 
                             <button
                                 onClick={handleCloseMessages}
-                                className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-full transition-colors"
+                                className="p-2 text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] rounded-full transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -667,15 +667,15 @@ export default function ConnectionsPage() {
                         </div>
 
                         {/* Body (Messages) */}
-                        <div id="message-thread" className="flex-1 overflow-y-auto p-6 space-y-5 bg-[#0B1220]">
+                        <div id="message-thread" className="flex-1 overflow-y-auto p-6 space-y-5 bg-[var(--bg)]">
                             {isMessageLoading ? (
                                 <div className="flex justify-center py-8">
                                     <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
                                 </div>
                             ) : messages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 pb-10">
+                                <div className="flex flex-col items-center justify-center h-full text-center text-[var(--muted)] pb-10">
                                     <div className="h-12 w-12 bg-white/5 rounded-full flex items-center justify-center mb-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                         </svg>
                                     </div>
@@ -691,8 +691,8 @@ export default function ConnectionsPage() {
                                             {msg.text && (
                                                 <div className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed relative shadow-sm mb-1
                                                     ${isSelf
-                                                        ? 'bg-indigo-600 text-white rounded-br-sm'
-                                                        : 'bg-[#1E293B] border border-white/5 text-gray-200 rounded-bl-sm'
+                                                        ? 'bg-indigo-600 text-[var(--text)] rounded-br-sm'
+                                                        : 'bg-[var(--card-hover)] border border-[var(--border)] text-[var(--text)] rounded-bl-sm'
                                                     }`}
                                                 >
                                                     {msg.text.split('\n').map((line, i) => (
@@ -711,8 +711,8 @@ export default function ConnectionsPage() {
                                                         if (isBundleSnapshot) {
                                                             const snapshotArr = Array.isArray(assoc.snapshotData) ? assoc.snapshotData : [];
                                                             return (
-                                                                <div key={assoc.id} className="bg-[#111A2C] border border-indigo-500/20 p-4 rounded-xl shadow-sm flex flex-col w-[280px]">
-                                                                    <div className="flex items-center gap-2 mb-3 border-b border-white/5 pb-2">
+                                                                <div key={assoc.id} className="bg-[var(--card)] border border-indigo-500/20 p-4 rounded-xl shadow-sm flex flex-col w-[280px]">
+                                                                    <div className="flex items-center gap-2 mb-3 border-b border-[var(--border)] pb-2">
                                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
                                                                             <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
                                                                             <path fillRule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clipRule="evenodd" />
@@ -722,12 +722,12 @@ export default function ConnectionsPage() {
                                                                     <div className="space-y-2">
                                                                         {snapshotArr.map((r: any, idx: number) => (
                                                                             <div key={idx} className="flex justify-between items-center text-xs">
-                                                                                <span className="text-gray-300 truncate pr-2 flex-1">{r.clientName || 'Receipt'}</span>
-                                                                                <span className="text-gray-500 font-medium">${(r.total || 0).toFixed(2)}</span>
+                                                                                <span className="text-[var(--text)] truncate pr-2 flex-1">{r.clientName || 'Receipt'}</span>
+                                                                                <span className="text-[var(--muted)] font-medium">${(r.total || 0).toFixed(2)}</span>
                                                                             </div>
                                                                         ))}
                                                                     </div>
-                                                                    <div className="mt-3 pt-2 border-t border-white/5 flex justify-between items-center text-[11px] text-gray-500">
+                                                                    <div className="mt-3 pt-2 border-t border-[var(--border)] flex justify-between items-center text-[11px] text-[var(--muted)]">
                                                                         <span>{snapshotArr.length} Receipts</span>
                                                                         <span className="font-semibold text-emerald-400/80">
                                                                             ${snapshotArr.reduce((sum: number, r: any) => sum + (r.total || 0), 0).toFixed(2)} Total
@@ -741,7 +741,7 @@ export default function ConnectionsPage() {
                                                         if (!receipt) return null; // Fallback just in case
 
                                                         return (
-                                                            <div key={assoc.id} className="bg-[#111A2C] border border-white/10 p-3 rounded-lg shadow-sm flex items-center justify-between min-w-[200px] max-w-[280px] gap-4">
+                                                            <div key={assoc.id} className="bg-[var(--card)] border border-[var(--border)] p-3 rounded-lg shadow-sm flex items-center justify-between min-w-[200px] max-w-[280px] gap-4">
                                                                 <div className="flex items-center gap-3 overflow-hidden">
                                                                     <div className="h-8 w-8 bg-indigo-500/10 rounded flex items-center justify-center text-indigo-400 shrink-0">
                                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -749,10 +749,10 @@ export default function ConnectionsPage() {
                                                                         </svg>
                                                                     </div>
                                                                     <div className="truncate">
-                                                                        <p className="text-[13px] font-semibold text-gray-200 truncate">{receipt.clientName || 'Unnamed Receipt'}</p>
+                                                                        <p className="text-[13px] font-semibold text-[var(--text)] truncate">{receipt.clientName || 'Unnamed Receipt'}</p>
                                                                         <div className="flex gap-2 items-center mt-0.5">
                                                                             <span className="text-[11px] font-medium text-indigo-300/80">${(receipt.total || 0).toFixed(2)}</span>
-                                                                            <span className="text-[10px] text-gray-500">{new Date(receipt.createdAt).toLocaleDateString()}</span>
+                                                                            <span className="text-[10px] text-[var(--muted)]">{new Date(receipt.createdAt).toLocaleDateString()}</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -760,7 +760,7 @@ export default function ConnectionsPage() {
                                                                     href={`/api/messages/download/${receipt.id}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="shrink-0 p-1.5 bg-white/5 hover:bg-white/10 rounded text-gray-300 transition-colors"
+                                                                    className="shrink-0 p-1.5 bg-white/5 hover:bg-[var(--card-hover)] rounded text-[var(--text)] transition-colors"
                                                                     title="Download Attachment"
                                                                 >
                                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -773,7 +773,7 @@ export default function ConnectionsPage() {
                                                 </div>
                                             )}
 
-                                            <span className="text-[10px] text-gray-500 mt-1 px-1">
+                                            <span className="text-[10px] text-[var(--muted)] mt-1 px-1">
                                                 {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         </div>
@@ -783,7 +783,7 @@ export default function ConnectionsPage() {
                         </div>
 
                         {/* Footer (Input) */}
-                        <div className="p-4 sm:p-5 bg-[#0F172A] border-t border-white/10 shrink-0">
+                        <div className="p-4 sm:p-5 bg-[var(--bg)] border-t border-[var(--border)] shrink-0">
                             {/* Selected Chips */}
                             {selectedReceiptIds.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mb-3">
@@ -812,12 +812,12 @@ export default function ConnectionsPage() {
                             )}
                             <form
                                 onSubmit={handleSendMessage}
-                                className="flex items-end gap-2 bg-[#1E293B]/50 border border-white/10 rounded-xl p-2 focus-within:ring-1 focus-within:ring-indigo-500/50 focus-within:border-indigo-500/30 transition-shadow"
+                                className="flex items-end gap-2 bg-[var(--card-hover)]/50 border border-[var(--border)] rounded-xl p-2 focus-within:ring-1 focus-within:ring-indigo-500/50 focus-within:border-indigo-500/30 transition-shadow"
                             >
                                 <button
                                     type="button"
                                     onClick={handleOpenAttachModal}
-                                    className="h-[44px] w-[44px] shrink-0 text-gray-400 hover:text-gray-200 hover:bg-white/5 rounded-lg flex items-center justify-center transition-colors"
+                                    className="h-[44px] w-[44px] shrink-0 text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] rounded-lg flex items-center justify-center transition-colors"
                                     title="Attach Receipt"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -825,7 +825,7 @@ export default function ConnectionsPage() {
                                     </svg>
                                 </button>
                                 <textarea
-                                    className="flex-1 max-h-32 min-h-[44px] bg-transparent resize-none outline-none text-gray-200 text-sm px-2 py-3 placeholder:text-gray-500"
+                                    className="flex-1 max-h-32 min-h-[44px] bg-transparent resize-none outline-none text-[var(--text)] text-sm px-2 py-3 placeholder:text-[var(--muted)]"
                                     placeholder="Type a message..."
                                     rows={1}
                                     value={messageInput}
@@ -838,15 +838,15 @@ export default function ConnectionsPage() {
                                 />
                                 <button
                                     type="submit"
-                                    className="h-[44px] w-[44px] shrink-0 bg-indigo-600/90 hover:bg-indigo-500 text-white rounded-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="h-[44px] w-[44px] shrink-0 bg-indigo-600/90 hover:bg-indigo-500 text-[var(--text)] rounded-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 -ml-1" viewBox="0 0 20 20" fill="currentColor">
                                         <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                                     </svg>
                                 </button>
                             </form>
-                            <div className="mt-2 text-center text-[10px] text-gray-500">
-                                Press <span className="text-gray-400 font-medium">Enter</span> to send, <span className="text-gray-400 font-medium">Shift + Enter</span> for new line. End-to-end secured.
+                            <div className="mt-2 text-center text-[10px] text-[var(--muted)]">
+                                Press <span className="text-[var(--muted)] font-medium">Enter</span> to send, <span className="text-[var(--muted)] font-medium">Shift + Enter</span> for new line. End-to-end secured.
                             </div>
                         </div>
 
@@ -857,11 +857,11 @@ export default function ConnectionsPage() {
             {/* ATTACHMENT MODAL */}
             {isAttachModalOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsAttachModalOpen(false)} />
-                    <div className="relative bg-[#0F172A] border border-white/10 rounded-xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh]">
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 shrink-0">
-                            <h3 className="text-[16px] font-semibold text-gray-100">Attach Receipts</h3>
-                            <button onClick={() => setIsAttachModalOpen(false)} className="text-gray-400 hover:text-white transition-colors">
+                    <div className="fixed inset-0 bg-[var(--bg)]/60 backdrop-blur-sm" onClick={() => setIsAttachModalOpen(false)} />
+                    <div className="relative bg-[var(--bg)] border border-[var(--border)] rounded-xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh]">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)] shrink-0">
+                            <h3 className="text-[16px] font-semibold text-[var(--text)]">Attach Receipts</h3>
+                            <button onClick={() => setIsAttachModalOpen(false)} className="text-[var(--muted)] hover:text-[var(--text)] transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -869,18 +869,18 @@ export default function ConnectionsPage() {
                         </div>
                         <div className="flex-1 overflow-y-auto p-5">
                             {/* Tabs Header */}
-                            <div className="flex gap-4 mb-4 border-b border-white/5 pb-2">
+                            <div className="flex gap-4 mb-4 border-b border-[var(--border)] pb-2">
                                 {!selectedBundleForAttach && (
                                     <>
                                         <button
                                             onClick={() => { setAttachModalTab('receipts'); setSelectedBundleForAttach(null); }}
-                                            className={`text-sm font-medium transition-colors border-b-2 pb-2 -mb-[9px] ${attachModalTab === 'receipts' ? 'text-indigo-400 border-indigo-500' : 'text-gray-500 border-transparent hover:text-gray-300'}`}
+                                            className={`text-sm font-medium transition-colors border-b-2 pb-2 -mb-[9px] ${attachModalTab === 'receipts' ? 'text-indigo-400 border-indigo-500' : 'text-[var(--muted)] border-transparent hover:text-[var(--text)]'}`}
                                         >
                                             Single Receipts
                                         </button>
                                         <button
                                             onClick={() => { setAttachModalTab('bundles'); setSelectedBundleForAttach(null); }}
-                                            className={`text-sm font-medium transition-colors border-b-2 pb-2 -mb-[9px] ${attachModalTab === 'bundles' ? 'text-indigo-400 border-indigo-500' : 'text-gray-500 border-transparent hover:text-gray-300'}`}
+                                            className={`text-sm font-medium transition-colors border-b-2 pb-2 -mb-[9px] ${attachModalTab === 'bundles' ? 'text-indigo-400 border-indigo-500' : 'text-[var(--muted)] border-transparent hover:text-[var(--text)]'}`}
                                         >
                                             Bundles
                                         </button>
@@ -920,10 +920,10 @@ export default function ConnectionsPage() {
                                                     onClick={() => toggleBundleReceiptSelection(receipt)}
                                                     className={`w-full text-left p-3 rounded border flex items-center justify-between transition-colors
                                                         ${isAtLimit ? 'opacity-50 cursor-not-allowed' : ''}
-                                                        ${isSelected ? 'bg-indigo-600/10 border-indigo-500/50' : 'bg-[#1E293B]/50 border-white/5 hover:border-white/10'}`}
+                                                        ${isSelected ? 'bg-indigo-600/10 border-indigo-500/50' : 'bg-[var(--card-hover)]/50 border-[var(--border)] hover:border-[var(--border)]'}`}
                                                 >
                                                     <div>
-                                                        <p className={`text-[14px] font-medium ${isSelected ? 'text-indigo-200' : 'text-gray-200'}`}>
+                                                        <p className={`text-[14px] font-medium ${isSelected ? 'text-indigo-200' : 'text-[var(--text)]'}`}>
                                                             {receipt.clientName || 'Unnamed Receipt'}
                                                         </p>
                                                         <div className="flex gap-2 text-[12px] opacity-70 mt-0.5">
@@ -933,7 +933,7 @@ export default function ConnectionsPage() {
                                                         </div>
                                                     </div>
                                                     <div className={`h-5 w-5 rounded border flex items-center justify-center shrink-0 transition-colors
-                                                        ${isSelected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-500 text-transparent'}`}
+                                                        ${isSelected ? 'bg-indigo-500 border-indigo-500 text-[var(--text)]' : 'border-gray-500 text-transparent'}`}
                                                     >
                                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -946,9 +946,9 @@ export default function ConnectionsPage() {
                                 </div>
                             ) : attachModalTab === 'receipts' ? (
                                 isFetchingReceipts ? (
-                                    <p className="text-center text-sm text-gray-400">Loading your receipts...</p>
+                                    <p className="text-center text-sm text-[var(--muted)]">Loading your receipts...</p>
                                 ) : userReceipts.length === 0 ? (
-                                    <p className="text-center text-sm text-gray-400 py-4">You have no stored receipts.</p>
+                                    <p className="text-center text-sm text-[var(--muted)] py-4">You have no stored receipts.</p>
                                 ) : (
                                     <div className="space-y-3">
                                         {userReceipts.map(receipt => {
@@ -959,10 +959,10 @@ export default function ConnectionsPage() {
                                                     type="button"
                                                     onClick={() => toggleReceiptSelection(receipt.id)}
                                                     className={`w-full text-left p-3 rounded border flex items-center justify-between transition-colors
-                                                        ${isSelected ? 'bg-indigo-600/10 border-indigo-500/50' : 'bg-[#1E293B]/50 border-white/5 hover:border-white/10'}`}
+                                                        ${isSelected ? 'bg-indigo-600/10 border-indigo-500/50' : 'bg-[var(--card-hover)]/50 border-[var(--border)] hover:border-[var(--border)]'}`}
                                                 >
                                                     <div>
-                                                        <p className={`text-[14px] font-medium ${isSelected ? 'text-indigo-200' : 'text-gray-200'}`}>
+                                                        <p className={`text-[14px] font-medium ${isSelected ? 'text-indigo-200' : 'text-[var(--text)]'}`}>
                                                             {receipt.clientName || 'Unnamed Receipt'}
                                                         </p>
                                                         <div className="flex gap-2 text-[12px] opacity-70 mt-0.5">
@@ -972,7 +972,7 @@ export default function ConnectionsPage() {
                                                         </div>
                                                     </div>
                                                     <div className={`h-5 w-5 rounded border flex items-center justify-center shrink-0 transition-colors
-                                                        ${isSelected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-500 text-transparent'}`}
+                                                        ${isSelected ? 'bg-indigo-500 border-indigo-500 text-[var(--text)]' : 'border-gray-500 text-transparent'}`}
                                                     >
                                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -985,9 +985,9 @@ export default function ConnectionsPage() {
                                 )
                             ) : (
                                 isFetchingBundles ? (
-                                    <p className="text-center text-sm text-gray-400">Loading your bundles...</p>
+                                    <p className="text-center text-sm text-[var(--muted)]">Loading your bundles...</p>
                                 ) : userBundles.length === 0 ? (
-                                    <p className="text-center text-sm text-gray-400 py-4">You have no bundles. Create some in the Dashboard.</p>
+                                    <p className="text-center text-sm text-[var(--muted)] py-4">You have no bundles. Create some in the Dashboard.</p>
                                 ) : (
                                     <div className="space-y-3">
                                         {userBundles.map(bundle => (
@@ -999,13 +999,13 @@ export default function ConnectionsPage() {
                                                     setBundleSelectedReceipts([]);
                                                     setSelectedReceiptIds([]); // clear any other picks
                                                 }}
-                                                className="w-full text-left p-4 rounded bg-[#1E293B]/50 border border-white/5 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-colors flex items-center justify-between"
+                                                className="w-full text-left p-4 rounded bg-[var(--card-hover)]/50 border border-[var(--border)] hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-colors flex items-center justify-between"
                                             >
                                                 <div>
-                                                    <p className="text-[14px] font-medium text-gray-200">{bundle.name}</p>
-                                                    <p className="text-xs text-gray-500 mt-1">{bundle.receiptCount} receipts contained</p>
+                                                    <p className="text-[14px] font-medium text-[var(--text)]">{bundle.name}</p>
+                                                    <p className="text-xs text-[var(--muted)] mt-1">{bundle.receiptCount} receipts contained</p>
                                                 </div>
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                 </svg>
                                             </button>
@@ -1014,10 +1014,10 @@ export default function ConnectionsPage() {
                                 )
                             )}
                         </div>
-                        <div className="px-5 py-4 border-t border-white/5 flex gap-3 shrink-0 bg-[#0B1220] rounded-b-xl">
+                        <div className="px-5 py-4 border-t border-[var(--border)] flex gap-3 shrink-0 bg-[var(--bg)] rounded-b-xl">
                             <button
                                 onClick={() => setIsAttachModalOpen(false)}
-                                className="flex-1 bg-transparent hover:bg-white/5 border border-white/10 text-gray-300 font-medium py-2 rounded transition-colors text-sm"
+                                className="flex-1 bg-transparent hover:bg-[var(--card-hover)] border border-[var(--border)] text-[var(--text)] font-medium py-2 rounded transition-colors text-sm"
                             >
                                 Done
                             </button>
