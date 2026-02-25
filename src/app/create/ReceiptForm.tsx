@@ -358,35 +358,40 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                 <div className="lg:col-span-2 space-y-6">
 
                     {/* OCR Scan Action (Top of Form) */}
-                    <div className="bg-[#111A2B] rounded-2xl border border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-4 flex items-center justify-between group overflow-hidden relative">
-                        {/* Background glow for PRO */}
-                        {features.ocr && <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-transparent pointer-events-none" />}
+                    <div className={`bg-[#111A2B] rounded-2xl border ${features.ocr ? 'border-yellow-500/20' : 'border-white/5'} shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 mb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 overflow-hidden relative`}>
 
-                        <div className="flex items-center gap-4 relative z-10">
-                            <div className={`h-10 w-10 shrink-0 rounded-xl flex items-center justify-center shadow-inner border ${features.ocr ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/10' : 'bg-white/5 text-gray-500 border-white/10'}`}>
+                        <div className="flex items-start gap-4 relative z-10 w-full sm:w-auto">
+                            <div className={`h-10 w-10 shrink-0 rounded-xl flex items-center justify-center shadow-inner border ${features.ocr ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 'bg-white/5 text-gray-500 border-white/10'}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </div>
-                            <div>
-                                <h3 className={`text-sm font-semibold tracking-tight ${features.ocr ? 'text-gray-200' : 'text-gray-400'}`}>Smart Scan (OCR)</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">Scan a physical receipt using your camera or upload an image.</p>
+                            <div className="flex flex-col items-start mt-0.5">
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                    <h3 className={`text-sm font-semibold tracking-tight ${features.ocr ? 'text-gray-200' : 'text-gray-400'}`}>Smart Scan (OCR)</h3>
+                                    {features.ocr && (
+                                        <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                                            PRO Feature
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-xs text-gray-500 leading-relaxed max-w-sm">Scan a physical receipt using your camera or upload an image.</p>
                             </div>
                         </div>
 
-                        <div className="relative z-10 flex items-center justify-end">
+                        <div className="relative z-10 flex items-center justify-end w-full sm:w-auto">
                             {features.ocr ? (
-                                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                                <div className="flex flex-col w-full sm:w-auto gap-3">
                                     <button
                                         type="button"
                                         onClick={() => cameraInputRef.current?.click()}
                                         disabled={ocrLoading}
-                                        className={`px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-slate-900 text-sm font-bold rounded-lg transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(234,179,8,0.3)] ${ocrLoading ? 'opacity-50 pointer-events-none' : ''}`}
+                                        className={`w-full sm:w-auto px-5 py-2.5 bg-transparent border border-yellow-500/50 hover:bg-yellow-500/10 text-yellow-500 text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm ${ocrLoading ? 'opacity-50 pointer-events-none' : ''}`}
                                     >
                                         {ocrLoading ? (
                                             <>
-                                                <svg className="animate-spin h-4 w-4 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <svg className="animate-spin h-4 w-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
@@ -401,7 +406,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                     </button>
 
                                     {!ocrLoading && (
-                                        <label className={`cursor-pointer px-3 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-sm font-medium rounded-lg transition-colors flex items-center gap-2`}>
+                                        <label className={`w-full sm:w-auto cursor-pointer px-5 py-2.5 bg-transparent border border-white/10 hover:border-white/20 hover:bg-white/5 text-gray-400 hover:text-gray-300 text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                                             Upload Image
                                             <input type="file" accept="image/*" className="hidden" onChange={handleOCRUpload} disabled={ocrLoading} />
