@@ -1,9 +1,15 @@
 import { getNextReceiptNumber } from "@/lib/actions";
 import ReceiptForm from "./ReceiptForm";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/auth";
 
 export default async function CreateReceiptPage() {
     const nextReceiptNumber = await getNextReceiptNumber();
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    const authUser = await verifyToken(token || '');
 
     return (
         <div className="bg-[#0B1220] min-h-screen p-6 md:p-10">
@@ -23,7 +29,7 @@ export default async function CreateReceiptPage() {
                     </p>
                 </div>
 
-                <ReceiptForm initialData={{ receiptNumber: nextReceiptNumber, date: new Date(), taxType: 'none', items: [] }} />
+                <ReceiptForm initialData={{ receiptNumber: nextReceiptNumber, date: new Date(), taxType: 'none', items: [] }} user={authUser || undefined} />
             </div>
         </div>
     );

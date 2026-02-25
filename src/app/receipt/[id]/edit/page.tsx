@@ -1,6 +1,8 @@
 import { getReceipt } from "@/lib/actions";
 import { notFound } from "next/navigation";
 import ReceiptForm from "@/app/create/ReceiptForm";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/auth";
 
 // Force dynamic to avoid build-time DB access
 export const dynamic = "force-dynamic";
@@ -12,6 +14,10 @@ export default async function EditReceiptPage(props: { params: Promise<{ id: str
     if (!receipt) {
         notFound();
     }
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    const authUser = await verifyToken(token || '');
 
     // Transform data for ReceiptForm
     const initialData = {
@@ -40,7 +46,7 @@ export default async function EditReceiptPage(props: { params: Promise<{ id: str
                 </div>
             </div>
 
-            <ReceiptForm initialData={initialData} />
+            <ReceiptForm initialData={initialData} user={authUser || undefined} />
         </div>
     );
 }
