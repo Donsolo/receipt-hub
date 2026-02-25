@@ -50,8 +50,11 @@ export async function POST(req: Request) {
         // 4. Perform OCR
         const ocrResult = await processReceiptOCR(buffer, file.type);
 
-        // 5. Return success
-        return NextResponse.json(ocrResult, { status: 200 });
+        // 5. Return success envelope
+        return NextResponse.json({
+            normalized: ocrResult,
+            requiresReview: true
+        }, { status: 200 });
 
     } catch (error: any) {
         if (error.message === "OCR_NOT_CONFIGURED") {

@@ -287,36 +287,52 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
 
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Failed to process receipt');
+                throw new Error(errorData.error || "Failed to parse receipt");
             }
 
             const data = await res.json();
+            const normalized = data.normalized;
 
-            // Populate Form
-            if (data.merchant) setClientName(data.merchant);
-            if (data.date) {
-                // simple date validation
-                const parsedDate = new Date(data.date);
+            if (!normalized) {
+                throw new Error("Invalid response format from OCR service.");
+            }
+
+            // Map standard fields
+            if (normalized.merchantName) {
+                setClientName(normalized.merchantName);
+            }
+            if (normalized.transactionDate) {
+                const parsedDate = new Date(normalized.transactionDate);
                 if (!isNaN(parsedDate.getTime())) {
                     setDate(parsedDate.toISOString().slice(0, 10));
                 }
             }
-
-            // For now, put the total as a single line item
-            if (data.total) {
-                setItems([
-                    { id: Date.now().toString(), description: "OCR Extracted Receipt", quantity: 1, unitPrice: data.total, lineTotal: data.total }
-                ]);
-            }
-
-            /* If tax data exists, maybe log or apply it. 
-               We're merging it into the total currently to keep parsing robust
-               since line items aren't perfectly extracted yet. */
-            if (data.tax) {
+            if (normalized.tax !== null) {
                 setTaxType("flat");
-                setTaxValue(data.tax);
+                setTaxValue(normalized.tax.toString());
             }
 
+            // Map line items if they exist
+            if (normalized.lineItems && normalized.lineItems.length > 0) {
+                setItems(normalized.lineItems.map((item: any) => ({
+                    id: Math.random().toString(36).substr(2, 9),
+                    description: item.description || "Item",
+                    quantity: item.quantity || 1,
+                    unitPrice: item.price !== null ? item.price : (item.total || 0),
+                    lineTotal: item.total !== null ? item.total : (item.price || 0)
+                })));
+            } else if (normalized.total !== null) {
+                // Fallback to a single line item if none were extracted
+                setItems([{
+                    id: Math.random().toString(36).substr(2, 9),
+                    description: "Receipt Total",
+                    quantity: 1,
+                    unitPrice: normalized.total,
+                    lineTotal: normalized.total
+                }]);
+            }
+
+            alert("Receipt scanned successfully! Please review the extracted data.");
         } catch (error: any) {
             console.error("OCR Error:", error);
             alert(error.message || "An error occurred during OCR scanning.");
