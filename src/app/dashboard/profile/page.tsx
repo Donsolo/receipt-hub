@@ -49,6 +49,12 @@ export default function ProfilePage() {
     const [timezone, setTimezone] = useState('America/New_York');
     const [showBanner, setShowBanner] = useState(true);
 
+    // Notification Preferences
+    const [notifyConnectionRequests, setNotifyConnectionRequests] = useState(true);
+    const [notifyConnectionAccepted, setNotifyConnectionAccepted] = useState(true);
+    const [notifyMessages, setNotifyMessages] = useState(true);
+    const [notifySystem, setNotifySystem] = useState(true);
+
     async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -107,6 +113,21 @@ export default function ProfilePage() {
                     setBusinessAddress(data.businessAddress || '');
                     setBusinessLogoPath(data.businessLogoPath || null);
                     setTimezone(data.timezone || 'America/New_York');
+
+                    // Fetch notification preferences directly after profile works
+                    try {
+                        const notifRes = await fetch('/api/user/notification-preferences');
+                        if (notifRes.ok) {
+                            const notifData = await notifRes.json();
+                            setNotifyConnectionRequests(notifData.notifyConnectionRequests ?? true);
+                            setNotifyConnectionAccepted(notifData.notifyConnectionAccepted ?? true);
+                            setNotifyMessages(notifData.notifyMessages ?? true);
+                            setNotifySystem(notifData.notifySystem ?? true);
+                        }
+                    } catch (notifErr) {
+                        console.error('Failed to fetch notification preferences', notifErr);
+                    }
+
                 } else if (profileRes.status === 404) {
                     // User exists in cookie but not in database (ghost session due to DB swap)
                     await fetch('/api/auth/logout', { method: 'POST', cache: 'no-store' });
@@ -169,6 +190,34 @@ export default function ProfilePage() {
         }
     };
 
+    const handleNotificationToggle = async (key: string, currentValue: boolean) => {
+        const newValue = !currentValue;
+
+        // Optimistic update
+        if (key === 'notifyConnectionRequests') setNotifyConnectionRequests(newValue);
+        if (key === 'notifyConnectionAccepted') setNotifyConnectionAccepted(newValue);
+        if (key === 'notifyMessages') setNotifyMessages(newValue);
+        if (key === 'notifySystem') setNotifySystem(newValue);
+
+        try {
+            await fetch('/api/user/notification-preferences', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [key]: newValue })
+            });
+        } catch (err) {
+            console.error('Failed to update notification preference:', err);
+            // Revert on error
+            if (key === 'notifyConnectionRequests') setNotifyConnectionRequests(currentValue);
+            if (key === 'notifyConnectionAccepted') setNotifyConnectionAccepted(currentValue);
+            if (key === 'notifyMessages') setNotifyMessages(currentValue);
+            if (key === 'notifySystem') setNotifySystem(currentValue);
+
+            setToastMessage('Failed to update notification setting');
+            setTimeout(() => setToastMessage(null), 3000);
+        }
+    };
+
     if (loading) return <div className="p-8 text-[var(--muted)] min-h-screen bg-[var(--bg)]">Loading profile...</div>;
     if (!profile) return <div className="p-8 text-red-500 min-h-screen bg-[var(--bg)]">Profile not found.</div>;
 
@@ -218,66 +267,6 @@ export default function ProfilePage() {
 
                     {/* LEFT COLUMN (40%): Settings & Account Info */}
                     <div className="lg:col-span-2 space-y-6">
-
-                        {/* APPEARANCE (THEME TOGGLE) */}
-                        <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8">
-                            <div className="mb-4">
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">Appearance</h2>
-                                <p className="text-sm text-[var(--muted)] mt-1">Customize the interface theme.</p>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium text-gray-700 dark:text-[var(--text)]">Theme Preference</span>
-                                <div className="flex items-center bg-gray-100 dark:bg-[var(--bg)]/50 border border-gray-200 dark:border-[var(--border)] p-1 rounded-lg">
-                                    <button
-                                        type="button"
-                                        onClick={() => handleThemeChange('light')}
-                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${theme === 'light'
-                                            ? 'bg-white dark:bg-[var(--card-hover)] text-gray-900 dark:text-[var(--text)] shadow-sm ring-1 ring-black/5 dark:ring-white/10'
-                                            : 'text-[var(--muted)] hover:text-gray-900 dark:hover:text-[var(--text)]'
-                                            }`}
-                                    >
-                                        Light
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleThemeChange('dark')}
-                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${theme === 'dark'
-                                            ? 'bg-white dark:bg-[var(--card-hover)] text-gray-900 dark:text-[var(--text)] shadow-sm ring-1 ring-black/5 dark:ring-white/10'
-                                            : 'text-[var(--muted)] hover:text-gray-900 dark:hover:text-[var(--text)]'
-                                            }`}
-                                    >
-                                        Dark
-                                    </button>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* TIMEZONE PREFERENCE */}
-                        <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8">
-                            <div className="mb-4">
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">Timezone</h2>
-                                <p className="text-sm text-[var(--muted)] mt-1">Set your local timezone for greetings and metrics.</p>
-                            </div>
-
-                            <div>
-                                <select
-                                    value={timezone}
-                                    onChange={(e) => setTimezone(e.target.value)}
-                                    className="block w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-[var(--text)] focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
-                                >
-                                    <option value="America/New_York">Eastern Time (EST/EDT) - Detroit/NY</option>
-                                    <option value="America/Chicago">Central Time (CST/CDT) - Chicago</option>
-                                    <option value="America/Denver">Mountain Time (MST/MDT) - Denver</option>
-                                    <option value="America/Los_Angeles">Pacific Time (PST/PDT) - LA</option>
-                                    <option value="America/Anchorage">Alaska Time (AKST/AKDT) - Anchorage</option>
-                                    <option value="Pacific/Honolulu">Hawaii-Aleutian Time (HST) - Honolulu</option>
-                                    <option value="UTC">Coordinated Universal Time (UTC)</option>
-                                    {/* Feel free to add more as needed explicitly */}
-                                </select>
-                            </div>
-                        </section>
-
 
                         {/* ACCOUNT INFORMATION */}
                         <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8">
@@ -468,6 +457,146 @@ export default function ProfilePage() {
                         </section>
                     </div>
 
+                </div>
+
+                {/* BOTTOM PREFERENCES GRID */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                    <div className="space-y-6">
+                        {/* APPEARANCE (THEME TOGGLE) */}
+                        <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8">
+                            <div className="mb-4">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">Appearance</h2>
+                                <p className="text-sm text-[var(--muted)] mt-1">Customize the interface theme.</p>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-700 dark:text-[var(--text)]">Theme Preference</span>
+                                <div className="flex items-center bg-gray-100 dark:bg-[var(--bg)]/50 border border-gray-200 dark:border-[var(--border)] p-1 rounded-lg">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleThemeChange('light')}
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${theme === 'light'
+                                            ? 'bg-white dark:bg-[var(--card-hover)] text-gray-900 dark:text-[var(--text)] shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+                                            : 'text-[var(--muted)] hover:text-gray-900 dark:hover:text-[var(--text)]'
+                                            }`}
+                                    >
+                                        Light
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleThemeChange('dark')}
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${theme === 'dark'
+                                            ? 'bg-white dark:bg-[var(--card-hover)] text-gray-900 dark:text-[var(--text)] shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+                                            : 'text-[var(--muted)] hover:text-gray-900 dark:hover:text-[var(--text)]'
+                                            }`}
+                                    >
+                                        Dark
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* TIMEZONE PREFERENCE */}
+                        <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8">
+                            <div className="mb-4">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">Timezone</h2>
+                                <p className="text-sm text-[var(--muted)] mt-1">Set your local timezone for greetings and metrics.</p>
+                            </div>
+
+                            <div>
+                                <select
+                                    value={timezone}
+                                    onChange={(e) => setTimezone(e.target.value)}
+                                    className="block w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-[var(--text)] focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
+                                >
+                                    <option value="America/New_York">Eastern Time (EST/EDT) - Detroit/NY</option>
+                                    <option value="America/Chicago">Central Time (CST/CDT) - Chicago</option>
+                                    <option value="America/Denver">Mountain Time (MST/MDT) - Denver</option>
+                                    <option value="America/Los_Angeles">Pacific Time (PST/PDT) - LA</option>
+                                    <option value="America/Anchorage">Alaska Time (AKST/AKDT) - Anchorage</option>
+                                    <option value="Pacific/Honolulu">Hawaii-Aleutian Time (HST) - Honolulu</option>
+                                    <option value="UTC">Coordinated Universal Time (UTC)</option>
+                                </select>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div>
+                        {/* NOTIFICATIONS */}
+                        <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8 h-full">
+                            <div className="mb-6">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">Notifications</h2>
+                                <p className="text-sm text-[var(--muted)] mt-1">Manage what alerts you receive.</p>
+                            </div>
+
+                            <div className="space-y-5">
+                                <div className="flex items-center justify-between">
+                                    <div className="pr-4">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-[var(--text)]">Connection Requests</p>
+                                        <p className="text-xs text-[var(--muted)] mt-0.5">When someone wants to connect</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        aria-checked={notifyConnectionRequests}
+                                        onClick={() => handleNotificationToggle('notifyConnectionRequests', notifyConnectionRequests)}
+                                        className={`${notifyConnectionRequests ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-[var(--bg)]`}
+                                    >
+                                        <span className={`${notifyConnectionRequests ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`} />
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-[var(--border)]">
+                                    <div className="pr-4">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-[var(--text)]">Connections Accepted</p>
+                                        <p className="text-xs text-[var(--muted)] mt-0.5">When a request is approved</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        aria-checked={notifyConnectionAccepted}
+                                        onClick={() => handleNotificationToggle('notifyConnectionAccepted', notifyConnectionAccepted)}
+                                        className={`${notifyConnectionAccepted ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-[var(--bg)]`}
+                                    >
+                                        <span className={`${notifyConnectionAccepted ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`} />
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-[var(--border)]">
+                                    <div className="pr-4">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-[var(--text)]">Direct Messages</p>
+                                        <p className="text-xs text-[var(--muted)] mt-0.5">When you receive a new message</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        aria-checked={notifyMessages}
+                                        onClick={() => handleNotificationToggle('notifyMessages', notifyMessages)}
+                                        className={`${notifyMessages ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-[var(--bg)]`}
+                                    >
+                                        <span className={`${notifyMessages ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`} />
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-[var(--border)]">
+                                    <div className="pr-4">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-[var(--text)]">System Alerts</p>
+                                        <p className="text-xs text-[var(--muted)] mt-0.5">Status updates & critical alerts</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        aria-checked={notifySystem}
+                                        onClick={() => handleNotificationToggle('notifySystem', notifySystem)}
+                                        className={`${notifySystem ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:ring-offset-[var(--bg)]`}
+                                    >
+                                        <span className={`${notifySystem ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`} />
+                                    </button>
+                                </div>
+
+                            </div>
+                        </section>
+                    </div>
                 </div>
             </div>
         </div>

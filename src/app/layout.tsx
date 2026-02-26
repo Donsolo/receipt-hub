@@ -4,6 +4,8 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import InstallPrompt from '@/components/InstallPrompt';
+import { NotificationProvider } from '@/context/NotificationContext';
+import NotificationToasts from '@/components/notifications/NotificationToasts';
 
 import { cookies } from 'next/headers';
 
@@ -88,32 +90,64 @@ export default async function RootLayout({
     <html lang="en" className="h-full" data-theme={initialTheme}>
       <ThemeProvider initialTheme={initialTheme}>
         <body className={`${inter.className} h-full bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
-          <div className="min-h-screen flex flex-col">
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{
-                __html: JSON.stringify({
-                  '@context': 'https://schema.org',
-                  '@type': 'Organization',
-                  name: 'Tektriq LLC',
-                  url: 'https://tektriq.com',
-                  logo: 'https://receipthub.tektriq.com/tektriq-logo.png',
-                  contactPoint: {
-                    '@type': 'ContactPoint',
-                    telephone: '',
-                    contactType: 'customer support',
-                    email: 'support@tektriq.com',
-                  },
-                }),
-              }}
-            />
-            <Navbar isAuthenticated={isAuthenticated} role={userRole} />
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
-              {children}
-            </main>
-            <InstallPrompt />
-            <Footer />
-          </div>
+          {isAuthenticated ? (
+            <NotificationProvider>
+              <div className="min-h-screen flex flex-col">
+                <script
+                  type="application/ld+json"
+                  dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                      '@context': 'https://schema.org',
+                      '@type': 'Organization',
+                      name: 'Tektriq LLC',
+                      url: 'https://tektriq.com',
+                      logo: 'https://receipthub.tektriq.com/tektriq-logo.png',
+                      contactPoint: {
+                        '@type': 'ContactPoint',
+                        telephone: '',
+                        contactType: 'customer support',
+                        email: 'support@tektriq.com',
+                      },
+                    }),
+                  }}
+                />
+                <NotificationToasts />
+                <Navbar isAuthenticated={isAuthenticated} role={userRole} />
+                <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
+                  {children}
+                </main>
+                <InstallPrompt />
+                <Footer />
+              </div>
+            </NotificationProvider>
+          ) : (
+            <div className="min-h-screen flex flex-col">
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                  __html: JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'Organization',
+                    name: 'Tektriq LLC',
+                    url: 'https://tektriq.com',
+                    logo: 'https://receipthub.tektriq.com/tektriq-logo.png',
+                    contactPoint: {
+                      '@type': 'ContactPoint',
+                      telephone: '',
+                      contactType: 'customer support',
+                      email: 'support@tektriq.com',
+                    },
+                  }),
+                }}
+              />
+              <Navbar isAuthenticated={isAuthenticated} role={userRole} />
+              <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
+                {children}
+              </main>
+              <InstallPrompt />
+              <Footer />
+            </div>
+          )}
         </body>
       </ThemeProvider>
     </html>

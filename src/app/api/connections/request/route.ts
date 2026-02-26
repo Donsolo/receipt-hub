@@ -41,6 +41,38 @@ export async function POST(request: Request) {
             }
         });
 
+        // ------------------------------------------------------------------
+        // Fire Notification (Non-blocking)
+        // ------------------------------------------------------------------
+        try {
+            const receiverPref = await db.user.findUnique({
+                where: { id: receiverId },
+                select: { notifyConnectionRequests: true }
+            });
+
+            if (receiverPref?.notifyConnectionRequests) {
+                const sender = await db.user.findUnique({
+                    where: { id: user.userId },
+                    select: { name: true }
+                });
+                const senderName = sender?.name || 'A user';
+
+                await db.notification.create({
+                    data: {
+                        userId: receiverId,
+                        type: 'CONNECTION_REQUEST',
+                        title: 'New Connection Request',
+                        message: `${senderName} sent you a connection request.`,
+                        link: '/business-network',
+                        read: false
+                    }
+                });
+            }
+        } catch (notifErr) {
+            console.error('Failed to dispatch connection request notification:', notifErr);
+            // Continue execution, do not fail the request
+        }
+
         return NextResponse.json(connection);
     } catch (error) {
         console.error('Connection request error:', error);

@@ -343,20 +343,20 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                                             opacity: expanded ? 0 : 1 // Prevents pop-in before animation
                                                         }}
                                                     >
-                                                        <div className="relative flex items-center justify-between transition-all duration-200 ease-in-out bg-[var(--card)] border border-[var(--border)] rounded-[14px] px-[16px] py-[16px] xl:py-[18px] shadow-[0_6px_20px_rgba(0,0,0,0.35)] group-hover:-translate-y-[3px] group-hover:shadow-[0_12px_30px_rgba(0,0,0,0.5)]">
+                                                        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between transition-all duration-200 ease-in-out bg-[var(--card)] border border-[var(--border)] rounded-[14px] p-4 sm:px-[16px] sm:py-[16px] xl:py-[18px] shadow-[0_6px_20px_rgba(0,0,0,0.35)] group-hover:-translate-y-[3px] group-hover:shadow-[0_12px_30px_rgba(0,0,0,0.5)]">
 
                                                             {/* LEFT STATUS ACCENT BAR */}
                                                             <div
                                                                 className="absolute left-0 top-0 bottom-0 w-[3px]"
                                                                 style={{
-                                                                    borderTopRightRadius: '6px',
-                                                                    borderBottomRightRadius: '6px',
+                                                                    borderTopLeftRadius: '14px',
+                                                                    borderBottomLeftRadius: '14px',
                                                                     background: receipt.receiptNumber ? '#6366f1' : '#10b981'
                                                                 }}
                                                             />
 
                                                             {/* Main Content Area */}
-                                                            <div className="flex items-center flex-1 min-w-0 pl-3">
+                                                            <div className="flex items-start sm:items-center w-full sm:w-auto flex-1 min-w-0 pl-3 sm:pl-3 mb-4 sm:mb-0">
 
                                                                 {/* Optional Icon / Thumbnail (Kept for continuity) */}
                                                                 <div className="hidden sm:flex flex-shrink-0 h-11 w-11 rounded-lg bg-[var(--bg)]/50 items-center justify-center overflow-hidden border border-[var(--border)] mr-4 opacity-80 group-hover:opacity-100 transition-opacity">
@@ -384,7 +384,7 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                                                         </p>
 
                                                                         {/* Line 3: Date · Category */}
-                                                                        <div className="flex flex-col gap-1.5">
+                                                                        <div className="flex flex-col gap-1.5 pt-0.5">
                                                                             <p className="text-[var(--text)] truncate" style={{ fontSize: '13px', opacity: 0.6 }}>
                                                                                 {format(new Date(receipt.date || receipt.createdAt), 'MMM d, yyyy')}
                                                                                 {categoryName !== 'Uncategorized' && ` · ${categoryName}`}
@@ -422,35 +422,49 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                                             </div>
 
                                                             {/* Actions & Total */}
-                                                            <div className="ml-5 flex-shrink-0 flex items-center space-x-3">
+                                                            <div className="w-full sm:w-auto flex-shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center pl-3 sm:pl-5 gap-3 sm:gap-0">
+
+                                                                {/* Mobile Total Display */}
                                                                 {receipt.total !== undefined && receipt.total !== null && (
-                                                                    <span className="hidden sm:inline-flex text-lg font-bold text-[var(--text)] tracking-tight mr-3">
+                                                                    <div className="flex justify-between items-center sm:hidden px-1 pb-1 mb-1 border-b border-white/5 dark:border-white/5">
+                                                                        <span className="text-sm font-medium text-[var(--muted)]">Total Amount</span>
+                                                                        <span className="text-[17px] font-bold text-[var(--text)] tracking-tight">
+                                                                            ${Number(receipt.total).toFixed(2)}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Desktop Total Display */}
+                                                                {receipt.total !== undefined && receipt.total !== null && (
+                                                                    <span className="hidden sm:inline-flex text-lg font-bold text-[var(--text)] tracking-tight mr-4">
                                                                         ${Number(receipt.total).toFixed(2)}
                                                                     </span>
                                                                 )}
 
-                                                                <Link
-                                                                    href={receipt.receiptNumber ? `/receipt/${receipt.id}` : receipt.imageUrl || '#'}
-                                                                    target={receipt.receiptNumber ? undefined : '_blank'}
-                                                                    className="px-[14px] py-[8px] text-sm font-medium rounded-lg text-[var(--text)] transition-all duration-[120ms] ease-out active:scale-[0.97] bg-[var(--card)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
-                                                                >
-                                                                    View
-                                                                </Link>
-                                                                <button
-                                                                    onClick={() => handleOpenBundleModal(receipt)}
-                                                                    className="px-[14px] py-[8px] text-sm font-medium rounded-lg transition-all duration-[120ms] ease-out active:scale-[0.97] bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20"
-                                                                    title="Add to Bundle"
-                                                                >
-                                                                    Bundle
-                                                                </button>
-                                                                {!receipt.isFinalized && (
-                                                                    <button
-                                                                        onClick={() => handleDelete(receipt.id)}
-                                                                        className="px-[14px] py-[8px] text-sm font-medium rounded-lg transition-all duration-[120ms] ease-out active:scale-[0.97] bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                                                                <div className="flex flex-col min-[480px]:flex-row sm:flex-row w-full sm:w-auto gap-2 sm:gap-2.5">
+                                                                    <Link
+                                                                        href={receipt.receiptNumber ? `/receipt/${receipt.id}` : receipt.imageUrl || '#'}
+                                                                        target={receipt.receiptNumber ? undefined : '_blank'}
+                                                                        className="flex-1 sm:flex-none flex items-center justify-center min-h-[44px] sm:min-h-0 px-[14px] py-[10px] sm:py-[8px] text-sm font-medium rounded-lg text-[var(--text)] transition-all duration-[120ms] ease-out active:scale-[0.97] bg-[var(--card)] hover:bg-[var(--card-hover)] border border-[var(--border)]"
                                                                     >
-                                                                        Delete
+                                                                        View
+                                                                    </Link>
+                                                                    <button
+                                                                        onClick={() => handleOpenBundleModal(receipt)}
+                                                                        className="flex-1 sm:flex-none flex items-center justify-center min-h-[44px] sm:min-h-0 px-[14px] py-[10px] sm:py-[8px] text-sm font-medium rounded-lg transition-all duration-[120ms] ease-out active:scale-[0.97] bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20"
+                                                                        title="Add to Bundle"
+                                                                    >
+                                                                        Bundle
                                                                     </button>
-                                                                )}
+                                                                    {!receipt.isFinalized && (
+                                                                        <button
+                                                                            onClick={() => handleDelete(receipt.id)}
+                                                                            className="flex-1 sm:flex-none flex items-center justify-center min-h-[44px] sm:min-h-0 px-[14px] py-[10px] sm:py-[8px] text-sm font-medium rounded-lg transition-all duration-[120ms] ease-out active:scale-[0.97] bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                                                                        >
+                                                                            Delete
+                                                                        </button>
+                                                                    )}
+                                                                </div>
                                                             </div>
 
                                                         </div>

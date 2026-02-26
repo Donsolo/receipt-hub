@@ -44,6 +44,39 @@ export async function PATCH(
             data: { status }
         });
 
+        // ------------------------------------------------------------------
+        // Fire Notification on Acceptance (Non-blocking)
+        // ------------------------------------------------------------------
+        if (status === 'accepted') {
+            try {
+                const targetPref = await db.user.findUnique({
+                    where: { id: connection.requesterId },
+                    select: { notifyConnectionAccepted: true }
+                });
+
+                if (targetPref?.notifyConnectionAccepted) {
+                    const receiver = await db.user.findUnique({
+                        where: { id: user.userId },
+                        select: { name: true }
+                    });
+                    const receiverName = receiver?.name || 'A user';
+
+                    await db.notification.create({
+                        data: {
+                            userId: connection.requesterId,
+                            type: 'CONNECTION_ACCEPTED',
+                            title: 'Connection Accepted',
+                            message: `${receiverName} accepted your connection request.`,
+                            link: '/business-network',
+                            read: false
+                        }
+                    });
+                }
+            } catch (notifErr) {
+                console.error('Failed to dispatch connection accepted notification:', notifErr);
+            }
+        }
+
         return NextResponse.json(updatedConnection);
     } catch (error) {
         console.error('Respond connection error:', error);

@@ -158,6 +158,46 @@ export async function POST(
             }
         });
 
+        // ------------------------------------------------------------------
+        // Fire Notification (Non-blocking)
+        // ------------------------------------------------------------------
+        if (user.userId !== receiverId) {
+            try {
+                const receiverPref = await db.user.findUnique({
+                    where: { id: receiverId },
+                    select: { notifyMessages: true }
+                });
+
+                if (receiverPref?.notifyMessages) {
+                    const sender = await db.user.findUnique({
+                        where: { id: user.userId },
+                        select: { name: true }
+                    });
+                    const senderName = sender?.name || 'A user';
+
+                    const rawText = messageText.trim();
+                    const excerpt = rawText.length > 60
+                        ? rawText.slice(0, 60) + '...'
+                        : rawText;
+
+                    const finalExcerpt = excerpt || (attachmentType === 'RECEIPT' ? '[Receipt attached]' : '[Bundle attached]');
+
+                    await db.notification.create({
+                        data: {
+                            userId: receiverId,
+                            type: 'MESSAGE_RECEIVED',
+                            title: 'New Message',
+                            message: `${senderName}: ${finalExcerpt}`,
+                            link: `/dashboard/connections`,
+                            read: false
+                        }
+                    });
+                }
+            } catch (notifErr) {
+                console.error('Failed to dispatch message notification:', notifErr);
+            }
+        }
+
         return NextResponse.json(message);
     } catch (error) {
         console.error('Failed to send message:', error);
