@@ -13,9 +13,9 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://verihub.app'),
-  title: 'Verihub — Secure Receipt Intelligence Platform',
+  title: 'Verihub — Secure, Audit-Ready Receipt Intelligence',
   applicationName: 'Verihub',
-  description: 'Verihub is a secure, audit-ready receipt intelligence platform built for modern operators. Generate, store, and verify business receipts with precision-grade infrastructure designed for compliance, scale, and serious growth.',
+  description: 'Verihub is a secure, audit-ready receipt intelligence platform built for modern operators. Generate, verify, and manage business receipts on infrastructure designed for compliance, scale, and long-term growth.',
   keywords: ['verihub', 'secure receipt intelligence', 'receipt management', 'tektriq'],
   manifest: '/manifest.json',
   robots: {
@@ -35,23 +35,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     url: 'https://verihub.app',
-    title: 'Verihub — Secure Receipt Intelligence Platform',
-    description: 'Secure, audit-ready receipt intelligence built for modern businesses. Generate, verify, and manage receipts on infrastructure designed for scale.',
+    title: 'Verihub — Secure, Audit-Ready Receipt Intelligence',
+    description: 'Secure, audit-ready receipt intelligence built for modern businesses. Generate, verify, and manage receipts with precision infrastructure designed for compliance and scale.',
     siteName: 'Verihub',
     images: [
       {
-        url: 'https://verihub.app/og-image.png',
+        url: 'https://verihub.app/og/verihub-og.png',
         width: 1200,
         height: 630,
-        alt: 'Verihub — Secure Receipt Intelligence',
+        alt: 'Verihub — Secure, Audit-Ready Receipt Intelligence',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Verihub — Secure Receipt Intelligence Platform',
-    description: 'Secure, audit-ready receipt intelligence for modern operators.',
-    images: ['https://verihub.app/og-image.png'],
+    title: 'Verihub — Secure, Audit-Ready Receipt Intelligence',
+    description: 'Secure receipt intelligence built for serious operators.',
+    images: ['https://verihub.app/og/verihub-og.png'],
   },
   appleWebApp: {
     capable: true,

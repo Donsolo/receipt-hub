@@ -1,51 +1,78 @@
 const sharp = require('sharp');
 const path = require('path');
+const fs = require('fs');
 
 async function generateOGImage() {
     const width = 1200;
     const height = 630;
 
     const iconPath = path.join(__dirname, '..', 'Verihub icon logo.png');
-    const outPath = path.join(__dirname, '..', 'public', 'og-image.png');
+    const outDir = path.join(__dirname, '..', 'public', 'og');
+    const outPath = path.join(outDir, 'verihub-og.png');
 
-    // Resize icon for header position
-    const iconSize = 180;
+    // Ensure target directory exists natively
+    if (!fs.existsSync(outDir)) {
+        fs.mkdirSync(outDir, { recursive: true });
+    }
+
+    // Clean, minimal 120px icon centered horizontally at the top portion
+    const iconSize = 120;
     const iconBuffer = await sharp(iconPath).resize(iconSize, iconSize).toBuffer();
-
-    // Calculate horizontal center
     const leftPos = Math.floor((width - iconSize) / 2);
-    const topPos = 140;
+    const topPos = 130;
 
-    // Use pure SVG composition for extremely sharp text rendering
+    // Render purely minimal typography strictly using the system sans stack
     const svgText = `
     <svg width="${width}" height="${height}">
       <style>
-        .title { 
+        .wordmark { 
             fill: #ffffff; 
-            font-size: 72px; 
+            font-size: 80px; 
             font-weight: 700; 
             font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            letter-spacing: -1px;
+            letter-spacing: -2.5px;
         }
-        .tagline { 
-            fill: #94A3B8; 
-            font-size: 32px; 
-            font-weight: 500; 
+        .subheadline { 
+            fill: #F8FAFC; 
+            font-size: 38px; 
+            font-weight: 600; 
             font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            letter-spacing: 0.5px;
+            letter-spacing: -0.5px;
+        }
+        .supporting {
+            fill: #94A3B8;
+            font-size: 24px;
+            font-weight: 500;
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            letter-spacing: 0.2px;
+        }
+        .cta {
+            fill: #64748B;
+            font-size: 20px;
+            font-weight: 500;
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
       </style>
-      <text x="50%" y="420" text-anchor="middle" class="title">Verihub</text>
-      <text x="50%" y="480" text-anchor="middle" class="tagline">Secure Receipt Intelligence</text>
+      
+      <!-- Center Aligned Text Cluster -->
+      <g transform="translate(600, 310)">
+        <text x="0" y="0" text-anchor="middle" class="wordmark">Verihub</text>
+        <text x="0" y="65" text-anchor="middle" class="subheadline">Secure Receipt Intelligence</text>
+        <text x="0" y="115" text-anchor="middle" class="supporting">Audit-Ready Infrastructure for Modern Businesses</text>
+      </g>
+      
+      <!-- CTA Anchor Bottom Right -->
+      <text x="1140" y="580" text-anchor="end" class="cta">Explore Verihub →</text>
     </svg>
   `;
 
+    // Deep SaaS Navy Background (#0F172A)
     await sharp({
         create: {
             width,
             height,
             channels: 4,
-            background: { r: 15, g: 23, b: 42, alpha: 1 } // Exact #0F172A
+            background: { r: 15, g: 23, b: 42, alpha: 1 }
         }
     })
         .composite([
@@ -55,7 +82,7 @@ async function generateOGImage() {
         .png()
         .toFile(outPath);
 
-    console.log("Successfully generated /public/og-image.png");
+    console.log("Successfully generated /public/og/verihub-og.png");
 }
 
 generateOGImage().catch(err => {
