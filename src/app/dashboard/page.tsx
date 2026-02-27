@@ -143,7 +143,7 @@ export default async function Dashboard() {
                                     </svg>
                                 </div>
                                 <div className="flex-1 pt-1.5">
-                                    <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Verihub</h2>
+                                    <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Receipt Hub</h2>
                                     <p className="text-[13px] text-[var(--muted)] mt-2 leading-relaxed">Create, upload, manage, and share all of your business receipts in the vault.</p>
                                 </div>
                             </div>
