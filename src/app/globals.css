@@ -69,29 +69,3 @@ body {
   border-color: var(--border);
   transition: background-color 0.25s ease, border-color 0.25s ease;
 }
-
-/* --- Global Custom Scrollbar --- */
-/* This overrides the native OS scrollbar behavior (especially visible in light mode on Windows)
-   by making the scroll track fundamentally transparent, solving the "white gap" right edge bleed. */
-::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-  background-color: transparent;
-  /* Makes the backing track invisible */
-}
-
-::-webkit-scrollbar-track {
-  background-color: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: var(--border);
-  border-radius: 6px;
-  border: 3px solid var(--bg);
-  /* Fakes padding by blending with background */
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: var(--muted);
-}

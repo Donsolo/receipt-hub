@@ -195,7 +195,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
     ];
 
     return (
-        <header className="w-[100vw] bg-[var(--header-bg)] border-b border-[var(--header-border)] sticky top-0 z-50">
+        <header className="w-full flex-shrink-0 bg-[var(--header-bg)] border-b border-[var(--header-border)] z-50">
             <div className="max-w-7xl mx-auto px-[20px]">
                 <div className="flex justify-between h-[60px]">
                     <div className="flex">

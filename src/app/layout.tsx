@@ -14,20 +14,27 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   metadataBase: new URL('https://verihub.tektriq.com'),
   title: 'Verihub',
-  description: 'Professional receipt generation and verification platform.',
-  keywords: ['verihub', 'receipt generator', 'create receipts', 'printable receipts', 'simple receipt app'],
+  applicationName: 'Verihub',
+  description: 'Secure Receipt Intelligence',
+  keywords: ['verihub', 'secure receipt intelligence', 'receipt management', 'tektriq'],
   manifest: '/manifest.json',
   robots: {
     index: true,
     follow: true,
   },
   icons: {
-    icon: '/icon.png',
-    apple: '/icon.png',
+    icon: [
+      { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon/favicon-48x48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/favicon/favicon-64x64.png', sizes: '64x64', type: 'image/png' }
+    ],
+    shortcut: '/favicon/favicon-32x32.png',
+    apple: '/icons/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'Verihub',
-    description: 'Professional receipt generation and verification platform.',
+    title: 'Verihub — Secure Receipt Intelligence',
+    description: 'Secure Receipt Intelligence',
     type: 'website',
     siteName: 'Verihub',
     images: [
@@ -41,16 +48,21 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Verihub',
-    description: 'Professional receipt generation and verification platform.',
+    title: 'Verihub — Secure Receipt Intelligence',
+    description: 'Secure Receipt Intelligence',
     images: ['/opengraph-image.png'],
   },
+  appleWebApp: {
+    capable: true,
+    title: 'Verihub',
+    statusBarStyle: 'default',
+  }
 };
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: 'var(--bg-primary)',
+  themeColor: '#0F172A',
 };
 
 import { verifyToken } from '@/lib/auth';
@@ -87,12 +99,12 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className="h-full antialiased overflow-x-hidden" data-theme={initialTheme}>
+    <html lang="en" className="h-[100vh] max-h-[100vh] antialiased overflow-hidden" data-theme={initialTheme}>
       <ThemeProvider initialTheme={initialTheme}>
-        <body className={`${inter.className} h-full w-full overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
+        <body className={`${inter.className} h-[100vh] max-h-[100vh] w-full max-w-full overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
           {isAuthenticated ? (
             <NotificationProvider>
-              <div className="min-h-screen flex flex-col">
+              <div className="h-[100vh] w-full flex flex-col overflow-hidden">
                 <script
                   type="application/ld+json"
                   dangerouslySetInnerHTML={{
@@ -113,15 +125,17 @@ export default async function RootLayout({
                 />
                 <NotificationToasts />
                 <Navbar isAuthenticated={isAuthenticated} role={userRole} />
-                <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
-                  {children}
-                </main>
-                <InstallPrompt />
-                <Footer />
+                <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full relative">
+                  <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
+                    {children}
+                  </main>
+                  <InstallPrompt />
+                  <Footer />
+                </div>
               </div>
             </NotificationProvider>
           ) : (
-            <div className="min-h-screen flex flex-col">
+            <div className="h-[100vh] w-full flex flex-col overflow-hidden">
               <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -141,11 +155,13 @@ export default async function RootLayout({
                 }}
               />
               <Navbar isAuthenticated={isAuthenticated} role={userRole} />
-              <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
-                {children}
-              </main>
-              <InstallPrompt />
-              <Footer />
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full relative">
+                <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
+                  {children}
+                </main>
+                <InstallPrompt />
+                <Footer />
+              </div>
             </div>
           )}
         </body>

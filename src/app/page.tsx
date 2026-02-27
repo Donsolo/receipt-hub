@@ -72,10 +72,6 @@ export default async function LandingPage() {
             />
           </div>
 
-          <p className="text-sm md:text-base font-semibold text-sky-400 opacity-80 mb-6 tracking-widest uppercase drop-shadow-sm">
-            Formerly Receipt Hub
-          </p>
-
           <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
             Generate, store, and verify receipts with audit-ready precision and secure cloud architecture built for serious operators.
           </p>
