@@ -200,20 +200,18 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                 <div className="flex justify-between h-[60px]">
                     <div className="flex">
                         <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex-shrink-0 flex items-center group transition-transform duration-200 hover:opacity-90">
-                            <Image
+                            <img
                                 src="/assets/verihub-logo-icon.png"
                                 alt="Verihub Logo"
                                 width={36}
                                 height={36}
-                                priority
                                 className="h-[36px] w-auto mr-[12px] group-hover:-translate-y-[1px] transition-transform duration-200"
                             />
-                            <Image
+                            <img
                                 src="/assets/text-logo.png"
                                 alt="Verihub"
                                 width={180}
                                 height={45}
-                                priority
                                 className="h-[28px] sm:h-[32px] w-auto group-hover:-translate-y-[1px] transition-transform duration-200"
                             />
                         </Link>
