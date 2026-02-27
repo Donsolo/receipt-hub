@@ -100,12 +100,12 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className="h-[100vh] max-h-[100vh] antialiased overflow-hidden" data-theme={initialTheme}>
+    <html lang="en" className="antialiased w-full max-w-full overflow-x-hidden" data-theme={initialTheme}>
       <ThemeProvider initialTheme={initialTheme}>
-        <body className={`${inter.className} h-[100vh] max-h-[100vh] w-full max-w-full overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
+        <body className={`${inter.className} min-h-screen flex flex-col w-full max-w-full overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
           {isAuthenticated ? (
             <NotificationProvider>
-              <div className="h-[100vh] w-full flex flex-col overflow-hidden">
+              <div className="flex flex-col min-h-screen w-full relative">
                 <script
                   type="application/ld+json"
                   dangerouslySetInnerHTML={{
@@ -126,7 +126,7 @@ export default async function RootLayout({
                 />
                 <NotificationToasts />
                 <Navbar isAuthenticated={isAuthenticated} role={userRole} />
-                <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full relative">
+                <div className="flex-1 flex flex-col w-full relative">
                   <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
                     {children}
                   </main>
@@ -136,7 +136,7 @@ export default async function RootLayout({
               </div>
             </NotificationProvider>
           ) : (
-            <div className="h-[100vh] w-full flex flex-col overflow-hidden">
+            <div className="flex flex-col min-h-screen w-full relative">
               <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -156,7 +156,7 @@ export default async function RootLayout({
                 }}
               />
               <Navbar isAuthenticated={isAuthenticated} role={userRole} />
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden w-full relative">
+              <div className="flex-1 flex flex-col w-full relative">
                 <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
                   {children}
                 </main>
