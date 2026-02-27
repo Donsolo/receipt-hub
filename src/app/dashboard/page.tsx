@@ -180,7 +180,7 @@ export default async function Dashboard() {
                                 </div>
                                 <div className="flex-1 pt-1.5">
                                     <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Submit Feedback</h2>
-                                    <p className="text-[13px] text-[var(--muted)] mt-2 leading-relaxed">Help shape the future of Receipt Hub. Share ideas or report any bugs you find.</p>
+                                    <p className="text-[13px] text-[var(--muted)] mt-2 leading-relaxed">Help shape the future of Verihub. Share ideas or report any bugs you find.</p>
                                 </div>
                             </div>
                         </div>

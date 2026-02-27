@@ -4,10 +4,10 @@ export default function TermsPage() {
             <h1 className="text-2xl font-bold text-[var(--text)] mb-6">Terms of Service</h1>
             <div className="prose prose-sm text-[var(--text)]">
                 <p className="mb-4 bg-[var(--card)] p-4 rounded-lg border border-[var(--border)]">
-                    <strong>Receipt Hub</strong> is owned and operated by <strong>Tektriq LLC</strong> (“Company”, “we”, “our”, or “us”), a limited liability company registered in the United States.
+                    <strong>Verihub</strong> is owned and operated by <strong>Tektriq LLC</strong> (“Company”, “we”, “our”, or “us”), a limited liability company registered in the United States.
                 </p>
                 <p className="mb-4">
-                    By using Receipt Hub, you agree that this tool is provided "as is" for internal business use.
+                    By using Verihub, you agree that this tool is provided "as is" for internal business use.
                     It is intended solely for authorized personnel to generate receipt documentation.
                 </p>
                 <p className="mb-4">

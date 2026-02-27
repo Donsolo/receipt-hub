@@ -29,7 +29,7 @@ export default function ChangeLogModal({ version }: { version: string }) {
 
             <div className="relative w-full max-w-md bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
                 <div className="p-6 border-b border-[var(--border)]">
-                    <h2 className="text-xl font-semibold text-[var(--text)]">What&apos;s New in Receipt Hub</h2>
+                    <h2 className="text-xl font-semibold text-[var(--text)]">What&apos;s New in Verihub</h2>
                 </div>
 
                 <div className="p-6 overflow-y-auto space-y-6">

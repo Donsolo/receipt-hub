@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
 :root {
   /* Dark Theme Palette (Default) */
   --bg: #0B1220;
@@ -10,6 +18,14 @@
   --border: rgba(255, 255, 255, 0.05);
   /* or #1E293B */
   --accent: #6366F1;
+
+  /* Dark Mode Header Tokens (Unchanged mappings) */
+  --header-bg: var(--bg);
+  --header-border: var(--border);
+  --header-text: var(--text);
+  --header-icon: var(--muted);
+  --header-icon-hover: var(--text);
+  --header-icon-hover-bg: var(--card-hover);
 }
 
 [data-theme="light"] {
@@ -21,6 +37,14 @@
   --muted: #6B7280;
   --border: #E5E7EB;
   --accent: #4F46E5;
+
+  /* Light Mode Header Tokens (Dark Mode Aesthetic) */
+  --header-bg: #0B1220;
+  --header-border: rgba(255, 255, 255, 0.05);
+  --header-text: #F9FAFB;
+  --header-icon: #9CA3AF;
+  --header-icon-hover: #F9FAFB;
+  --header-icon-hover-bg: #182338;
 }
 
 @theme inline {
@@ -46,18 +70,28 @@ body {
   transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
-/* Persistent Horizontal Scrollbar for Desktop Tables */
-.persistent-scrollbar::-webkit-scrollbar {
+/* --- Global Custom Scrollbar --- */
+/* This overrides the native OS scrollbar behavior (especially visible in light mode on Windows)
+   by making the scroll track fundamentally transparent, solving the "white gap" right edge bleed. */
+::-webkit-scrollbar {
+  width: 12px;
   height: 12px;
+  background-color: transparent;
+  /* Makes the backing track invisible */
+}
+
+::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
-.persistent-scrollbar::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background-color: var(--border);
   border-radius: 6px;
-  border: 3px solid var(--card);
+  border: 3px solid var(--bg);
+  /* Fakes padding by blending with background */
+  background-clip: padding-box;
 }
 
-.persistent-scrollbar:hover::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb:hover {
   background-color: var(--muted);
 }

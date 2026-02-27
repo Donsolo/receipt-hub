@@ -1,14 +1,14 @@
-# Receipt Hub
+# Verihub
 
 Generate. Share. Done.
 
-Receipt Hub is a lightweight, professional web app for generating clean, client-ready PDF receipts in seconds. Built for contractors, small business owners, freelancers, and service providers who need fast, polished documentation without complicated accounting software.
+Verihub is a lightweight, professional web app for generating clean, client-ready PDF receipts in seconds. Built for contractors, small business owners, freelancers, and service providers who need fast, polished documentation without complicated accounting software.
 
 ---
 
 ## 🚀 Overview
 
-Receipt Hub allows users to:
+Verihub allows users to:
 
 - Create professional receipts instantly
 - Export clean PDF documents

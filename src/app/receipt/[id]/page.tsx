@@ -156,7 +156,7 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
                 <div className="mt-16 text-center border-t border-gray-100 pt-8 print:mt-8 print:pt-4">
                     <p className="text-sm text-[var(--muted)] mb-4">Thank you for your business!</p>
                     <div className="flex items-center justify-center gap-1.5 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
-                        <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Receipt Hub is powered by</span>
+                        <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Verihub is powered by</span>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/tektriq-logo.png" alt="Tektriq LLC" className="h-3 w-auto object-contain" />
                         <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-bold">Tektriq LLC</span>

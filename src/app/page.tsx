@@ -47,71 +47,100 @@ export default async function LandingPage() {
       {/* Main Content Area */}
       <main className="flex-grow flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
 
-        {/* Hero Glow Effect */}
-        <div className="absolute inset-0 flex justify-center overflow-hidden pointer-events-none">
-          <div className="w-[800px] h-[800px] bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.15),transparent_60%)] blur-3xl" />
-        </div>
+        {/* Layer 1: Base Background & Layer 2: Radial Glow behind H1 */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050816] via-[#0b1230] to-[#050816] -z-20 pointer-events-none" />
+
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[800px] bg-[radial-gradient(circle_at_top_center,rgba(56,189,248,0.12),transparent_60%)] blur-[120px] -z-10 pointer-events-none" />
+
+        {/* Layer 3: Ultra-faint tech grid */}
+        <div
+          className="absolute inset-0 -z-10 pointer-events-none opacity-[0.03]"
+          style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '64px 64px' }}
+        />
 
         {/* Hero Section */}
-        <div className="text-center z-10 max-w-4xl mx-auto py-20 relative">
+        <div className="text-center z-10 max-w-4xl mx-auto pt-24 pb-16 relative">
 
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight tracking-tight text-[var(--text)] mb-6">
-            Professional Receipts. <span className="block bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">Secure Storage.</span>
-          </h1>
+          <div className="flex flex-col items-center mb-6">
+            <Image
+              src="/assets/text-logo.png"
+              alt="Verihub Logo"
+              width={600}
+              height={150}
+              className="w-[280px] sm:w-[400px] md:w-[550px] h-auto object-contain drop-shadow-md"
+              priority
+            />
+          </div>
 
-          <p className="text-lg text-[var(--muted)] mt-4 max-w-xl mx-auto mb-10 leading-relaxed">
-            Generate clean PDF receipts or securely upload and store receipt images with enterprise-grade reliability.
+          <p className="text-sm md:text-base font-semibold text-sky-400 opacity-80 mb-6 tracking-widest uppercase drop-shadow-sm">
+            Formerly Receipt Hub
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center px-8 py-3 h-12 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-[var(--text)] font-medium shadow-lg shadow-indigo-600/20 transition-colors w-full sm:w-auto"
-            >
-              Login
-            </Link>
+          <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
+            Generate, store, and verify receipts with audit-ready precision and secure cloud architecture built for serious operators.
+          </p>
+
+          {/* modern enterprise CTAs */}
+          <div className="flex flex-col sm:flex-row gap-5 justify-center items-center mb-16">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center px-8 py-3 h-12 rounded-lg bg-transparent border border-[var(--border)] text-[var(--text)] hover:bg-[var(--card)] font-medium transition-colors w-full sm:w-auto"
+              className="inline-flex items-center justify-center px-10 py-3.5 h-[52px] rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-lg shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] transition-all transform hover:-translate-y-0.5 w-full sm:w-auto"
             >
-              Register
+              Start Free
             </Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center px-10 py-3.5 h-[52px] rounded-lg bg-transparent border-2 border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 hover:bg-slate-800/50 font-semibold text-lg transition-all w-full sm:w-auto"
+            >
+              Sign In
+            </Link>
+          </div>
+
+          {/* Trust Strip elements */}
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-[13px] font-medium text-slate-500 uppercase tracking-widest border-t border-slate-800/60 pt-8 mt-4">
+            <span>Secure Cloud Storage</span>
+            <span className="hidden sm:inline">·</span>
+            <span>Private Access</span>
+            <span className="hidden sm:inline">·</span>
+            <span>Audit-Ready PDFs</span>
+            <span className="hidden sm:inline">·</span>
+            <span>Built by Tektriq LLC</span>
           </div>
         </div>
 
-        {/* Feature Strip Section */}
-        <div className="relative w-full max-w-4xl mx-auto mt-10">
+        {/* Feature Strip Section with Added Depth Element */}
+        <div className="relative w-full max-w-5xl mx-auto mt-16 mb-12">
 
-          {/* Background Glow */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.08),transparent_70%)] pointer-events-none" />
+          {/* Background Depth Element - Subtle blurred abstract mock */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-3/4 h-[120%] bg-gradient-to-b from-indigo-900/10 to-transparent blur-2xl rounded-3xl -z-10 pointer-events-none" />
 
-          <div className="grid md:grid-cols-2 gap-6 relative z-10">
-            {/* Feature 1: PDF Generation */}
-            <div className="relative bg-gradient-to-br from-[#111827] to-[#0F172A] border border-[var(--border)] rounded-2xl p-6 transition-all duration-300 hover:border-indigo-500/40 hover:-translate-y-1 flex items-start gap-4 group">
-              <div className="shrink-0 h-12 w-12 flex items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-400 shadow-inner group-hover:text-indigo-300 transition-colors">
+          <div className="grid md:grid-cols-2 gap-8 relative z-10">
+            {/* Feature 1: PDF Generation Engine */}
+            <div className="relative bg-[#0b1121] border border-slate-800/80 rounded-2xl p-8 transition-all duration-300 hover:border-indigo-500/50 hover:shadow-[0_8px_30px_rgba(79,70,229,0.12)] hover:-translate-y-1 flex items-start gap-5 group">
+              <div className="shrink-0 h-14 w-14 flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 text-indigo-400 shadow-inner group-hover:text-indigo-300 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                   <path fillRule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3 3 0 0016.5 9.75h-3a3 3 0 01-3-3v-3a3 3 0 00-3-3H5.625zM12 3v3.75a.75.75 0 00.75.75H16.5a.75.75 0 00.52-1.29l-3.48-3.47A.75.75 0 0012 3zm4.5 12a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h7.5a.75.75 0 00.75-.75zm0 3.75a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h7.5a.75.75 0 00.75-.75z" clipRule="evenodd" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-[var(--text)]">Instant PDF Generation</h3>
-                <p className="text-sm text-[var(--muted)] mt-2 leading-relaxed">
-                  Create professional, formatted receipts instantly using the built-in generator.
+                <h3 className="text-xl font-semibold text-slate-100 mb-2">High-Fidelity PDF Engine</h3>
+                <p className="text-sm text-slate-400 leading-relaxed font-medium">
+                  Structured, compliant receipt rendering built for professional workflows.
                 </p>
               </div>
             </div>
 
-            {/* Feature 2: Secure Storage */}
-            <div className="relative bg-gradient-to-br from-[#111827] to-[#0F172A] border border-[var(--border)] rounded-2xl p-6 transition-all duration-300 hover:border-indigo-500/40 hover:-translate-y-1 flex items-start gap-4 group">
-              <div className="shrink-0 h-12 w-12 flex items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-400 shadow-inner group-hover:text-indigo-300 transition-colors">
+            {/* Feature 2: Vault */}
+            <div className="relative bg-[#0b1121] border border-slate-800/80 rounded-2xl p-8 transition-all duration-300 hover:border-indigo-500/50 hover:shadow-[0_8px_30px_rgba(79,70,229,0.12)] hover:-translate-y-1 flex items-start gap-5 group">
+              <div className="shrink-0 h-14 w-14 flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 text-indigo-400 shadow-inner group-hover:text-indigo-300 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-[var(--text)]">Secure Image Storage</h3>
-                <p className="text-sm text-[var(--muted)] mt-2 leading-relaxed">
-                  Upload and store receipt images securely with private, user-based access.
+                <h3 className="text-xl font-semibold text-slate-100 mb-2">Encrypted Asset Vault</h3>
+                <p className="text-sm text-slate-400 leading-relaxed font-medium">
+                  Private, user-scoped cloud storage with controlled access layers.
                 </p>
               </div>
             </div>
@@ -123,11 +152,11 @@ export default async function LandingPage() {
           <div className="w-full max-w-7xl mx-auto py-24 relative z-10 px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16 relative">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none" />
-              <h2 className="text-3xl md:text-5xl font-extrabold text-[var(--text)] mb-4 tracking-tight relative z-10">
-                Loved by <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Pioneers</span>
+              <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight relative z-10">
+                Trusted by Early Access Operators
               </h2>
-              <p className="text-[var(--muted)] text-lg max-w-2xl mx-auto font-medium">
-                Join a rapidly compounding network of early-access founders already scaling their operations on the core workspace.
+              <p className="text-slate-400 text-lg max-w-2xl mx-auto font-medium">
+                Infrastructure relied upon by professionals to run serious businesses with absolute confidence.
               </p>
             </div>
 
@@ -219,18 +248,10 @@ export default async function LandingPage() {
 
             {/* Left: Branding */}
             <div className="flex flex-col items-center md:items-start space-y-2">
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/tektriq-logo.png"
-                  alt="Tektriq Logo"
-                  width={20}
-                  height={20}
-                  className="h-5 w-auto object-contain opacity-70"
-                />
-                <span className="text-[var(--muted)] font-medium">Tektriq LLC</span>
-              </div>
+              <span className="text-lg font-bold text-[var(--text)]">Verihub</span>
               <p className="text-xs text-[var(--muted)]">
-                © 2026 Tektriq LLC. All rights reserved.
+                © {new Date().getFullYear()} Verihub. All rights reserved.<br />
+                Powered by Tektriq LLC.
               </p>
             </div>
 

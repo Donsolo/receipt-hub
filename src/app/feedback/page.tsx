@@ -178,7 +178,7 @@ export default function FeedbackPage() {
 
                                 {type === 'positive' && (
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-[var(--text)]">How would you rate Receipt Hub?</label>
+                                        <label className="block text-sm font-medium text-[var(--text)]">How would you rate Verihub?</label>
                                         <select
                                             value={rating}
                                             onChange={(e) => setRating(e.target.value)}
@@ -200,7 +200,7 @@ export default function FeedbackPage() {
                                         rows={5}
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
-                                        placeholder={type === 'bug' ? "What went wrong?" : type === 'suggestion' ? "What should we add or change?" : "What do you like best about Receipt Hub?"}
+                                        placeholder={type === 'bug' ? "What went wrong?" : type === 'suggestion' ? "What should we add or change?" : "What do you like best about Verihub?"}
                                         className="block w-full rounded-md border-0 bg-[var(--card)] ring-1 ring-inset ring-[var(--border)] focus:ring-2 focus:ring-inset focus:ring-indigo-500 py-3 px-4 text-[var(--text)] sm:text-sm sm:leading-6"
                                     />
                                 </div>
@@ -242,7 +242,7 @@ export default function FeedbackPage() {
                         Community Polls
                     </h3>
                     <p className="text-sm text-[var(--muted)] mb-4">
-                        Vote on upcoming features and help shape the direction of Receipt Hub.
+                        Vote on upcoming features and help shape the direction of Verihub.
                     </p>
 
                     {isLoadingPolls ? (

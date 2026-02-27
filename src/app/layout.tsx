@@ -12,10 +12,10 @@ import { cookies } from 'next/headers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://receipthub.tektriq.com'),
-  title: 'Receipt Hub – Simple Receipt Generator',
-  description: 'Create, save, and print professional receipts with a simple web-based receipt generator. No accounts required.',
-  keywords: ['receipt generator', 'create receipts', 'printable receipts', 'simple receipt app'],
+  metadataBase: new URL('https://verihub.tektriq.com'),
+  title: 'Verihub',
+  description: 'Professional receipt generation and verification platform.',
+  keywords: ['verihub', 'receipt generator', 'create receipts', 'printable receipts', 'simple receipt app'],
   manifest: '/manifest.json',
   robots: {
     index: true,
@@ -26,23 +26,23 @@ export const metadata: Metadata = {
     apple: '/icon.png',
   },
   openGraph: {
-    title: 'Receipt Hub – Simple Receipt Generator',
-    description: 'Create, save, and print professional receipts with a simple web-based receipt generator.',
+    title: 'Verihub',
+    description: 'Professional receipt generation and verification platform.',
     type: 'website',
-    siteName: 'Receipt Hub',
+    siteName: 'Verihub',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Receipt Hub Logo',
+        alt: 'Verihub Logo',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Receipt Hub – Simple Receipt Generator',
-    description: 'Create, save, and print professional receipts with a simple web-based receipt generator.',
+    title: 'Verihub',
+    description: 'Professional receipt generation and verification platform.',
     images: ['/opengraph-image.png'],
   },
 };
@@ -87,9 +87,9 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className="h-full" data-theme={initialTheme}>
+    <html lang="en" className="h-full antialiased overflow-x-hidden" data-theme={initialTheme}>
       <ThemeProvider initialTheme={initialTheme}>
-        <body className={`${inter.className} h-full bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
+        <body className={`${inter.className} h-full w-full overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
           {isAuthenticated ? (
             <NotificationProvider>
               <div className="min-h-screen flex flex-col">
@@ -101,7 +101,7 @@ export default async function RootLayout({
                       '@type': 'Organization',
                       name: 'Tektriq LLC',
                       url: 'https://tektriq.com',
-                      logo: 'https://receipthub.tektriq.com/tektriq-logo.png',
+                      logo: 'https://verihub.tektriq.com/tektriq-logo.png',
                       contactPoint: {
                         '@type': 'ContactPoint',
                         telephone: '',
@@ -130,7 +130,7 @@ export default async function RootLayout({
                     '@type': 'Organization',
                     name: 'Tektriq LLC',
                     url: 'https://tektriq.com',
-                    logo: 'https://receipthub.tektriq.com/tektriq-logo.png',
+                    logo: 'https://verihub.tektriq.com/tektriq-logo.png',
                     contactPoint: {
                       '@type': 'ContactPoint',
                       telephone: '',

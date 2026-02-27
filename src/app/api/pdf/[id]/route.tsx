@@ -127,7 +127,7 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
           <div class="mt-12 text-center border-t border-gray-100 pt-8">
             <p class="text-sm text-[var(--muted)] mb-4">Thank you for your business!</p>
             <div class="flex items-center justify-center gap-1.5 opacity-60 grayscale">
-              <span class="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Receipt Hub is powered by</span>
+              <span class="text-[10px] uppercase tracking-wider text-[var(--muted)] font-medium">Verihub is powered by</span>
               <img src="data:image/png;base64,${tektriqLogoBase64}" alt="Tektriq LLC" class="h-3 w-auto object-contain" />
               <span class="text-[10px] uppercase tracking-wider text-[var(--muted)] font-bold">Tektriq LLC</span>
             </div>
@@ -164,7 +164,7 @@ export async function GET(
     }
 
     // Default or user's business text
-    const businessName = receipt.user?.businessName || receipt.user?.name || receipt.user?.email || "Generated via Receipt Hub Core";
+    const businessName = receipt.user?.businessName || receipt.user?.name || receipt.user?.email || "Generated via Verihub Core";
 
     // Address splitting safely
     const businessAddressStr = receipt.user?.businessAddress || "123 Business Rd.\nSuite 400\nCity, ST 12345";
@@ -235,7 +235,7 @@ export async function GET(
     return new NextResponse(Buffer.from(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename = "ReceiptHub_${receipt.receiptNumber}.pdf"`,
+        'Content-Disposition': `attachment; filename = "Verihub_${receipt.receiptNumber}.pdf"`,
       },
     });
 

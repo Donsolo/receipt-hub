@@ -1,6 +1,6 @@
 {
-    "name": "Receipt Hub",
-    "short_name": "Receipt Hub",
+    "name": "Verihub",
+    "short_name": "Verihub",
     "description": "Simple Receipt Generator",
     "start_url": "/",
     "display": "standalone",

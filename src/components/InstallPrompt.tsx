@@ -71,7 +71,7 @@ export default function InstallPrompt() {
                         />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[var(--text)]">Install Receipt Hub</p>
+                        <p className="text-sm font-medium text-[var(--text)]">Install Verihub</p>
                         <p className="text-xs text-[var(--muted)] truncate">Add to Home Screen for quick access</p>
                     </div>
                 </div>

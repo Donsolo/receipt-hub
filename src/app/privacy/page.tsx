@@ -4,10 +4,10 @@ export default function PrivacyPage() {
             <h1 className="text-2xl font-bold text-[var(--text)] mb-6">Privacy Policy</h1>
             <div className="prose prose-sm text-[var(--text)]">
                 <p className="mb-4 bg-[var(--card)] p-4 rounded-lg border border-[var(--border)]">
-                    <strong>Receipt Hub</strong> is a product of <strong>Tektriq LLC</strong>. Tektriq LLC respects your privacy and is committed to protecting your information.
+                    <strong>Verihub</strong> is a product of <strong>Tektriq LLC</strong>. Tektriq LLC respects your privacy and is committed to protecting your information.
                 </p>
                 <p className="mb-4">
-                    This Privacy Policy applies to the internal use of the Receipt Hub application.
+                    This Privacy Policy applies to the internal use of the Verihub application.
                     As an internal utility, this application does not collect personal data from external users or share data with third parties.
                 </p>
                 <p className="mb-8">

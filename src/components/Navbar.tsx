@@ -63,7 +63,7 @@ function NotificationBell() {
             <div className="relative flex items-center">
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="relative p-2 rounded-full text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] transition-colors focus:outline-none"
+                    className="relative p-2 rounded-md text-[var(--header-icon)] hover:text-[var(--header-icon-hover)] hover:bg-[var(--header-icon-hover-bg)] transition-colors focus:outline-none min-h-[40px] min-w-[40px] flex items-center justify-center ml-1"
                     aria-label="Open notifications"
                 >
                     <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -194,29 +194,40 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
         { href: '/register', label: 'Register' },
     ];
 
-    const links = isAuthenticated ? authLinks : guestLinks;
-
     return (
-        <nav className="border-b border-[var(--border)] bg-[var(--bg)] relative z-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16">
+        <header className="w-[100vw] bg-[var(--header-bg)] border-b border-[var(--header-border)] sticky top-0 z-50">
+            <div className="max-w-7xl mx-auto px-[20px]">
+                <div className="flex justify-between h-[60px]">
                     <div className="flex">
-                        <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex-shrink-0 flex items-center">
-                            <span className="text-xl font-bold text-[var(--text)]">Receipt Hub</span>
+                        <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex-shrink-0 flex items-center group transition-transform duration-200 hover:opacity-90">
+                            <Image
+                                src="/assets/verihub-logo-icon.png"
+                                alt="Verihub Logo"
+                                width={36}
+                                height={36}
+                                className="h-[36px] w-auto mr-[12px] group-hover:-translate-y-[1px] transition-transform duration-200"
+                            />
+                            <Image
+                                src="/assets/text-logo.png"
+                                alt="Verihub"
+                                width={180}
+                                height={45}
+                                className="h-[28px] sm:h-[32px] w-auto group-hover:-translate-y-[1px] transition-transform duration-200"
+                            />
                         </Link>
                     </div>
 
                     {/* Right Side Tools */}
                     <div className="flex items-center space-x-1 sm:space-x-4">
                         {/* Desktop Menu */}
-                        <div className="hidden md:flex items-center space-x-4">
+                        <div className="hidden md:flex items-center space-x-2">
                             {isAuthenticated ? (
                                 <>
                                     {authLinks.map((link) => (
                                         <Link
                                             key={link.href}
                                             href={link.href}
-                                            className="text-[var(--text)] hover:text-[var(--text)] px-3 py-2 rounded-md text-sm font-medium"
+                                            className="text-[var(--header-icon)] hover:text-[var(--header-icon-hover)] hover:bg-[var(--header-icon-hover-bg)] px-3 py-2 rounded-md text-sm font-medium transition-colors"
                                         >
                                             {link.label}
                                         </Link>
@@ -224,14 +235,14 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                                     {role === 'ADMIN' || role === 'SUPER_ADMIN' ? (
                                         <Link
                                             href="/admin"
-                                            className="text-[var(--text)] hover:text-[var(--text)] px-3 py-2 rounded-md text-sm font-medium"
+                                            className="text-[var(--header-icon)] hover:text-[var(--header-icon-hover)] hover:bg-[var(--header-icon-hover-bg)] px-3 py-2 rounded-md text-sm font-medium transition-colors"
                                         >
                                             Admin
                                         </Link>
                                     ) : null}
                                     <button
                                         onClick={handleLogout}
-                                        className="text-[var(--text)] hover:text-[var(--text)] px-3 py-2 rounded-md text-sm font-medium"
+                                        className="text-[var(--header-icon)] hover:text-[var(--header-icon-hover)] hover:bg-[var(--header-icon-hover-bg)] px-3 py-2 rounded-md text-sm font-medium transition-colors ml-2"
                                     >
                                         Sign Out
                                     </button>
@@ -247,7 +258,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                             {isAuthenticated && (
                                 <button
                                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                    className="inline-flex items-center justify-center p-2 rounded-md text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-colors"
+                                    className="inline-flex items-center justify-center p-2 rounded-md text-[var(--header-icon)] hover:text-[var(--header-icon-hover)] hover:bg-[var(--header-icon-hover-bg)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-colors"
                                 >
                                     <span className="sr-only">Open main menu</span>
                                     {!isMenuOpen ? (
@@ -301,6 +312,6 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                     </div>
                 </div>
             )}
-        </nav>
+        </header>
     );
 }
