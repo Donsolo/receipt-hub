@@ -12,10 +12,10 @@ import { cookies } from 'next/headers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://verihub.tektriq.com'),
-  title: 'Verihub',
+  metadataBase: new URL('https://verihub.app'),
+  title: 'Verihub — Secure Receipt Intelligence Platform',
   applicationName: 'Verihub',
-  description: 'Secure Receipt Intelligence',
+  description: 'Verihub is a secure, audit-ready receipt intelligence platform built for modern operators. Generate, store, and verify business receipts with precision-grade infrastructure designed for compliance, scale, and serious growth.',
   keywords: ['verihub', 'secure receipt intelligence', 'receipt management', 'tektriq'],
   manifest: '/manifest.json',
   robots: {
@@ -33,24 +33,25 @@ export const metadata: Metadata = {
     apple: '/icons/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'Verihub — Secure Receipt Intelligence',
-    description: 'Secure Receipt Intelligence',
     type: 'website',
+    url: 'https://verihub.app',
+    title: 'Verihub — Secure Receipt Intelligence Platform',
+    description: 'Secure, audit-ready receipt intelligence built for modern businesses. Generate, verify, and manage receipts on infrastructure designed for scale.',
     siteName: 'Verihub',
     images: [
       {
-        url: '/opengraph-image.png',
+        url: 'https://verihub.app/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Verihub Logo',
+        alt: 'Verihub — Secure Receipt Intelligence',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Verihub — Secure Receipt Intelligence',
-    description: 'Secure Receipt Intelligence',
-    images: ['/opengraph-image.png'],
+    title: 'Verihub — Secure Receipt Intelligence Platform',
+    description: 'Secure, audit-ready receipt intelligence for modern operators.',
+    images: ['https://verihub.app/og-image.png'],
   },
   appleWebApp: {
     capable: true,
