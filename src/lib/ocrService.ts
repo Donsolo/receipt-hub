@@ -98,7 +98,8 @@ Do not include markdown formatting like \`\`\`json in your response. Just the ra
                         ]
                     }
                 ],
-                max_tokens: 300,
+                response_format: { type: "json_object" },
+                max_tokens: 2048,
                 temperature: 0.1
             })
         });
