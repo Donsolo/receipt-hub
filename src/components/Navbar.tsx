@@ -205,6 +205,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                                 alt="Verihub Logo"
                                 width={36}
                                 height={36}
+                                priority
                                 className="h-[36px] w-auto mr-[12px] group-hover:-translate-y-[1px] transition-transform duration-200"
                             />
                             <Image
@@ -212,6 +213,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
                                 alt="Verihub"
                                 width={180}
                                 height={45}
+                                priority
                                 className="h-[28px] sm:h-[32px] w-auto group-hover:-translate-y-[1px] transition-transform duration-200"
                             />
                         </Link>
