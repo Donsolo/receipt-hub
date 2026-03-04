@@ -20,12 +20,19 @@ export async function PATCH(request: Request) {
             return NextResponse.json({ error: 'Invalid version provided' }, { status: 400 });
         }
 
-        await (db as any).user.update({
-            where: { id: user.userId },
-            data: { lastSeenChangelogVersion: version },
-        });
-
-        return NextResponse.json({ success: true, version });
+        try {
+            await (db as any).user.update({
+                where: { id: user.userId },
+                data: { lastSeenChangelogVersion: version },
+            });
+            return NextResponse.json({ success: true, version });
+        } catch (updateError: any) {
+            if (updateError.code === 'P2025') {
+                // User from token no longer exists in DB (e.g. after local DB wipe)
+                return NextResponse.json({ error: 'User not found. Please log in again.' }, { status: 401 });
+            }
+            throw updateError;
+        }
     } catch (error) {
         console.error('Update Changelog Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

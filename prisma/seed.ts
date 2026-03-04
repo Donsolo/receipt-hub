@@ -66,6 +66,20 @@ async function main() {
         console.log(`Connection already exists: ${curtis.name} <-> ${darius.name}`);
     }
 
+    // 4. Create Apology Announcement
+    const existingAnn = await (prisma as any).announcement.findFirst({ where: { type: 'APOLOGY' } });
+    if (!existingAnn) {
+        await (prisma as any).announcement.create({
+            data: {
+                title: 'A Quick Note to Our Founders',
+                type: 'APOLOGY',
+                isActive: true,
+                content: `<p>Thank you for being one of Verihub’s early founders.</p><p>Recently we deployed several major upgrades to the platform, including new features and a full database security upgrade. As part of this process, some early test accounts needed to be recreated.</p><p>We sincerely apologize for any inconvenience this caused.</p><p>Testing and refining a brand new platform sometimes requires adjustments like this, and we truly appreciate your patience while we build something powerful and reliable.</p><p>The good news is these upgrades allow us to implement stronger security, improved performance, and many new features that are now rolling out across Verihub.</p><p>Your early support helps shape the future of this platform, and we’re excited to keep building with you.</p><p class="font-medium pt-2">Thank you for being here.<br /><span class="text-[var(--muted)] font-normal">– The Verihub Team</span></p>`
+            }
+        });
+        console.log('Created Apology Announcement');
+    }
+
     console.log('Seed restoration complete.');
 }
 

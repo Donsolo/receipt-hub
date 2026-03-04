@@ -47,6 +47,12 @@ export async function ensureActivated(user: JWTPayload) {
         }
     }
 }
+export async function isAdmin(userId: string): Promise<boolean> {
+    const { db } = await import('@/lib/db');
+    const user = await db.user.findUnique({ where: { id: userId }, select: { role: true } });
+    return user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+}
+
 import { serialize } from 'cookie';
 
 export function createAuthCookie(token: string) {

@@ -3,8 +3,7 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getReceipts } from '@/lib/actions';
-import { CURRENT_CHANGELOG_VERSION } from '@/lib/constants';
-import ChangeLogModal from './ChangeLogModal';
+import ModalManager from './ModalManager';
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +19,8 @@ export default async function Dashboard() {
     // Fetch user details for the greeting
     const user = await db.user.findUnique({
         where: { id: authUser.userId },
-        select: { email: true, lastSeenChangelogVersion: true, isEarlyAccess: true, ...({ name: true, businessName: true, timezone: true } as any) }
+        select: { email: true, isEarlyAccess: true, ...({ name: true, businessName: true, timezone: true } as any) }
     }) as any;
-
-    const showChangelog = user?.lastSeenChangelogVersion !== CURRENT_CHANGELOG_VERSION;
 
     const isPro = (authUser.plan === "PRO" && authUser.planStatus !== "inactive") || authUser.role === "ADMIN" || authUser.role === "SUPER_ADMIN";
 
@@ -73,8 +70,8 @@ export default async function Dashboard() {
         <div className="min-h-screen bg-[var(--bg)] p-4 sm:p-8">
             <div className="max-w-5xl mx-auto space-y-6">
 
-                {/* Changelog Modal */}
-                {showChangelog && <ChangeLogModal version={CURRENT_CHANGELOG_VERSION} />}
+                {/* Dynamic Database Modals */}
+                <ModalManager />
 
                 {/* Greeting Section */}
                 <div className="mt-2 mb-5">

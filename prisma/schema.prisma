@@ -320,3 +320,14 @@ enum NotificationType {
   SYSTEM
   ADMIN
 }
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  type      String   @default("ANNOUNCEMENT") 
+  isActive  Boolean  @default(true) 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
