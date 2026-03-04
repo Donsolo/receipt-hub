@@ -55,6 +55,12 @@ export default function ProfilePage() {
     const [notifyMessages, setNotifyMessages] = useState(true);
     const [notifySystem, setNotifySystem] = useState(true);
 
+    // Password Security State
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [savingPassword, setSavingPassword] = useState(false);
+
     async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -597,6 +603,92 @@ export default function ProfilePage() {
                             </div>
                         </section>
                     </div>
+                </div>
+
+                {/* SECURITY (PASSWORD RESET) */}
+                <div className="mt-8">
+                    <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8">
+                        <div className="mb-6">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">Security</h2>
+                            <p className="text-sm text-[var(--muted)] mt-1">Update your password to keep your account secure.</p>
+                        </div>
+
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            if (newPassword !== confirmPassword) {
+                                setToastMessage("New passwords do not match.");
+                                return;
+                            }
+                            if (newPassword.length < 8) {
+                                setToastMessage("New password must be at least 8 characters.");
+                                return;
+                            }
+                            setSavingPassword(true);
+                            try {
+                                const res = await fetch('/api/auth/password', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ currentPassword, newPassword })
+                                });
+                                const data = await res.json();
+                                if (res.ok) {
+                                    setToastMessage('Password updated successfully.');
+                                    setCurrentPassword('');
+                                    setNewPassword('');
+                                    setConfirmPassword('');
+                                } else {
+                                    setToastMessage(data.error || 'Failed to update password.');
+                                }
+                            } catch (err) {
+                                setToastMessage('An error occurred.');
+                            } finally {
+                                setSavingPassword(false);
+                            }
+                        }} className="max-w-xl space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-[var(--text)] mb-1.5">Current Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    className="block w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-[var(--text)] focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-[var(--text)] mb-1.5">New Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="block w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-[var(--text)] focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
+                                    minLength={8}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-[var(--text)] mb-1.5">Confirm New Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="block w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-[var(--text)] focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
+                                    minLength={8}
+                                />
+                            </div>
+
+                            <div className="pt-2">
+                                <button
+                                    type="submit"
+                                    disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword}
+                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors"
+                                >
+                                    {savingPassword ? 'Updating...' : 'Update Password'}
+                                </button>
+                            </div>
+                        </form>
+                    </section>
                 </div>
             </div>
         </div>

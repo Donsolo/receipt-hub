@@ -130,7 +130,7 @@ export default async function Dashboard() {
                 </div>
 
                 {/* Action Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
 
                     {/* Receipts */}
                     <Link href="/history" className="block group h-full">
@@ -145,6 +145,24 @@ export default async function Dashboard() {
                                 <div className="flex-1 pt-1.5">
                                     <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Receipt Hub</h2>
                                     <p className="text-[13px] text-[var(--muted)] mt-2 leading-relaxed">Create, upload, manage, and share all of your business receipts in the vault.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* Reports */}
+                    <Link href="/dashboard/reports" className="block group h-full">
+                        <div className="bg-[var(--bg)] border border-[var(--border)] rounded-xl px-5 py-6 hover:bg-[var(--card-hover)] hover:-translate-y-1 hover:shadow-lg shadow-md transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="flex items-start gap-4 mb-2 relative z-10">
+                                <div className="h-12 w-12 shrink-0 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500 group-hover:bg-amber-500/20 transition-colors shadow-inner border border-amber-500/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                                <div className="flex-1 pt-1.5">
+                                    <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Reports</h2>
+                                    <p className="text-[13px] text-[var(--muted)] mt-2 leading-relaxed">Generate summaries, category breakdowns, and compliance-ready exports.</p>
                                 </div>
                             </div>
                         </div>

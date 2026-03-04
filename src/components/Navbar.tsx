@@ -186,6 +186,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
         { href: '/dashboard', label: 'Dashboard' },
         { href: '/history', label: 'Receipts' },
         { href: '/dashboard/connections', label: 'Network' },
+        { href: '/dashboard/messages', label: 'Messages' },
         { href: '/dashboard/profile', label: 'Profile' }
     ];
 

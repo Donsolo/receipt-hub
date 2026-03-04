@@ -43,9 +43,9 @@ model User {
   sentConnections     Connection[] @relation("Requester")
   receivedConnections Connection[] @relation("Receiver")
 
-  // Messages
+  // Messages & Conversations
   sentMessages     Message[] @relation("Sender")
-  receivedMessages Message[] @relation("MessageReceiver")
+  conversationParticipants ConversationParticipant[]
 
   // Saved Receipt Items for Auto-Populate
   savedReceiptItems SavedReceiptItem[]
@@ -144,16 +144,38 @@ model Connection {
   @@unique([requesterId, receiverId])
 }
 
-model Message {
-  id         String   @id @default(cuid())
-  senderId   String
-  receiverId String
-  text       String
-  createdAt  DateTime @default(now())
+model Conversation {
+  id           String                    @id @default(cuid())
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  participants ConversationParticipant[]
+  messages     Message[]
+}
 
-  sender      User                @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver    User                @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
-  attachments MessageAttachment[]
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  createdAt      DateTime  @default(now())
+  deliveredAt    DateTime?
+  readAt         DateTime?
+
+  conversation   Conversation        @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User                @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  attachments    MessageAttachment[]
 }
 
 enum AttachmentType {

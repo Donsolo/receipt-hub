@@ -27,9 +27,6 @@ export async function processReceiptOCR(fileBuffer: Buffer, mimeType: string): P
     }
 
     switch (provider.toUpperCase()) {
-        case "LOCAL":
-            const { processLocalReceipt } = await import('./receipts/extractReceipt');
-            return await processLocalReceipt(fileBuffer, mimeType);
         case "OPENAI":
             return await processWithOpenAI(fileBuffer, mimeType);
         case "AZURE":

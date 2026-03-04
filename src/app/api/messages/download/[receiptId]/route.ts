@@ -24,7 +24,15 @@ export async function GET(
             include: {
                 messages: {
                     include: {
-                        message: true
+                        message: {
+                            include: {
+                                conversation: {
+                                    include: {
+                                        participants: true
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -38,7 +46,7 @@ export async function GET(
         const isOwner = receipt.userId === user.userId;
 
         const isP2PParticipant = receipt.messages.some((pivot: any) =>
-            pivot.message.senderId === user.userId || pivot.message.receiverId === user.userId
+            pivot.message.conversation?.participants.some((p: any) => p.userId === user.userId)
         );
 
         if (!isOwner && !isP2PParticipant) {

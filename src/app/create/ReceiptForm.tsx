@@ -285,7 +285,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
             const formData = new FormData();
             formData.append('file', file);
 
-            const res = await fetch('/api/pro/ocr', {
+            const res = await fetch('/api/receipts/scan', {
                 method: 'POST',
                 body: formData,
             });
