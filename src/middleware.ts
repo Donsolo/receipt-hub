@@ -9,6 +9,11 @@ export async function middleware(request: NextRequest) {
     // Protect Dashboard, Admin, Uploads, Generator & History routes
     const protectedPaths = ['/dashboard', '/admin', '/uploads', '/create', '/history', '/settings', '/activate', '/feedback'];
     if (protectedPaths.some(path => pathname.startsWith(path))) {
+        // Special exemption for public hero assets
+        if (pathname.startsWith('/uploads/heroes/')) {
+            return NextResponse.next();
+        }
+
         if (!token) {
             return NextResponse.redirect(new URL('/login', request.url));
         }

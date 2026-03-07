@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import FintechBackground from '@/components/ui/FintechBackground';
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('');
@@ -45,8 +46,13 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] px-4 relative overflow-hidden">
-            {/* Background Glow */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.1),transparent_70%)] pointer-events-none" />
+            {/* Animated Canvas Layer */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <FintechBackground isDashboard={false} />
+            </div>
+
+            {/* Background Glow Overlay */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.15),transparent_70%)] pointer-events-none z-0" />
 
             <div className="w-full max-w-md bg-gradient-to-br from-[#111827] to-[#0F172A] border border-[var(--border)] rounded-2xl p-8 shadow-xl shadow-black/20 relative z-10 my-12">
                 {isSuccess ? (

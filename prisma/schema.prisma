@@ -7,20 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Plan {
-  CORE
-  PRO
-}
-
 model User {
-  id                       String    @id @default(cuid())
-  email                    String    @unique
+  id                       String                    @id @default(cuid())
+  email                    String                    @unique
   password                 String
-  role                     String    @default("USER")
-  createdAt                DateTime  @default(now())
+  role                     String                    @default("USER")
+  createdAt                DateTime                  @default(now())
   lastSeenChangelogVersion String?
-  isActivated              Boolean   @default(true)
-  isEarlyAccess            Boolean   @default(false)
+  isActivated              Boolean                   @default(true)
+  isEarlyAccess            Boolean                   @default(false)
   activatedAt              DateTime?
   activationSource         String?
   activationTransactionId  String?
@@ -29,86 +24,66 @@ model User {
   businessPhone            String?
   businessLogoPath         String?
   name                     String?
-  theme                    String    @default("dark")
-  timezone                 String    @default("America/New_York")
-  plan                     Plan      @default(CORE)
+  theme                    String                    @default("dark")
+  timezone                 String                    @default("America/New_York")
+  plan                     Plan                      @default(CORE)
   planStatus               String?
   planExpiresAt            DateTime?
-  receipts                 Receipt[]
-
-  // Custom Categories
-  categories Category[]
-
-  // Connections
-  sentConnections     Connection[] @relation("Requester")
-  receivedConnections Connection[] @relation("Receiver")
-
-  // Messages & Conversations
-  sentMessages     Message[] @relation("Sender")
+  notifyConnectionRequests Boolean                   @default(true)
+  notifyConnectionAccepted Boolean                   @default(true)
+  notifyMessages           Boolean                   @default(true)
+  notifySystem             Boolean                   @default(true)
+  bundles                  Bundle[]
+  categories               Category[]
+  receivedConnections      Connection[]              @relation("Receiver")
+  sentConnections          Connection[]              @relation("Requester")
   conversationParticipants ConversationParticipant[]
-
-  // Saved Receipt Items for Auto-Populate
-  savedReceiptItems SavedReceiptItem[]
-
-  // Feedback System
-  feedbacks Feedback[]
-
-  // Receipt Bundles
-  bundles Bundle[]
-
-  // Polls
-  pollVotes PollVote[]
-
-  // Notifications
+  feedbacks                Feedback[]
+  sentMessages             Message[]                 @relation("Sender")
   notifications            Notification[]
-  notifyConnectionRequests Boolean        @default(true)
-  notifyConnectionAccepted Boolean        @default(true)
-  notifyMessages           Boolean        @default(true)
-  notifySystem             Boolean        @default(true)
+  pollVotes                PollVote[]
+  receipts                 Receipt[]
+  savedReceiptItems        SavedReceiptItem[]
 }
 
 model Category {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
-  userId    String? // Null for system defaults, User ID for custom
-  color     String? // Optional hex code for UI badges
-  createdAt DateTime @default(now())
-
-  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  receipts Receipt[]
+  userId    String?
+  color     String?
+  createdAt DateTime  @default(now())
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  receipts  Receipt[]
 
   @@unique([name, userId])
 }
 
 model Receipt {
-  id            String   @id @default(cuid())
-  receiptNumber String?  @unique
-  userId        String
-  categoryId    String?
-  imageUrl      String?
-  date          DateTime
-  clientName    String?
-  notes         String?
-  taxType       String   @default("none")
-  taxValue      Float?
-  subtotal      Float    @default(0)
-  total         Float    @default(0)
-  createdAt     DateTime @default(now())
-  fileSize      Int?
-
-  // Finalize & Lock
-  isFinalized     Boolean   @default(false)
+  id              String              @id @default(cuid())
+  receiptNumber   String?             @unique
+  userId          String
+  categoryId      String?
+  imageUrl        String?
+  date            DateTime
+  clientName      String?
+  notes           String?
+  taxType         String              @default("none")
+  taxValue        Float?
+  subtotal        Float               @default(0)
+  total           Float               @default(0)
+  createdAt       DateTime            @default(now())
+  fileSize        Int?
+  isFinalized     Boolean             @default(false)
   finalizedAt     DateTime?
   parentReceiptId String?
-  versionNumber   Int       @default(1)
+  versionNumber   Int                 @default(1)
   ocrNormalized   Json?
-  sourceType      String?   @default("manual")
-
-  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category Category?           @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  items    ReceiptItem[]
-  messages MessageAttachment[]
-  bundles  BundleReceipt[]
+  sourceType      String?             @default("manual")
+  bundles         BundleReceipt[]
+  messages        MessageAttachment[]
+  category        Category?           @relation(fields: [categoryId], references: [id])
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           ReceiptItem[]
 }
 
 model ReceiptItem {
@@ -134,12 +109,11 @@ model Connection {
   id          String   @id @default(cuid())
   requesterId String
   receiverId  String
-  status      String   @default("pending") // "pending", "accepted", "declined"
+  status      String   @default("pending")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  requester User @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
-  receiver  User @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  requester   User     @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
 
   @@unique([requesterId, receiverId])
 }
@@ -157,7 +131,6 @@ model ConversationParticipant {
   conversationId String
   userId         String
   joinedAt       DateTime     @default(now())
-
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -165,38 +138,28 @@ model ConversationParticipant {
 }
 
 model Message {
-  id             String    @id @default(cuid())
+  id             String              @id @default(cuid())
   conversationId String
   senderId       String
   content        String
-  createdAt      DateTime  @default(now())
+  createdAt      DateTime            @default(now())
   deliveredAt    DateTime?
   readAt         DateTime?
-
   conversation   Conversation        @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender         User                @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
   attachments    MessageAttachment[]
 }
 
-enum AttachmentType {
-  RECEIPT
-  BUNDLE_SNAPSHOT
-}
-
 model MessageAttachment {
-  id        String  @id @default(cuid())
-  messageId String
-  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
-
-  type AttachmentType @default(RECEIPT)
-
-  receiptId String?
-  receipt   Receipt? @relation(fields: [receiptId], references: [id], onDelete: Cascade)
-
+  id           String         @id @default(cuid())
+  messageId    String
+  type         AttachmentType @default(RECEIPT)
+  receiptId    String?
   bundleName   String?
   snapshotData Json?
-
-  createdAt DateTime @default(now())
+  createdAt    DateTime       @default(now())
+  message      Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  receipt      Receipt?       @relation(fields: [receiptId], references: [id], onDelete: Cascade)
 }
 
 model Bundle {
@@ -204,19 +167,19 @@ model Bundle {
   name        String
   description String?
   userId      String
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  receipts    BundleReceipt[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  receipts    BundleReceipt[]
 }
 
 model BundleReceipt {
   id        String   @id @default(cuid())
   bundleId  String
   receiptId String
+  addedAt   DateTime @default(now())
   bundle    Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
   receipt   Receipt  @relation(fields: [receiptId], references: [id], onDelete: Cascade)
-  addedAt   DateTime @default(now())
 
   @@unique([bundleId, receiptId])
 }
@@ -229,8 +192,7 @@ model SavedReceiptItem {
   usageCount     Int      @default(1)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, normalizedName])
   @@index([userId, normalizedName])
@@ -247,70 +209,97 @@ model SystemSetting {
 model Feedback {
   id          String   @id @default(cuid())
   userId      String
-  type        String // 'positive', 'suggestion', 'bug'
+  type        String
   message     String
-  rating      Int? // 1-5
+  rating      Int?
   isApproved  Boolean  @default(false)
   isShowcased Boolean  @default(false)
   createdAt   DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([type])
   @@index([isShowcased])
 }
 
 model Poll {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   question    String
   description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  options PollOption[]
-  votes   PollVote[]
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  options     PollOption[]
+  votes       PollVote[]
 }
 
 model PollOption {
-  id     String @id @default(cuid())
+  id     String     @id @default(cuid())
   pollId String
   text   String
-
-  poll  Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  votes PollVote[]
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes  PollVote[]
 }
 
 model PollVote {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   pollId    String
   optionId  String
   userId    String
-  createdAt DateTime @default(now())
-
-  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  option PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([pollId, userId])
 }
 
 model Notification {
-  id          String   @id @default(cuid())
-  userId      String
-  type        NotificationType
-  title       String
-  message     String
-  link        String?
-  read        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([read])
   @@index([createdAt])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  type      String   @default("ANNOUNCEMENT")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HeroImage {
+  id             String   @id @default(cuid())
+  pageKey        String   @unique
+  imageUrl       String
+  overlayOpacity Float    @default(0.55)
+  blurStrength   Float    @default(6)
+  title          String?
+  subtitle       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum Plan {
+  CORE
+  PRO
+}
+
+enum AttachmentType {
+  RECEIPT
+  BUNDLE_SNAPSHOT
 }
 
 enum NotificationType {
@@ -320,14 +309,3 @@ enum NotificationType {
   SYSTEM
   ADMIN
 }
-
-model Announcement {
-  id        String   @id @default(cuid())
-  title     String
-  content   String   @db.Text
-  type      String   @default("ANNOUNCEMENT") 
-  isActive  Boolean  @default(true) 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-

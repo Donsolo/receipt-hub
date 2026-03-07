@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import PageHeaderCard from '@/components/ui/PageHeaderCard';
 
 type PollOption = {
     id: string;
@@ -121,28 +122,25 @@ export default function FeedbackPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--bg)] px-4 py-12 flex flex-col pt-24">
-            <div className="max-w-4xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-8">
-                {/* Left Column: Feedback Form */}
-                <div className="lg:col-span-3">
-                    <div className="mb-6 flex items-center justify-between">
-                        <Link href="/dashboard" className="text-[var(--muted)] hover:text-[var(--text)] transition-colors flex items-center gap-2 group text-sm">
+        <div className="min-h-screen bg-[var(--bg)] px-4 py-8 flex flex-col pt-12">
+            <div className="max-w-6xl mx-auto w-full relative z-10 mb-8 mt-12">
+                <PageHeaderCard title="Share Your Feedback" description="Help us improve the core workspace. Let us know what you love, what to add, or what's broken.">
+                    <div className="mt-4">
+                        <Link href="/dashboard" className="text-[var(--muted)] hover:text-[var(--text)] transition-colors flex items-center gap-2 group text-sm w-fit">
                             <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                             Back to Dashboard
                         </Link>
                     </div>
+                </PageHeaderCard>
+            </div>
+
+            <div className="max-w-6xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-8">
+                {/* Left Column: Feedback Form */}
+                <div className="lg:col-span-3">
 
                     <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden relative">
-                        {/* Header */}
-                        <div className="px-6 py-8 sm:p-10 border-b border-[var(--border)] bg-[var(--card)] relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-                            <h2 className="text-2xl font-bold text-[var(--text)] mb-2 relative z-10">Share Your Feedback</h2>
-                            <p className="text-sm text-[var(--muted)] relative z-10">
-                                Help us improve the core workspace. Let us know what you love, what to add, or what's broken.
-                            </p>
-                        </div>
 
                         {isSuccess ? (
                             <div className="p-8 sm:p-10 text-center">
@@ -232,8 +230,6 @@ export default function FeedbackPage() {
 
                 {/* Right Column: Community Polls */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="hidden lg:block h-[52px]"></div> {/* Spacer to align with form box */}
-
                     <h3 className="text-xl font-bold text-[var(--text)] flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />

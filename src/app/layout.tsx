@@ -100,9 +100,9 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className="antialiased w-full max-w-full overflow-x-hidden" data-theme={initialTheme}>
+    <html lang="en" suppressHydrationWarning data-theme={initialTheme}>
       <ThemeProvider initialTheme={initialTheme}>
-        <body className={`${inter.className} min-h-screen flex flex-col w-full max-w-full overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
+        <body className={`${inter.className} antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
           {isAuthenticated ? (
             <NotificationProvider>
               <div className="flex flex-col min-h-screen w-full relative">
@@ -127,7 +127,7 @@ export default async function RootLayout({
                 <NotificationToasts />
                 <Navbar isAuthenticated={isAuthenticated} role={userRole} />
                 <div className="flex-1 flex flex-col w-full relative">
-                  <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
+                  <main className="flex-grow w-full flex flex-col relative">
                     {children}
                   </main>
                   <InstallPrompt />
@@ -157,7 +157,7 @@ export default async function RootLayout({
               />
               <Navbar isAuthenticated={isAuthenticated} role={userRole} />
               <div className="flex-1 flex flex-col w-full relative">
-                <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
+                <main className="flex-grow w-full flex flex-col relative">
                   {children}
                 </main>
                 <InstallPrompt />

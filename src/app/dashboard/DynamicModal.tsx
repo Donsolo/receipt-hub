@@ -75,9 +75,21 @@ export default function DynamicModal({
             <div className={`relative w-full max-w-md bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col ${theme.border}`}>
                 <div className={`p-6 border-b border-[var(--border)] ${theme.bg}`}>
                     <h2 className="text-lg font-semibold text-[var(--text)] flex items-center gap-2">
-                        {announcement.type === 'CHANGELOG' && '🚀 '}
-                        {announcement.type === 'APOLOGY' && '📝 '}
-                        {announcement.type === 'ANNOUNCEMENT' && '📣 '}
+                        {announcement.type === 'CHANGELOG' && (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        )}
+                        {announcement.type === 'APOLOGY' && (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        )}
+                        {announcement.type === 'ANNOUNCEMENT' && (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[var(--text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                            </svg>
+                        )}
                         {announcement.title}
                     </h2>
                 </div>

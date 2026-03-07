@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
+import PageHeaderCard from '@/components/ui/PageHeaderCard';
 
 interface ReportsClientProps {
     isPro: boolean;
@@ -62,7 +63,7 @@ export default function ReportsClient({ isPro }: ReportsClientProps) {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--bg)] p-4 sm:p-8">
+        <div className="w-full space-y-6">
             <div className="max-w-5xl mx-auto space-y-6">
 
                 {/* Breadcrumb */}
@@ -73,23 +74,11 @@ export default function ReportsClient({ isPro }: ReportsClientProps) {
                 </div>
 
                 {/* Header Section */}
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--text)] tracking-tight">Reports</h1>
-                        <p className="text-sm text-[var(--muted)] mt-1 max-w-lg">Turn your receipts into clean summaries and exportable insights.</p>
-                    </div>
-                    <div>
-                        {isPro ? (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 shadow-sm shadow-yellow-500/10 tracking-widest uppercase">
-                                PRO
-                            </span>
-                        ) : (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-900/40 text-indigo-300 border border-indigo-800/50 tracking-widest uppercase">
-                                CORE
-                            </span>
-                        )}
-                    </div>
-                </div>
+                <PageHeaderCard
+                    title="Reports"
+                    description="Turn your receipts into clean summaries and exportable insights."
+                    badge={isPro ? "PRO" : "CORE"}
+                />
 
                 {/* 1. Generate Report Card */}
                 <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow space-y-6">

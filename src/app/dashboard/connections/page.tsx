@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import PageHeaderCard from '@/components/ui/PageHeaderCard';
+import HeroSection from '@/components/ui/HeroSection';
 
 type UserResult = {
     id: string;
@@ -252,220 +254,218 @@ export default function ConnectionsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--bg)] p-4 sm:p-8">
-            {toastMessage && (
-                <div className="fixed top-4 right-4 bg-[var(--card)] text-[var(--text)] px-4 py-2 rounded shadow-lg border border-[var(--border)] z-50 transition-opacity">
-                    {toastMessage}
-                </div>
-            )}
+        <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)]">
+            <HeroSection pageKey="connections" />
 
-            <div className="max-w-6xl mx-auto space-y-6">
-
-                {/* SECTION 1: Header & Pill Badges */}
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2">
-                    <div>
-                        <h1 className="text-2xl font-bold text-[var(--text)] mb-1">Business Network</h1>
-                        <p className="text-[var(--muted)] text-sm">Manage your private business connections.</p>
-                    </div>
-                    <div className="flex gap-2">
-                        <div className="bg-[var(--card)]/40 border border-[var(--border)] rounded-full px-3 py-1 flex items-center">
-                            <span className="text-xs text-[var(--muted)] mr-2">Connections</span>
-                            <span className="text-xs font-medium text-[var(--text)]">{connections.length}</span>
+            <div className="flex-1 w-full flex flex-col items-center px-4 sm:px-6 lg:px-8 py-8">
+                <div className="w-full max-w-6xl space-y-6 relative">
+                    {toastMessage && (
+                        <div className="absolute -top-16 right-0 bg-[var(--card)] text-[var(--text)] px-4 py-2 rounded shadow-lg border border-[var(--border)] z-50 transition-opacity">
+                            {toastMessage}
                         </div>
-                        <div className="bg-[var(--card)]/40 border border-[var(--border)] rounded-full px-3 py-1 flex items-center">
-                            <span className="text-xs text-[var(--muted)] mr-2">Pending</span>
-                            <span className="text-xs font-medium text-[var(--text)]">{incomingRequests.length}</span>
+                    )}
+
+                    <PageHeaderCard title="Business Network" description="Manage your private business connections.">
+                        <div className="flex flex-wrap items-center gap-2 mt-4">
+                            <div className="bg-white border border-slate-200 dark:bg-slate-800 dark:border-slate-700 rounded-full px-3 py-1 flex items-center shadow-sm">
+                                <span className="text-xs text-slate-500 dark:text-slate-400 mr-2">Connections</span>
+                                <span className="text-xs font-semibold text-black dark:text-white">{connections.length}</span>
+                            </div>
+                            <div className="bg-white border border-slate-200 dark:bg-slate-800 dark:border-slate-700 rounded-full px-3 py-1 flex items-center shadow-sm">
+                                <span className="text-xs text-slate-500 dark:text-slate-400 mr-2">Pending</span>
+                                <span className="text-xs font-semibold text-black dark:text-white">{incomingRequests.length}</span>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </PageHeaderCard>
 
-                {/* MAIN GRID: 60/40 Split */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                    {/* MAIN GRID: 60/40 Split */}
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-                    {/* LEFT COLUMN (60%): Search Module */}
-                    <div className="lg:col-span-3">
-                        <section className="bg-[var(--bg)] border border-[var(--border)] shadow-sm rounded-lg p-5 sm:p-6 space-y-8">
+                        {/* LEFT COLUMN (60%): Search Module */}
+                        <div className="lg:col-span-3">
+                            <section className="bg-[var(--bg)] border border-[var(--border)] shadow-sm rounded-lg p-5 sm:p-6 space-y-8">
 
-                            {/* Search by Name/Business */}
-                            <div className="relative">
-                                <label className="block text-sm font-medium text-[var(--text)] mb-2">Search by Name or Business</label>
+                                {/* Search by Name/Business */}
                                 <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg className="h-4 w-4 text-[var(--muted)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
+                                    <label className="block text-sm font-medium text-[var(--text)] mb-2">Search by Name or Business</label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg className="h-4 w-4 text-[var(--muted)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                            </svg>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter name..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="block w-full pl-9 pr-3 py-2 bg-[var(--card-hover)]/50 border border-[var(--border)] rounded-md text-[var(--text)] text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 hover:bg-[var(--card-hover)] transition-colors"
+                                        />
                                     </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Enter name..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="block w-full pl-9 pr-3 py-2 bg-[var(--card-hover)]/50 border border-[var(--border)] rounded-md text-[var(--text)] text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 hover:bg-[var(--card-hover)] transition-colors"
-                                    />
+
+                                    {/* Floating Dropdown */}
+                                    {searchQuery.length >= 2 && (
+                                        <div className="absolute z-10 mt-1 w-full bg-[var(--card-hover)] border border-[var(--border)] rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                            {isSearching ? (
+                                                <div className="px-4 py-3 text-sm text-[var(--muted)]">Searching...</div>
+                                            ) : searchResults.length > 0 ? (
+                                                <ul className="divide-y divide-white/5">
+                                                    {searchResults.map(user => {
+                                                        const { primary, secondary } = getDisplayNameInfo(user);
+                                                        return (
+                                                            <li key={user.id} className="p-3 hover:bg-[var(--card)] transition-colors flex items-center justify-between group">
+                                                                <div>
+                                                                    <p className="text-sm font-medium text-[var(--text)] group-hover:text-[var(--text)] transition-colors">{primary}</p>
+                                                                    <p className="text-xs text-[var(--muted)]">{secondary}</p>
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => handleConnect(user.id)}
+                                                                    disabled={actionLoading === user.id}
+                                                                    className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-[var(--text)] px-3 py-1.5 rounded-full disabled:opacity-50 transition-colors"
+                                                                >
+                                                                    Connect
+                                                                </button>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            ) : (
+                                                <div className="px-4 py-3 text-sm text-[var(--muted)]">No available users found.</div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* Floating Dropdown */}
-                                {searchQuery.length >= 2 && (
-                                    <div className="absolute z-10 mt-1 w-full bg-[var(--card-hover)] border border-[var(--border)] rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                        {isSearching ? (
-                                            <div className="px-4 py-3 text-sm text-[var(--muted)]">Searching...</div>
-                                        ) : searchResults.length > 0 ? (
-                                            <ul className="divide-y divide-white/5">
-                                                {searchResults.map(user => {
-                                                    const { primary, secondary } = getDisplayNameInfo(user);
-                                                    return (
-                                                        <li key={user.id} className="p-3 hover:bg-[var(--card)] transition-colors flex items-center justify-between group">
-                                                            <div>
-                                                                <p className="text-sm font-medium text-[var(--text)] group-hover:text-[var(--text)] transition-colors">{primary}</p>
-                                                                <p className="text-xs text-[var(--muted)]">{secondary}</p>
-                                                            </div>
-                                                            <button
-                                                                onClick={() => handleConnect(user.id)}
-                                                                disabled={actionLoading === user.id}
-                                                                className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-[var(--text)] px-3 py-1.5 rounded-full disabled:opacity-50 transition-colors"
-                                                            >
-                                                                Connect
-                                                            </button>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        ) : (
-                                            <div className="px-4 py-3 text-sm text-[var(--muted)]">No available users found.</div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                                {/* Search by Exact Email */}
+                                <div>
+                                    <label className="block text-sm font-medium text-[var(--text)] mb-2">Search by Full Email</label>
+                                    <form onSubmit={handleEmailSearch} className="flex gap-2">
+                                        <input
+                                            type="email"
+                                            required
+                                            placeholder="exact@email.com"
+                                            value={emailQuery}
+                                            onChange={(e) => setEmailQuery(e.target.value)}
+                                            className="flex-1 bg-[var(--card-hover)]/50 border border-[var(--border)] rounded-md px-3 py-2 text-[var(--text)] text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 hover:bg-[var(--card-hover)] transition-colors"
+                                        />
+                                        <button
+                                            type="submit"
+                                            className="bg-[var(--card)] hover:bg-[var(--card-hover)] text-[var(--text)] px-4 py-2 rounded-md text-sm border border-transparent transition-colors shadow-sm"
+                                        >
+                                            Search
+                                        </button>
+                                    </form>
 
-                            {/* Search by Exact Email */}
-                            <div>
-                                <label className="block text-sm font-medium text-[var(--text)] mb-2">Search by Full Email</label>
-                                <form onSubmit={handleEmailSearch} className="flex gap-2">
-                                    <input
-                                        type="email"
-                                        required
-                                        placeholder="exact@email.com"
-                                        value={emailQuery}
-                                        onChange={(e) => setEmailQuery(e.target.value)}
-                                        className="flex-1 bg-[var(--card-hover)]/50 border border-[var(--border)] rounded-md px-3 py-2 text-[var(--text)] text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 hover:bg-[var(--card-hover)] transition-colors"
-                                    />
-                                    <button
-                                        type="submit"
-                                        className="bg-[var(--card)] hover:bg-[var(--card-hover)] text-[var(--text)] px-4 py-2 rounded-md text-sm border border-transparent transition-colors shadow-sm"
-                                    >
-                                        Search
-                                    </button>
-                                </form>
-
-                                {/* Inline Email Result */}
-                                {emailSearchStatus !== 'idle' && (
-                                    <div className="mt-3">
-                                        {emailSearchStatus === 'searching' && <p className="text-sm text-[var(--muted)]">Searching...</p>}
-                                        {emailSearchStatus === 'not-found' && <p className="text-sm text-[var(--muted)] text-red-400/80">No user found.</p>}
-                                        {emailSearchStatus === 'found' && emailResult && (
-                                            <div className="bg-[var(--card-hover)] border border-[var(--border)] p-3 rounded-md flex items-center justify-between">
-                                                <div>
-                                                    {emailResult.businessName && <p className="text-sm font-medium text-[var(--text)]">{emailResult.businessName}</p>}
-                                                    {emailResult.name && <p className="text-sm font-medium text-[var(--text)]">{emailResult.name}</p>}
-                                                    <p className="text-xs text-indigo-400/90 mt-0.5">{emailResult.email}</p>
+                                    {/* Inline Email Result */}
+                                    {emailSearchStatus !== 'idle' && (
+                                        <div className="mt-3">
+                                            {emailSearchStatus === 'searching' && <p className="text-sm text-[var(--muted)]">Searching...</p>}
+                                            {emailSearchStatus === 'not-found' && <p className="text-sm text-[var(--muted)] text-red-400/80">No user found.</p>}
+                                            {emailSearchStatus === 'found' && emailResult && (
+                                                <div className="bg-[var(--card-hover)] border border-[var(--border)] p-3 rounded-md flex items-center justify-between">
+                                                    <div>
+                                                        {emailResult.businessName && <p className="text-sm font-medium text-[var(--text)]">{emailResult.businessName}</p>}
+                                                        {emailResult.name && <p className="text-sm font-medium text-[var(--text)]">{emailResult.name}</p>}
+                                                        <p className="text-xs text-indigo-400/90 mt-0.5">{emailResult.email}</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleConnect(emailResult.id)}
+                                                        disabled={actionLoading === emailResult.id}
+                                                        className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-[var(--text)] px-3 py-1.5 rounded-full disabled:opacity-50 transition-colors"
+                                                    >
+                                                        Connect
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleConnect(emailResult.id)}
-                                                    disabled={actionLoading === emailResult.id}
-                                                    className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-[var(--text)] px-3 py-1.5 rounded-full disabled:opacity-50 transition-colors"
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+                        </div>
+
+                        {/* RIGHT COLUMN (40%): Activity Modules */}
+                        <div className="lg:col-span-2 space-y-6">
+
+                            {/* Incoming Requests */}
+                            <section className="bg-[var(--bg)] border border-[var(--border)] shadow-sm rounded-lg p-5 flex flex-col">
+                                <h2 className="text-[15px] font-medium text-[var(--text)] mb-3">Incoming Requests</h2>
+                                <div className="flex-1 space-y-2">
+                                    {incomingRequests.length === 0 ? (
+                                        <div className="pt-2">
+                                            <p className="text-sm font-medium text-[var(--text)]">No pending requests</p>
+                                            <p className="text-xs text-[var(--muted)] mt-0.5">When someone connects with you, they’ll appear here.</p>
+                                        </div>
+                                    ) : (
+                                        incomingRequests.map(req => {
+                                            const { primary, secondary } = getDisplayNameInfo(req.requester);
+                                            return (
+                                                <div key={req.id} className="bg-[var(--card-hover)]/60 hover:bg-[var(--card-hover)] transition-colors border border-[var(--border)] p-3 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
+                                                    <div>
+                                                        <p className="text-[13px] font-medium text-[var(--text)] group-hover:text-[var(--text)] transition-colors">{primary}</p>
+                                                        <p className="text-[11px] text-[var(--muted)] mt-0.5">{secondary}</p>
+                                                    </div>
+                                                    <div className="flex gap-2 shrink-0">
+                                                        <button
+                                                            onClick={() => handleRespond(req.id, 'accepted')}
+                                                            disabled={actionLoading === req.id}
+                                                            className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-[var(--text)] px-3 py-1 rounded transition-colors"
+                                                        >
+                                                            Accept
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRespond(req.id, 'declined')}
+                                                            disabled={actionLoading === req.id}
+                                                            className="text-[11px] font-medium bg-transparent border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] px-3 py-1 rounded transition-colors"
+                                                        >
+                                                            Decline
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            </section>
+
+                            {/* My Connections */}
+                            <section className="bg-[var(--bg)] border border-[var(--border)] shadow-sm rounded-lg p-5 flex flex-col">
+                                <h2 className="text-[15px] font-medium text-[var(--text)] mb-3">My Connections</h2>
+                                <div className="flex-1 space-y-2">
+                                    {connections.length === 0 ? (
+                                        <div className="pt-2">
+                                            <p className="text-sm font-medium text-[var(--text)]">No connections yet</p>
+                                            <p className="text-xs text-[var(--muted)] mt-0.5">Search for a business to start building your network.</p>
+                                        </div>
+                                    ) : (
+                                        connections.map(conn => {
+                                            console.log('connection.connectedUser:', conn.connectedUser);
+                                            const { primary, secondary } = getDisplayNameInfo(conn.connectedUser);
+                                            return (
+                                                <div
+                                                    key={conn.connectionId}
+                                                    onClick={() => handleOpenMessages(conn)}
+                                                    className="bg-[var(--card-hover)]/60 hover:bg-[var(--card-hover)] cursor-pointer transition-colors border border-[var(--border)] p-3 rounded-md flex justify-between items-center group"
                                                 >
-                                                    Connect
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </section>
+                                                    <div>
+                                                        <p className="text-[13px] font-medium text-[var(--text)] group-hover:text-[var(--text)] transition-colors">{primary}</p>
+                                                        <p className="text-[11px] text-[var(--muted)] mt-0.5">{secondary}</p>
+                                                    </div>
+                                                    <div className="text-[var(--muted)] group-hover:text-white/80 transition-transform duration-150 group-hover:translate-x-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            </section>
+
+                        </div>
                     </div>
 
-                    {/* RIGHT COLUMN (40%): Activity Modules */}
-                    <div className="lg:col-span-2 space-y-6">
-
-                        {/* Incoming Requests */}
-                        <section className="bg-[var(--bg)] border border-[var(--border)] shadow-sm rounded-lg p-5 flex flex-col">
-                            <h2 className="text-[15px] font-medium text-[var(--text)] mb-3">Incoming Requests</h2>
-                            <div className="flex-1 space-y-2">
-                                {incomingRequests.length === 0 ? (
-                                    <div className="pt-2">
-                                        <p className="text-sm font-medium text-[var(--text)]">No pending requests</p>
-                                        <p className="text-xs text-[var(--muted)] mt-0.5">When someone connects with you, they’ll appear here.</p>
-                                    </div>
-                                ) : (
-                                    incomingRequests.map(req => {
-                                        const { primary, secondary } = getDisplayNameInfo(req.requester);
-                                        return (
-                                            <div key={req.id} className="bg-[var(--card-hover)]/60 hover:bg-[var(--card-hover)] transition-colors border border-[var(--border)] p-3 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
-                                                <div>
-                                                    <p className="text-[13px] font-medium text-[var(--text)] group-hover:text-[var(--text)] transition-colors">{primary}</p>
-                                                    <p className="text-[11px] text-[var(--muted)] mt-0.5">{secondary}</p>
-                                                </div>
-                                                <div className="flex gap-2 shrink-0">
-                                                    <button
-                                                        onClick={() => handleRespond(req.id, 'accepted')}
-                                                        disabled={actionLoading === req.id}
-                                                        className="text-[11px] font-medium bg-indigo-600/90 hover:bg-indigo-500 text-[var(--text)] px-3 py-1 rounded transition-colors"
-                                                    >
-                                                        Accept
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleRespond(req.id, 'declined')}
-                                                        disabled={actionLoading === req.id}
-                                                        className="text-[11px] font-medium bg-transparent border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] px-3 py-1 rounded transition-colors"
-                                                    >
-                                                        Decline
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                )}
-                            </div>
-                        </section>
-
-                        {/* My Connections */}
-                        <section className="bg-[var(--bg)] border border-[var(--border)] shadow-sm rounded-lg p-5 flex flex-col">
-                            <h2 className="text-[15px] font-medium text-[var(--text)] mb-3">My Connections</h2>
-                            <div className="flex-1 space-y-2">
-                                {connections.length === 0 ? (
-                                    <div className="pt-2">
-                                        <p className="text-sm font-medium text-[var(--text)]">No connections yet</p>
-                                        <p className="text-xs text-[var(--muted)] mt-0.5">Search for a business to start building your network.</p>
-                                    </div>
-                                ) : (
-                                    connections.map(conn => {
-                                        console.log('connection.connectedUser:', conn.connectedUser);
-                                        const { primary, secondary } = getDisplayNameInfo(conn.connectedUser);
-                                        return (
-                                            <div
-                                                key={conn.connectionId}
-                                                onClick={() => handleOpenMessages(conn)}
-                                                className="bg-[var(--card-hover)]/60 hover:bg-[var(--card-hover)] cursor-pointer transition-colors border border-[var(--border)] p-3 rounded-md flex justify-between items-center group"
-                                            >
-                                                <div>
-                                                    <p className="text-[13px] font-medium text-[var(--text)] group-hover:text-[var(--text)] transition-colors">{primary}</p>
-                                                    <p className="text-[11px] text-[var(--muted)] mt-0.5">{secondary}</p>
-                                                </div>
-                                                <div className="text-[var(--muted)] group-hover:text-white/80 transition-transform duration-150 group-hover:translate-x-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                )}
-                            </div>
-                        </section>
-
-                    </div>
                 </div>
-
             </div>
         </div>
     );
