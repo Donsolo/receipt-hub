@@ -27,7 +27,7 @@ export default function ProfilePage() {
     const [saving, setSaving] = useState(false);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-    const handleThemeChange = async (newTheme: 'light' | 'dark') => {
+    const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
         if (newTheme === theme) return;
         setTheme(newTheme);
         try {
@@ -479,6 +479,16 @@ export default function ProfilePage() {
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-gray-700 dark:text-[var(--text)]">Theme Preference</span>
                                     <div className="flex items-center bg-gray-100 dark:bg-[var(--bg)]/50 border border-gray-200 dark:border-[var(--border)] p-1 rounded-lg">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleThemeChange('system')}
+                                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${theme === 'system'
+                                                ? 'bg-white dark:bg-[var(--card-hover)] text-gray-900 dark:text-[var(--text)] shadow-sm ring-1 ring-black/5 dark:ring-white/10'
+                                                : 'text-[var(--muted)] hover:text-gray-900 dark:hover:text-[var(--text)]'
+                                                }`}
+                                        >
+                                            System
+                                        </button>
                                         <button
                                             type="button"
                                             onClick={() => handleThemeChange('light')}

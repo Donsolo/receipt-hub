@@ -20,7 +20,7 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { theme } = body;
 
-        if (!theme || (theme !== "light" && theme !== "dark")) {
+        if (!theme || (theme !== "light" && theme !== "dark" && theme !== "system")) {
             return new NextResponse("Invalid theme selection", { status: 400 });
         }
 

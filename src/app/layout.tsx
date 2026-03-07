@@ -80,7 +80,7 @@ export default async function RootLayout({
   let isAuthenticated = false;
   let userRole: string | undefined;
 
-  let initialTheme: "dark" | "light" = "dark";
+  let initialTheme: "dark" | "light" | "system" = "dark";
 
   if (token) {
     const payload = await verifyToken(token);
@@ -95,12 +95,31 @@ export default async function RootLayout({
       });
       if (dbUser?.theme === "light") {
         initialTheme = "light";
+      } else if (dbUser?.theme === "system") {
+        initialTheme = "system";
       }
     }
   }
 
   return (
-    <html lang="en" suppressHydrationWarning data-theme={initialTheme}>
+    <html lang="en" suppressHydrationWarning data-theme={initialTheme === "system" ? "dark" : initialTheme}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var initialTheme = '${initialTheme}';
+                  if (initialTheme === 'system') {
+                    var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <ThemeProvider initialTheme={initialTheme}>
         <body className={`${inter.className} antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
           {isAuthenticated ? (

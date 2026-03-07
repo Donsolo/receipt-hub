@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "light";
+type Theme = "dark" | "light" | "system";
 
 interface ThemeContextType {
     theme: Theme;
@@ -21,9 +21,28 @@ export function ThemeProvider({
     const [theme, setThemeState] = useState<Theme>(initialTheme);
 
     useEffect(() => {
-        // Sync the HTML data-theme attribute on client side if needed
-        document.documentElement.setAttribute('data-theme', theme);
+        const applyTheme = (currentTheme: Theme) => {
+            if (currentTheme === 'system') {
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', systemPrefersDark ? 'dark' : 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', currentTheme);
+            }
+        };
+
+        // Apply immediately
+        applyTheme(theme);
         localStorage.setItem("user-theme", theme);
+
+        // Listen for OS changes if in system mode
+        if (theme === 'system') {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const handleChange = () => applyTheme('system');
+
+            // Modern event listener support
+            mediaQuery.addEventListener('change', handleChange);
+            return () => mediaQuery.removeEventListener('change', handleChange);
+        }
     }, [theme]);
 
     const setTheme = (newTheme: Theme) => {
