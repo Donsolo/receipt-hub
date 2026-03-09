@@ -30,7 +30,9 @@ export default function ChatClient({ conversationId }: { conversationId: string 
     const [isLoading, setIsLoading] = useState(true);
     const [messageInput, setMessageInput] = useState('');
     const [isTyping, setIsTyping] = useState(false); // Simulated
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
 
     // Fetch Auth User
     useEffect(() => {
@@ -81,6 +83,17 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         return () => clearInterval(interval);
     }, [conversationId, authUserId]);
 
+    // Close menu on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     // Auto-scroll
     useEffect(() => {
         if (scrollRef.current) {
@@ -129,6 +142,32 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage(e as any);
+        }
+    };
+
+    const handleClearChat = async () => {
+        if (!confirm('Are you sure you want to clear this chat history? This cannot be undone.')) return;
+        setIsMenuOpen(false);
+        try {
+            const res = await fetch(`/api/conversations/${conversationId}?action=clear`, { method: 'DELETE' });
+            if (res.ok) {
+                setMessages([]);
+            }
+        } catch (error) {
+            console.error('Failed to clear chat:', error);
+        }
+    };
+
+    const handleDeleteConversation = async () => {
+        if (!confirm('Are you sure you want to delete this entire conversation?')) return;
+        setIsMenuOpen(false);
+        try {
+            const res = await fetch(`/api/conversations/${conversationId}?action=delete`, { method: 'DELETE' });
+            if (res.ok) {
+                router.push('/dashboard/messages');
+            }
+        } catch (error) {
+            console.error('Failed to delete conversation:', error);
         }
     };
 
@@ -257,9 +296,47 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                     <button className="p-2 text-gray-400 hover:text-indigo-600 dark:text-[var(--muted)] dark:hover:text-indigo-400 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-[var(--card-hover)]">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-indigo-600 dark:text-[var(--muted)] dark:hover:text-indigo-400 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-[var(--card-hover)]">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
-                    </button>
+                    <div className="relative" ref={menuRef}>
+                        <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="p-2 text-gray-400 hover:text-indigo-600 dark:text-[var(--muted)] dark:hover:text-indigo-400 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-[var(--card-hover)]"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                        </button>
+
+                        {isMenuOpen && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[var(--card)] rounded-xl shadow-xl border border-gray-200 dark:border-[var(--border)] py-2 z-30 animate-in fade-in slide-in-from-top-2 duration-200">
+                                <button
+                                    onClick={() => {
+                                        setIsMenuOpen(false);
+                                        // View Profile logic - assuming connection link or profile link
+                                        if (otherParticipant?.id) {
+                                            router.push(`/dashboard/connections?search=${encodeURIComponent(otherParticipant.name)}`);
+                                        }
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-[var(--text)] hover:bg-gray-50 dark:hover:bg-[var(--card-hover)] transition-colors flex items-center gap-2"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                    View Profile
+                                </button>
+                                <button
+                                    onClick={handleClearChat}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-[var(--text)] hover:bg-gray-50 dark:hover:bg-[var(--card-hover)] transition-colors flex items-center gap-2"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    Clear Chat
+                                </button>
+                                <div className="h-px bg-gray-100 dark:bg-[var(--border)] my-1"></div>
+                                <button
+                                    onClick={handleDeleteConversation}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors flex items-center gap-2"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    Delete Conversation
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </header>
 
