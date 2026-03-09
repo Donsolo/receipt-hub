@@ -4,10 +4,10 @@ import { verifyToken } from '@/lib/auth';
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { conversationId: string } }
+    { params }: { params: Promise<{ conversationId: string }> }
 ) {
     try {
-        const { conversationId } = params;
+        const { conversationId } = await params;
         const { searchParams } = new URL(request.url);
         const action = searchParams.get('action'); // 'clear' or 'delete'
 
