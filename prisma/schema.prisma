@@ -292,6 +292,46 @@ model HeroImage {
   updatedAt      DateTime @updatedAt
 }
 
+model BroadcastMessage {
+  id            String   @id @default(cuid())
+  title         String
+  message       String
+  type          BroadcastType @default(INFO)
+  target        BroadcastTarget @default(ALL_USERS)
+  createdBy     String
+  createdAt     DateTime @default(now())
+  expiresAt     DateTime?
+  isActive      Boolean @default(true)
+  dismissible   Boolean @default(true)
+  viewCount     Int @default(0)
+
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model BroadcastDismissal {
+  id          String @id @default(cuid())
+  userId      String
+  broadcastId String
+  dismissedAt DateTime @default(now())
+
+  @@unique([userId, broadcastId])
+}
+
+enum BroadcastType {
+  INFO
+  UPDATE
+  WARNING
+  SUCCESS
+}
+
+enum BroadcastTarget {
+  ALL_USERS
+  FREE_USERS
+  PRO_USERS
+  BUSINESS_USERS
+}
+
 enum Plan {
   CORE
   PRO

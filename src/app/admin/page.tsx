@@ -612,7 +612,7 @@ export default function AdminPage() {
                                     </Link>
                                 </div>
 
-                                {/* User Directory Card */}
+                                { /* User Directory Card */}
                                 <div className="bg-[var(--bg)]/50 border border-[var(--border)] rounded-md p-6 flex flex-col items-center justify-center text-center">
                                     <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center mb-3">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -623,6 +623,20 @@ export default function AdminPage() {
                                     <p className="text-sm text-[var(--muted)] mb-5 max-w-xs">View, search, and manage user accounts, subscriptions, and receipts.</p>
                                     <Link href="/admin/users" className="bg-indigo-600 hover:bg-indigo-500 text-[var(--text)] text-sm font-medium px-6 py-2 rounded-md transition-colors w-full max-w-[200px]">
                                         Open User Directory
+                                    </Link>
+                                </div>
+
+                                {/* Global Messaging Card */}
+                                <div className="bg-[var(--bg)]/50 border border-[var(--border)] rounded-md p-6 flex flex-col items-center justify-center text-center">
+                                    <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                        </svg>
+                                    </div>
+                                    <h4 className="text-[var(--text)] font-medium mb-1">Global Messaging</h4>
+                                    <p className="text-sm text-[var(--muted)] mb-5 max-w-xs">Send platform-wide direct messages to users' inboxes.</p>
+                                    <Link href="/admin/global-message" className="bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-500/20 text-sm font-medium px-6 py-2 rounded-md transition-colors w-full max-w-[200px]">
+                                        Global Message
                                     </Link>
                                 </div>
                             </div>
