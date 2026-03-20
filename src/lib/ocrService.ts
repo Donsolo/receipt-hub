@@ -1,3 +1,6 @@
+import sharp from 'sharp';
+import { enhanceWithHeuristics } from './structuredParser';
+
 export interface NormalizedOCRData {
     merchantName: string | null;
     merchantAddress?: string | null;
@@ -16,6 +19,8 @@ export interface NormalizedOCRData {
         total?: number;
     }[];
     confidence?: number;
+    needsReview?: boolean;
+    rawText?: string;
     raw?: any;
 }
 
@@ -44,7 +49,8 @@ export async function processReceiptOCR(fileBuffer: Buffer, mimeType: string): P
 // Provider Implementations
 // ---------------------------------------------------------------------------
 
-async function processWithOpenAI(fileBuffer: Buffer, mimeType: string): Promise<NormalizedOCRData> {
+// Helper to call OpenAI API
+async function callOpenAIOCR(fileBuffer: Buffer, mimeType: string, temperature: number = 0.1): Promise<any> {
     const apiKey = process.env.OCR_API_KEY;
     if (!apiKey) throw new Error("OCR_API_KEY missing for OpenAI provider");
 
@@ -52,7 +58,7 @@ async function processWithOpenAI(fileBuffer: Buffer, mimeType: string): Promise<
     const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
     const prompt = `You are an expert receipt parsing assistant. Extract the information from the provided receipt image.
-Return ONLY a valid JSON object matching this exact structure structure (use null for fields you cannot confidently extract):
+Return ONLY a valid JSON object matching this exact structure (use null for fields you cannot confidently extract):
 {
   "merchantName": "string or null",
   "merchantAddress": "string or null",
@@ -72,67 +78,76 @@ Return ONLY a valid JSON object matching this exact structure structure (use nul
       "total": number or null (line total)
     }
   ],
-  "confidence": number between 0 and 1
+  "confidence": number between 0 and 1,
+  "rawText": "string containing ALL verbatim text found on the receipt exactly as written, with line breaks preserved as \\n"
 }
 
-Do not include markdown formatting like \`\`\`json in your response. Just the raw JSON.`;
+Do not include markdown formatting like \`\`\`json in your response. Just output raw JSON.`;
 
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        { type: "text", text: prompt },
+                        { type: "image_url", image_url: { url: dataUrl } }
+                    ]
+                }
+            ],
+            response_format: { type: "json_object" },
+            max_tokens: 2500,
+            temperature: temperature
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.text();
+        throw Error(`OpenAI API error: ${response.status} - ${errorData}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0]?.message?.content?.trim() || "{}";
+    const cleanContent = content.replace(/```json/g, "").replace(/```/g, "").trim();
+    return JSON.parse(cleanContent);
+}
+
+// Multi-pass implementation
+async function processWithOpenAI(fileBuffer: Buffer, mimeType: string): Promise<NormalizedOCRData> {
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [
-                    {
-                        role: "user",
-                        content: [
-                            { type: "text", text: prompt },
-                            {
-                                type: "image_url",
-                                image_url: { url: dataUrl }
-                            }
-                        ]
-                    }
-                ],
-                response_format: { type: "json_object" },
-                max_tokens: 2048,
-                temperature: 0.1
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.text();
-            throw Error(`OpenAI API error: ${response.status} - ${errorData}`);
+        console.log("[OCR Service] Pass 1: Original Image");
+        let parsed = await callOpenAIOCR(fileBuffer, mimeType, 0.1);
+        let confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0;
+        
+        // Validation check for Pass 1
+        const isMissingCritical = !parsed.merchantName || !parsed.total;
+        
+        if (confidence < 0.75 || isMissingCritical) {
+            console.log(`[OCR Service] Pass 1 yielded weak results (Conf: ${confidence}, Missing Critical: ${isMissingCritical}). Initiating Pass 2...`);
+            
+            // Apply preprocessing: Grayscale, Normalize (adaptive contrast), and resize limit
+            const preprocessedBuffer = await sharp(fileBuffer)
+                .grayscale()
+                .normalize()
+                .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
+                .toFormat('jpeg', { quality: 90 }) // standardize back to jpeg
+                .toBuffer();
+            
+            parsed = await callOpenAIOCR(preprocessedBuffer, 'image/jpeg', 0.2);
+            confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0;
+            console.log(`[OCR Service] Pass 2 Completed (Conf: ${confidence})`);
         }
 
-        const data = await response.json();
-        const content = data.choices[0]?.message?.content?.trim() || "{}";
-
-        // Sometimes the model still outputs markdown blocks despite instructions
-        const cleanContent = content.replace(/```json/g, "").replace(/```/g, "").trim();
-
-        const parsed = JSON.parse(cleanContent);
-
-        return {
-            merchantName: parsed.merchantName || null,
-            merchantAddress: parsed.merchantAddress || null,
-            phone: parsed.phone || null,
-            transactionDate: parsed.transactionDate || null,
-            subtotal: typeof parsed.subtotal === 'number' ? parsed.subtotal : null,
-            tax: typeof parsed.tax === 'number' ? parsed.tax : null,
-            total: typeof parsed.total === 'number' ? parsed.total : null,
-            currency: parsed.currency || null,
-            paymentMethod: parsed.paymentMethod || null,
-            last4: parsed.last4 || null,
-            lineItems: Array.isArray(parsed.lineItems) ? parsed.lineItems : [],
-            confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.9,
-            raw: parsed
-        };
-
+        // Pass to specialized Heuristics layer to extract values missed by AI JSON structure
+        const finalData = enhanceWithHeuristics(parsed.rawText || "", parsed);
+        
+        return finalData;
     } catch (error: any) {
         console.error("OpenAI OCR Error:", error);
         throw new Error(`Failed to process OCR via OpenAI: ${error.message}`);

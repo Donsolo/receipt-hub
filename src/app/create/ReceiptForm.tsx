@@ -110,6 +110,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
             ? initialData.items.map(i => ({ ...i, id: Math.random().toString(), unitPrice: Number(i.unitPrice), lineTotal: Number(i.lineTotal) }))
             : [{ id: '1', description: "", quantity: 1, unitPrice: 0, lineTotal: 0 }]
     );
+    const [activeEditItemId, setActiveEditItemId] = useState<string | null>(null);
 
     // Totals
     const [taxType, setTaxType] = useState<"none" | "percent" | "flat">(initialData.taxType as any || "none");
@@ -215,10 +216,12 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
     };
 
     const addItem = () => {
+        const newId = Date.now().toString();
         setItems(prev => [
             ...prev,
-            { id: Date.now().toString(), description: "", quantity: 1, unitPrice: 0, lineTotal: 0 }
+            { id: newId, description: "", quantity: 1, unitPrice: 0, lineTotal: 0 }
         ]);
+        setActiveEditItemId(newId);
     };
 
     const removeItem = (id: string) => {
@@ -534,101 +537,55 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                     </div>
 
                     {/* Section: Line Items */}
-                    <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6">
-                        <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Line Items</h3>
-                        <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] overflow-visible">
-                            <div className="w-full">
-                                <table className="min-w-full table-fixed divide-y divide-white/5">
-                                    <thead>
-                                        <tr>
-                                            <th className="pl-4 pr-2 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider w-auto">Description</th>
-                                            <th className="px-2 py-3 text-right text-xs font-medium text-white/40 uppercase tracking-wider w-20 sm:w-24">Qty</th>
-                                            <th className="px-2 py-3 text-right text-xs font-medium text-white/40 uppercase tracking-wider w-24 sm:w-32">Price</th>
-                                            <th className="pl-2 pr-4 py-3 text-right text-xs font-medium text-white/40 uppercase tracking-wider w-24 sm:w-32">Total</th>
-                                            <th className="px-2 py-3 w-8 sm:w-10"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-white/5">
-                                        {items.map((item) => (
-                                            <tr key={item.id} className="group hover:bg-[var(--bg-surface)] transition-colors">
-                                                <td className="pl-4 pr-2 py-3">
-                                                    <div className="relative w-full">
-                                                        <input
-                                                            type="text"
-                                                            required
-                                                            value={item.description}
-                                                            onChange={e => updateItem(item.id, 'description', e.target.value)}
-                                                            onFocus={() => {
-                                                                setActiveInputId(item.id);
-                                                                setSearchQuery(item.description);
-                                                            }}
-                                                            onKeyDown={e => handleKeyDown(e, item.id)}
-                                                            className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-3 text-[var(--text-primary)] bg-[var(--bg-surface)] placeholder-gray-500 relative z-10"
-                                                            placeholder="Item description"
-                                                            autoComplete="off"
-                                                        />
-
-                                                        {/* Dropdown Suggestions */}
-                                                        {activeInputId === item.id && suggestions.length > 0 && (
-                                                            <div ref={wrapperRef} className="absolute left-0 right-0 top-full mt-1 bg-[var(--card-hover)] border border-gray-600/50 rounded-md shadow-2xl z-[100] overflow-hidden">
-                                                                <ul className="py-1">
-                                                                    {suggestions.map((suggestion, idx) => (
-                                                                        <li
-                                                                            key={idx}
-                                                                            onClick={() => handleSelectSuggestion(item.id, suggestion)}
-                                                                            onMouseEnter={() => setActiveSuggestionIndex(idx)}
-                                                                            className={`px-3 py-2 text-sm cursor-pointer transition-colors ${idx === activeSuggestionIndex
-                                                                                ? 'bg-indigo-600/20 text-indigo-300'
-                                                                                : 'text-[var(--text)] hover:bg-[var(--card-hover)]'
-                                                                                }`}
-                                                                        >
-                                                                            {suggestion}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className="px-2 py-3">
-                                                    <input
-                                                        type="number"
-                                                        min="1"
-                                                        required
-                                                        value={item.quantity}
-                                                        onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))}
-                                                        className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-2 text-right text-[var(--text-primary)] bg-[var(--bg-surface)]"
-                                                    />
-                                                </td>
-                                                <td className="px-2 py-3">
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        step="0.01"
-                                                        required
-                                                        value={item.unitPrice}
-                                                        onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
-                                                        className="w-full border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 rounded text-sm py-2 px-2 text-right text-[var(--text-primary)] bg-[var(--bg-surface)]"
-                                                    />
-                                                </td>
-                                                <td className="pl-2 pr-4 py-3 text-right text-sm font-medium text-[var(--text-primary)] truncate">
-                                                    {item.lineTotal.toFixed(2)}
-                                                </td>
-                                                <td className="px-2 py-3 text-center">
-                                                    {items.length > 1 && (
-                                                        <button type="button" onClick={() => removeItem(item.id)} className="text-[var(--muted)] hover:text-red-500 p-1">
-                                                            &times;
-                                                        </button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                    <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-4 sm:p-6 mb-24 lg:mb-0">
+                        <h3 className="text-xs font-semibold text-[var(--muted)] uppercase tracking-widest mb-4">Line Items</h3>
+                        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] overflow-hidden">
+                            
+                            {/* Grid Header */}
+                            <div className="grid grid-cols-4 sm:grid-cols-12 gap-2 px-4 py-3 bg-[var(--card)] border-b border-[var(--border)] text-[10px] sm:text-xs font-medium text-[var(--muted)] uppercase tracking-wider items-center">
+                                <div className="col-span-2 sm:col-span-5">Item Name</div>
+                                <div className="col-span-1 sm:col-span-2 text-center">Qty</div>
+                                <div className="col-span-1 sm:col-span-3 text-right">Price</div>
+                                <div className="hidden sm:block col-span-2 text-right">Total</div>
                             </div>
-                            <div className="bg-[var(--bg-surface)] px-6 py-3 border-t border-[var(--border-subtle)]">
-                                <button type="button" onClick={addItem} className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium flex items-center">
-                                    <span className="mr-1 text-lg leading-none">+</span> Add Item
+
+                            <div className="divide-y divide-white/10">
+                                {items.map((item) => (
+                                    <div 
+                                        key={item.id} 
+                                        onClick={() => setActiveEditItemId(item.id)}
+                                        className="group hover:bg-black/5 dark:hover:bg-white/5 active:bg-black/10 dark:active:bg-white/10 cursor-pointer transition-colors px-4 py-3 grid grid-cols-4 sm:grid-cols-12 gap-2 items-center relative"
+                                    >
+                                        <div className="col-span-2 sm:col-span-5 w-full pr-2 text-sm text-[var(--text)] font-medium truncate">
+                                            {item.description || <span className="text-[var(--muted)] italic">No description</span>}
+                                        </div>
+                                        <div className="col-span-1 sm:col-span-2 text-center text-sm text-[var(--text)] tabular-nums">
+                                            {item.quantity}
+                                        </div>
+                                        <div className="col-span-1 sm:col-span-3 lg:col-span-2 text-right text-sm text-[var(--text)] tabular-nums font-medium">
+                                            {item.unitPrice !== null && item.unitPrice !== undefined ? `$${item.unitPrice.toFixed(2)}` : '-'}
+                                        </div>
+                                        <div className="hidden sm:block col-span-2 text-right text-sm text-[var(--text)] font-semibold tabular-nums">
+                                            ${item.lineTotal.toFixed(2)}
+                                        </div>
+                                        <div className="hidden lg:flex col-span-1 justify-center items-center">
+                                            {items.length > 1 && (
+                                                <button type="button" onClick={(e) => { e.stopPropagation(); removeItem(item.id); }} className="text-[var(--muted)] hover:text-red-500 p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5">
+                                                    &times;
+                                                </button>
+                                            )}
+                                        </div>
+                                        {/* Mobile Tap Indicator */}
+                                        <div className="lg:hidden absolute inset-y-0 right-2 flex items-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <svg className="w-4 h-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="bg-[var(--card)] px-4 py-3 border-t border-[var(--border)]">
+                                <button type="button" onClick={addItem} className="text-sm text-blue-400 hover:text-blue-300 font-medium flex items-center transition-colors">
+                                    <span className="mr-1.5 text-lg leading-none">+</span> Add Line Item
                                 </button>
                             </div>
                         </div>
@@ -639,16 +596,16 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                 <div className="lg:col-span-1 space-y-6">
 
                     {/* Section: Totals */}
-                    <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6">
-                        <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-4">Summary</h3>
+                    <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-[0_-10px_30px_rgba(0,0,0,0.35)] lg:shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-6 space-y-6 sticky bottom-4 z-[40] lg:static lg:bottom-auto">
+                        <h3 className="text-xs font-semibold text-[var(--muted)] uppercase tracking-widest mb-4">Summary</h3>
 
                         <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-6 space-y-4">
-                            <div className="flex justify-between items-center text-sm text-white/70">
+                            <div className="flex justify-between items-center text-sm text-[var(--muted)]">
                                 <span>Subtotal</span>
                                 <span className="font-medium text-[var(--text)]">{subtotal.toFixed(2)}</span>
                             </div>
 
-                            <div className="flex justify-between items-center text-sm text-white/70">
+                            <div className="flex justify-between items-center text-sm text-[var(--muted)]">
                                 <div className="flex items-center space-x-3">
                                     <label htmlFor="taxType" className="font-medium">Tax:</label>
                                     <select
@@ -676,7 +633,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                 <span className="font-medium text-[var(--text)]">{calculatedTax.toFixed(2)}</span>
                             </div>
 
-                            <div className="h-px bg-white/10 my-4" />
+                            <div className="h-px bg-[var(--border)] my-4" />
 
                             <div className="flex justify-between items-center">
                                 <span className="text-base font-semibold text-[var(--text)]">Total</span>
@@ -732,6 +689,18 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
+                        
+                        {ocrData.needsReview && (
+                            <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-3 flex items-start gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <div>
+                                    <p className="text-sm font-semibold text-amber-500">We couldn't fully verify this receipt</p>
+                                    <p className="text-xs text-amber-500/80 mt-1">Please review the extracted quantities, prices, and totals carefully before saving. Some fields may be missing or inaccurate.</p>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="p-6 overflow-y-auto space-y-8 custom-scrollbar flex-1">
                             {/* Merchant Details */}
@@ -831,6 +800,83 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                 Apply to Form
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* Edit Line Item Modal */}
+            {activeEditItemId && (
+                <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-[var(--bg)] border border-[var(--border)] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        {(() => {
+                            const item = items.find(i => i.id === activeEditItemId);
+                            if (!item) return null;
+                            return (
+                                <>
+                                    <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--card)]">
+                                        <h2 className="text-xl font-bold text-[var(--text)] tracking-tight">Edit Line Item</h2>
+                                        <button type="button" onClick={() => setActiveEditItemId(null)} className="text-[var(--muted)] hover:text-[var(--text)] transition-colors">
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    </div>
+                                    <div className="p-6 space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-medium text-[var(--muted)] uppercase mb-2">Item Name</label>
+                                            <input
+                                                type="text"
+                                                autoFocus
+                                                value={item.description}
+                                                onChange={e => updateItem(item.id, 'description', e.target.value)}
+                                                className="w-full border border-[var(--border)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg text-sm px-4 py-3 bg-[var(--card)] text-[var(--text)]"
+                                                placeholder="Brief description..."
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-medium text-[var(--muted)] uppercase mb-2">Quantity</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={item.quantity}
+                                                    onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))}
+                                                    className="w-full border border-[var(--border)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg text-sm px-4 py-3 bg-[var(--card)] text-[var(--text)] tabular-nums"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-[var(--muted)] uppercase mb-2">Unit Price ($)</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={item.unitPrice}
+                                                    onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
+                                                    className="w-full border border-[var(--border)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg text-sm px-4 py-3 bg-[var(--card)] text-[var(--text)] tabular-nums"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="pt-4 flex justify-between items-center border-t border-[var(--border)]">
+                                            <div className="text-sm text-[var(--muted)]">Line Total</div>
+                                            <div className="text-xl font-semibold tabular-nums text-[var(--text)]">${item.lineTotal.toFixed(2)}</div>
+                                        </div>
+                                    </div>
+                                    <div className="px-6 py-4 bg-[var(--card)] border-t border-[var(--border)] flex gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => { removeItem(item.id); setActiveEditItemId(null); }}
+                                            className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-medium rounded-lg text-sm transition-colors"
+                                        >
+                                            Delete Item
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveEditItemId(null)}
+                                            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-md transition-all shadow-blue-500/20"
+                                        >
+                                            Done
+                                        </button>
+                                    </div>
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
             )}

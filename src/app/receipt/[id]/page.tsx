@@ -98,48 +98,44 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
 
                 {/* Items Table */}
                 <div className="mb-12">
-                    <table className="min-w-full">
-                        <thead>
-                            <tr className="border-b border-gray-200">
-                                <th className="py-3 text-left text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Item</th>
-                                <th className="py-3 text-right text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Qty</th>
-                                <th className="py-3 text-right text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Price</th>
-                                <th className="py-3 text-right text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {receipt.items.map((item: any) => (
-                                <tr key={item.id}>
-                                    <td className="py-4 text-sm text-gray-900 font-medium">{item.description}</td>
-                                    <td className="py-4 text-right text-sm text-[var(--muted)]">{item.quantity}</td>
-                                    <td className="py-4 text-right text-sm text-[var(--muted)]">{Number(item.unitPrice).toFixed(2)}</td>
-                                    <td className="py-4 text-right text-sm text-gray-900">{Number(item.lineTotal).toFixed(2)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <div className="grid grid-cols-4 sm:grid-cols-12 gap-2 pb-3 border-b border-gray-200 items-center">
+                        <div className="col-span-2 sm:col-span-5 text-left text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Item</div>
+                        <div className="col-span-1 sm:col-span-2 text-center text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Qty</div>
+                        <div className="col-span-1 sm:col-span-3 lg:col-span-2 text-right text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Price</div>
+                        <div className="hidden sm:block col-span-2 text-right text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Total</div>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                        {receipt.items.map((item: any) => (
+                            <div key={item.id} className="grid grid-cols-4 sm:grid-cols-12 gap-2 items-center py-3">
+                                <div className="col-span-2 sm:col-span-5 text-sm text-gray-900 font-medium pr-2 truncate">{item.description}</div>
+                                <div className="col-span-1 sm:col-span-2 text-center text-sm text-[var(--muted)] tabular-nums">{item.quantity}</div>
+                                <div className="col-span-1 sm:col-span-3 lg:col-span-2 text-right text-sm text-[var(--muted)] tabular-nums">{Number(item.unitPrice).toFixed(2)}</div>
+                                <div className="hidden sm:block col-span-2 text-right text-sm text-gray-900 font-semibold tabular-nums">{Number(item.lineTotal).toFixed(2)}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Totals */}
-                <div className="flex justify-end">
-                    <div className="w-full sm:w-1/2 md:w-1/3 space-y-3">
-                        <div className="flex justify-between text-sm">
+                <div className="flex justify-end mt-8">
+                    <div className="w-full sm:w-1/2 md:w-1/3 space-y-4">
+                        <div className="flex justify-between text-sm items-center">
                             <span className="text-[var(--muted)]">Subtotal</span>
-                            <span className="text-gray-900 font-medium">{Number(receipt.subtotal).toFixed(2)}</span>
+                            <span className="text-gray-900 font-medium tabular-nums">{Number(receipt.subtotal).toFixed(2)}</span>
                         </div>
                         {receipt.taxType !== 'none' && (
-                            <div className="flex justify-between text-sm">
+                            <div className="flex justify-between text-sm items-center">
                                 <span className="text-[var(--muted)]">
                                     Tax {receipt.taxType === 'percent' ? `(${Number(receipt.taxValue)}%)` : ''}
                                 </span>
-                                <span className="text-gray-900 font-medium">
+                                <span className="text-gray-900 font-medium tabular-nums">
                                     {(Number(receipt.total) - Number(receipt.subtotal)).toFixed(2)}
                                 </span>
                             </div>
                         )}
-                        <div className="flex justify-between py-4 border-t border-gray-200 mt-2 align-baseline">
-                            <span className="text-lg font-bold text-gray-900">Total</span>
-                            <span className="text-2xl font-bold text-gray-900">{Number(receipt.total).toFixed(2)}</span>
+                        <div className="flex justify-between pt-4 pb-2 border-t-2 border-gray-900 mt-4 items-baseline">
+                            <span className="text-lg font-bold text-gray-900 tracking-tight">Total</span>
+                            <span className="text-3xl font-bold text-gray-900 tabular-nums tracking-tight">${Number(receipt.total).toFixed(2)}</span>
                         </div>
                     </div>
                 </div>

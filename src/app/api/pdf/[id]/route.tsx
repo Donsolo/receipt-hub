@@ -13,12 +13,12 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
   const formatDate = (d: Date) => format(new Date(d), "MMMM d, yyyy");
 
   const itemsRows = receipt.items.map((item: any) => `
-    <tr>
-      <td class="py-4 text-sm text-gray-900">${item.description}</td>
-      <td class="py-4 text-right text-sm text-[var(--muted)]">${item.quantity}</td>
-      <td class="py-4 text-right text-sm text-[var(--muted)]">${formatMoney(item.unitPrice)}</td>
-      <td class="py-4 text-right text-sm text-gray-900">${formatMoney(item.lineTotal)}</td>
-    </tr>
+    <div class="grid grid-cols-12 gap-2 items-center py-3">
+        <div class="col-span-5 text-sm text-gray-900 font-medium pr-2 truncate">${item.description}</div>
+        <div class="col-span-2 text-center text-sm text-gray-500 tabular-nums">${item.quantity}</div>
+        <div class="col-span-3 text-right text-sm text-gray-500 tabular-nums">${formatMoney(item.unitPrice)}</div>
+        <div class="col-span-2 text-right text-sm text-gray-900 font-semibold tabular-nums">${formatMoney(item.lineTotal)}</div>
+    </div>
   `).join('');
 
   // Use absolute URL or relative if served. Puppeteer can load external images if network enabled.
@@ -33,11 +33,11 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
   const logoHtml = logoSrc ? `<img src="${logoSrc}" alt="Logo" class="h-12 w-auto object-contain mr-4" />` : '';
 
   const taxInfo = receipt.taxType !== 'none' ? `
-  <div class="flex justify-between py-2">
-         <span class="text-sm font-medium text-[var(--muted)]">
-            Tax ${receipt.taxType === 'percent' ? `(${receipt.taxValue}%)` : '(Flat)'}
+  <div class="flex justify-between py-2 items-center">
+         <span class="text-sm font-medium text-gray-500">
+            Tax ${receipt.taxType === 'percent' ? '(' + receipt.taxValue + '%)' : '(Flat)'}
          </span>
-         <span class="text-sm text-gray-900">
+         <span class="text-sm text-gray-900 font-medium tabular-nums">
             ${formatMoney(Number(receipt.total) - Number(receipt.subtotal))}
          </span>
       </div>
@@ -91,32 +91,28 @@ function generateReceiptHtml(receipt: any, business: any, tektriqLogoBase64: str
 
           <!-- Items Table -->
           <div class="mt-8">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr class="border-b border-gray-200">
-                  <th class="py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Item</th>
-                  <th class="py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Qty</th>
-                  <th class="py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Price</th>
-                  <th class="py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Total</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
+            <div class="grid grid-cols-12 gap-2 pb-3 border-b border-gray-200 items-center">
+                <div class="col-span-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Item</div>
+                <div class="col-span-2 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Qty</div>
+                <div class="col-span-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Price</div>
+                <div class="col-span-2 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Total</div>
+            </div>
+            <div class="divide-y divide-gray-100">
                 ${itemsRows}
-              </tbody>
-            </table>
+            </div>
           </div>
 
           <!-- Totals -->
           <div class="mt-8 border-t border-gray-200 pt-8 flex justify-end">
             <div class="w-1/2">
-              <div class="flex justify-between py-2">
-                <span class="text-sm font-medium text-[var(--muted)]">Subtotal</span>
-                <span class="text-sm text-gray-900">${formatMoney(receipt.subtotal)}</span>
+              <div class="flex justify-between py-2 items-center">
+                <span class="text-sm font-medium text-gray-500">Subtotal</span>
+                <span class="text-sm text-gray-900 font-medium tabular-nums">${formatMoney(receipt.subtotal)}</span>
               </div>
               ${taxInfo}
-              <div class="flex justify-between py-2 border-t border-gray-200 mt-2">
-                <span class="text-base font-bold text-gray-900">Total</span>
-                <span class="text-base font-bold text-gray-900">${formatMoney(receipt.total)}</span>
+              <div class="flex justify-between py-4 border-t-2 border-gray-900 mt-2 items-baseline">
+                <span class="text-lg font-bold text-gray-900 tracking-tight">Total</span>
+                <span class="text-2xl font-bold text-gray-900 tabular-nums tracking-tight">$${formatMoney(receipt.total)}</span>
               </div>
             </div>
           </div>

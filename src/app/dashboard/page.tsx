@@ -3,7 +3,6 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getReceipts } from '@/lib/actions';
-import ModalManager from './ModalManager';
 import HeroSection from '@/components/ui/HeroSection';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
 
@@ -74,9 +73,6 @@ export default async function Dashboard() {
 
             <div className="p-4 sm:p-8 flex-1">
                 <div className="max-w-5xl mx-auto space-y-6">
-
-                    {/* Dynamic Database Modals */}
-                    <ModalManager />
 
                     {/* Greeting Section */}
                     <div className="mb-5">
