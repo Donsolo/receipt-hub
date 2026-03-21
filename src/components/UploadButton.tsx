@@ -64,33 +64,28 @@ export default function UploadButton({
 
         try {
             // 1. Compress
-            const compressedBlob = await compressImage(file);
-
-            // 2. Get Presigned URL
-            const presignRes = await fetch('/api/upload/presign', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filename: file.name, fileType: 'image/jpeg' })
-            });
-
-            if (!presignRes.ok) {
-                const responseText = await presignRes.text();
-                console.error("Upload presign failed", responseText);
-                throw new Error('Failed to get upload URL');
+            let compressedBlob = file as any; // Fallback
+            try {
+                if (file.type.startsWith('image/')) {
+                    compressedBlob = await compressImage(file);
+                }
+            } catch (err) {
+                console.warn("Compression failed, using original file", err);
             }
-            const { uploadUrl, fileUrl } = await presignRes.json();
 
-            // 3. Upload to S3
-            const uploadRes = await fetch(uploadUrl, {
-                method: 'PUT',
-                body: compressedBlob,
-                headers: {
-                    'Content-Type': 'image/jpeg',
-                },
+            // 2. Server Proxy S3 Upload (Bypasses Browser CORS)
+            const formData = new FormData();
+            formData.append('file', compressedBlob, file.name || 'mobile_capture.jpg');
+
+            const uploadRes = await fetch('/api/upload/s3', {
+                method: 'POST',
+                body: formData
             });
-            if (!uploadRes.ok) throw new Error('S3 Upload failed');
 
-            // 4. Save to DB
+            if (!uploadRes.ok) throw new Error('Proxy Upload failed');
+            const { fileUrl } = await uploadRes.json();
+
+            // 3. Save to DB
             const saveRes = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -98,7 +93,7 @@ export default function UploadButton({
             });
             if (!saveRes.ok) throw new Error('Failed to save receipt');
 
-            // 5. Cleanup & Refresh
+            // 4. Cleanup & Refresh
             onUploadComplete();
             router.refresh();
 
