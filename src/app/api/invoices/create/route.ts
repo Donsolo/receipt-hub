@@ -14,7 +14,7 @@ export async function POST(req: Request) {
         if (!user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
 
         const body = await req.json();
-        const { clientName, clientEmail, title, description, currency, tax, issueDate, dueDate, notes, items } = body;
+        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, issueDate, dueDate, notes, items } = body;
 
         if (!clientName || !title || !issueDate || !items || !Array.isArray(items) || items.length === 0) {
             return NextResponse.json({ success: false, error: 'Missing required fields or items' }, { status: 400 });
@@ -49,6 +49,10 @@ export async function POST(req: Request) {
                 userId: user.userId,
                 clientName,
                 clientEmail: clientEmail || null,
+                clientCompany: clientCompany || null,
+                clientPhone: clientPhone || null,
+                clientAddress: clientAddress || null,
+                clientPropertyAddress: clientPropertyAddress || null,
                 title,
                 description: description || null,
                 currency: currency || "USD",

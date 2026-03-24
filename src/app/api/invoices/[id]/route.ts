@@ -50,12 +50,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         }
 
         const body = await req.json();
-        const { clientName, clientEmail, title, description, currency, tax, issueDate, dueDate, notes, status, items } = body;
+        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, issueDate, dueDate, notes, status, items } = body;
 
         let dataToUpdate: any = {};
 
         if (clientName !== undefined) dataToUpdate.clientName = clientName;
         if (clientEmail !== undefined) dataToUpdate.clientEmail = clientEmail || null;
+        if (clientCompany !== undefined) dataToUpdate.clientCompany = clientCompany || null;
+        if (clientPhone !== undefined) dataToUpdate.clientPhone = clientPhone || null;
+        if (clientAddress !== undefined) dataToUpdate.clientAddress = clientAddress || null;
+        if (clientPropertyAddress !== undefined) dataToUpdate.clientPropertyAddress = clientPropertyAddress || null;
         if (title !== undefined) dataToUpdate.title = title;
         if (description !== undefined) dataToUpdate.description = description || null;
         if (currency !== undefined) dataToUpdate.currency = currency || "USD";

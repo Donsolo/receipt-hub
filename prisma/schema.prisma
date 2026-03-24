@@ -363,6 +363,10 @@ model Invoice {
   userId             String
   clientName         String
   clientEmail        String?
+  clientCompany      String?
+  clientPhone        String?
+  clientAddress      String?
+  clientPropertyAddress String?
   title              String
   description        String?
   status             InvoiceStatus     @default(DRAFT)

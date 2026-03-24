@@ -19,6 +19,10 @@ export interface InvoiceWizardProps {
         id?: string;
         clientName: string;
         clientEmail: string;
+        clientCompany?: string;
+        clientPhone?: string;
+        clientAddress?: string;
+        clientPropertyAddress?: string;
         title: string;
         description: string;
         issueDate: string;
@@ -40,6 +44,11 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
     // Step 1: Client Info
     const [clientName, setClientName] = useState(initialData?.clientName || '');
     const [clientEmail, setClientEmail] = useState(initialData?.clientEmail || '');
+    const [clientCompany, setClientCompany] = useState(initialData?.clientCompany || '');
+    const [clientPhone, setClientPhone] = useState(initialData?.clientPhone || '');
+    const [clientAddress, setClientAddress] = useState(initialData?.clientAddress || '');
+    const [clientPropertyAddress, setClientPropertyAddress] = useState(initialData?.clientPropertyAddress || '');
+    const [propertyDifferent, setPropertyDifferent] = useState(!!initialData?.clientPropertyAddress);
 
     // Step 2: Details
     const [title, setTitle] = useState(initialData?.title || 'Invoice');
@@ -99,6 +108,10 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
             const payload = {
                 clientName,
                 clientEmail,
+                clientCompany,
+                clientPhone,
+                clientAddress,
+                clientPropertyAddress: propertyDifferent ? clientPropertyAddress : '',
                 title,
                 description,
                 issueDate: new Date(issueDate).toISOString(),
@@ -181,20 +194,30 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
                             <p className="text-sm text-[var(--muted)] mt-1">Who is this invoice for?</p>
                         </div>
                         
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">Client Name <span className="text-red-500">*</span></label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="md:col-span-2">
+                                <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">Primary Contact Name <span className="text-red-500">*</span></label>
                                 <input 
                                     type="text" 
                                     value={clientName} 
                                     onChange={(e) => setClientName(e.target.value)}
-                                    placeholder="Acme Corp"
+                                    placeholder="Jane Doe"
                                     className="w-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 placeholder:text-[var(--muted)]/50 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
                                     autoFocus
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">Client Email (Optional)</label>
+                                <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">Company Name (Optional)</label>
+                                <input 
+                                    type="text" 
+                                    value={clientCompany} 
+                                    onChange={(e) => setClientCompany(e.target.value)}
+                                    placeholder="Acme Corp LLC"
+                                    className="w-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 placeholder:text-[var(--muted)]/50 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">Contact Email (Optional)</label>
                                 <input 
                                     type="email" 
                                     value={clientEmail} 
@@ -203,6 +226,55 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
                                     className="w-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 placeholder:text-[var(--muted)]/50 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">Phone Number (Optional)</label>
+                                <input 
+                                    type="tel" 
+                                    value={clientPhone} 
+                                    onChange={(e) => setClientPhone(e.target.value)}
+                                    placeholder="+1 (555) 000-0000"
+                                    className="w-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 placeholder:text-[var(--muted)]/50 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                                />
+                            </div>
+                            
+                            <div className="md:col-span-2 pt-2 border-t border-[var(--border)] mt-2">
+                                <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">Billing Address (Optional)</label>
+                                <textarea 
+                                    value={clientAddress} 
+                                    onChange={(e) => setClientAddress(e.target.value)}
+                                    placeholder="123 Financial District&#10;Suite 400&#10;New York, NY 10004"
+                                    rows={2}
+                                    className="w-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 placeholder:text-[var(--muted)]/50 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all resize-none"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2 flex items-center gap-3">
+                                <button 
+                                    type="button"
+                                    onClick={() => setPropertyDifferent(!propertyDifferent)}
+                                    className="w-10 h-6 bg-[var(--border)] rounded-full relative transition-colors border border-black/5 dark:border-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 shadow-inner"
+                                    style={{ backgroundColor: propertyDifferent ? '#3b82f6' : undefined }}
+                                >
+                                    <span className={clsx("absolute top-[3px] left-[3px] bg-white w-4 h-4 rounded-full transition-transform shadow-md", propertyDifferent && "translate-x-4")} />
+                                </button>
+                                <span className="text-sm font-medium text-[var(--text)] cursor-pointer select-none" onClick={() => setPropertyDifferent(!propertyDifferent)}>
+                                    Service/Property Address is different from Billing Address
+                                </span>
+                            </div>
+
+                            {propertyDifferent && (
+                                <div className="md:col-span-2 animate-in fade-in slide-in-from-top-2">
+                                    <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">Service/Property Address <span className="text-blue-500">*</span></label>
+                                    <textarea 
+                                        value={clientPropertyAddress} 
+                                        onChange={(e) => setClientPropertyAddress(e.target.value)}
+                                        placeholder="456 Real Estate Blvd&#10;Los Angeles, CA 90001"
+                                        rows={2}
+                                        className="w-full bg-blue-500/5 border border-blue-500/20 text-[var(--text)] rounded-xl px-4 py-3 placeholder:text-[var(--muted)]/50 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all resize-none"
+                                    />
+                                </div>
+                            )}
+
                         </div>
                     </div>
                 )}
@@ -366,9 +438,25 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
 
                             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-[var(--border)] pb-6 mb-6">
                                 <div>
-                                    <h3 className="text-sm font-bold text-[var(--muted)] uppercase tracking-wider mb-1">Billed To</h3>
-                                    <p className="text-lg font-bold text-[var(--text)]">{clientName}</p>
-                                    {clientEmail && <p className="text-sm text-[var(--muted)]">{clientEmail}</p>}
+                                    <h3 className="text-sm font-bold text-[var(--muted)] uppercase tracking-wider mb-2">Billed To</h3>
+                                    {clientCompany && <p className="text-lg font-bold text-[var(--text)] leading-tight">{clientCompany}</p>}
+                                    <p className={clsx("font-bold text-[var(--text)]", clientCompany ? "text-sm text-[var(--muted)] font-medium mt-0.5" : "text-lg")}>{clientName}</p>
+                                    
+                                    {(clientEmail || clientPhone) && (
+                                        <div className="mt-1 space-y-0.5">
+                                            {clientEmail && <p className="text-sm text-[var(--muted)]">{clientEmail}</p>}
+                                            {clientPhone && <p className="text-sm text-[var(--muted)]">{clientPhone}</p>}
+                                        </div>
+                                    )}
+
+                                    {clientAddress && <pre className="text-sm text-[var(--muted)] font-sans mt-2 whitespace-pre-wrap leading-relaxed">{clientAddress}</pre>}
+                                    
+                                    {propertyDifferent && clientPropertyAddress && (
+                                        <div className="mt-3 pt-3 border-t border-[var(--border)]/50">
+                                            <h4 className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">Service Address</h4>
+                                            <pre className="text-sm text-[var(--muted)] font-sans whitespace-pre-wrap leading-relaxed">{clientPropertyAddress}</pre>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="sm:text-right">
                                     <p className="text-xl font-bold text-[var(--text)]">{title}</p>

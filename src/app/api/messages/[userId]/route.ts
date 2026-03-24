@@ -19,7 +19,7 @@ export async function GET(
         try { await ensureActivated(user); } catch (e: any) { if (e.message === 'CORE_ACTIVATION_REQUIRED') return NextResponse.json({ error: 'Core activation required' }, { status: 403 }); throw e; }
 
         // Ensure these users are actually connected and accepted
-        const connection = await (db as any).connection.findFirst({
+        const connection = await db.connection.findFirst({
             where: {
                 OR: [
                     { requesterId: user.userId, receiverId: connectionId, status: "accepted" },
@@ -32,23 +32,40 @@ export async function GET(
             return NextResponse.json({ error: 'You can only message accepted connections.' }, { status: 403 });
         }
 
-        const messages = await (db as any).message.findMany({
-            where: {
-                OR: [
-                    { senderId: user.userId, receiverId: connectionId },
-                    { senderId: connectionId, receiverId: user.userId }
-                ]
-            },
+        // Find the 1-on-1 Conversation ID
+        const conversationUsers = [user.userId, connectionId];
+        const sharedConvos = await db.conversationParticipant.findMany({
+            where: { userId: { in: conversationUsers } },
+            select: { conversationId: true, userId: true }
+        });
+
+        const convTally: Record<string, string[]> = {};
+        for (const p of sharedConvos) {
+            if (!convTally[p.conversationId]) convTally[p.conversationId] = [];
+            convTally[p.conversationId].push(p.userId);
+        }
+
+        let targetConvId = null;
+        for (const [cId, uIds] of Object.entries(convTally)) {
+            if (uIds.includes(user.userId) && uIds.includes(connectionId) && uIds.length === 2) {
+                targetConvId = cId;
+                break;
+            }
+        }
+
+        if (!targetConvId) {
+            // No messages exist yet
+            return NextResponse.json([]);
+        }
+
+        const messages = await db.message.findMany({
+            where: { conversationId: targetConvId },
             include: {
                 attachments: {
-                    include: {
-                        receipt: true
-                    }
+                    include: { receipt: true }
                 }
             },
-            orderBy: {
-                createdAt: 'asc'
-            }
+            orderBy: { createdAt: 'asc' }
         });
 
         return NextResponse.json(messages);
@@ -86,11 +103,11 @@ export async function POST(
         }
 
         if (messageText.length > 2000) {
-            return NextResponse.json({ error: 'Message exceeds maximum length.' }, { status: 400 });
+            return NextResponse.json({ error: 'Message text exceeds maximum length.' }, { status: 400 });
         }
 
         // Verify connection status
-        const connection = await (db as any).connection.findFirst({
+        const connection = await db.connection.findFirst({
             where: {
                 OR: [
                     { requesterId: user.userId, receiverId, status: "accepted" },
@@ -106,16 +123,12 @@ export async function POST(
         // Validate receipts if any for standard receipt attachment
         let validReceiptIds: string[] = [];
         if (attachmentType === 'RECEIPT' && receiptIds && Array.isArray(receiptIds) && receiptIds.length > 0) {
-            const ownedReceipts = await (db as any).receipt.findMany({
-                where: {
-                    id: { in: receiptIds },
-                    userId: user.userId
-                },
+            const ownedReceipts = await db.receipt.findMany({
+                where: { id: { in: receiptIds }, userId: user.userId },
                 select: { id: true }
             });
-            validReceiptIds = ownedReceipts.map((r: any) => r.id);
+            validReceiptIds = ownedReceipts.map(r => r.id);
 
-            // Fail strictly if any receipt ID passed isn't owned by the user
             if (validReceiptIds.length !== receiptIds.length) {
                 return NextResponse.json({ error: 'You do not own all the provided receipts.' }, { status: 403 });
             }
@@ -125,13 +138,9 @@ export async function POST(
 
         if (attachmentType === 'RECEIPT' && validReceiptIds.length > 0) {
             attachmentsCreate = {
-                create: validReceiptIds.map(rid => ({
-                    type: 'RECEIPT',
-                    receiptId: rid
-                }))
+                create: validReceiptIds.map(rid => ({ type: 'RECEIPT', receiptId: rid }))
             };
         } else if (attachmentType === 'BUNDLE_SNAPSHOT' && snapshotData) {
-            // Snapshot arrays should strictly be capped at 10 items
             const limitedSnapshot = Array.isArray(snapshotData) ? snapshotData.slice(0, 10) : snapshotData;
             attachmentsCreate = {
                 create: {
@@ -142,25 +151,54 @@ export async function POST(
             };
         }
 
-        const message = await (db as any).message.create({
+        // Find or create Conversation
+        const conversationUsers = [user.userId, receiverId];
+        const sharedConvos = await db.conversationParticipant.findMany({
+            where: { userId: { in: conversationUsers } },
+            select: { conversationId: true, userId: true }
+        });
+
+        const convTally: Record<string, string[]> = {};
+        for (const p of sharedConvos) {
+            if (!convTally[p.conversationId]) convTally[p.conversationId] = [];
+            convTally[p.conversationId].push(p.userId);
+        }
+
+        let targetConvId = null;
+        for (const [cId, uIds] of Object.entries(convTally)) {
+            if (uIds.includes(user.userId) && uIds.includes(receiverId) && uIds.length === 2) {
+                targetConvId = cId;
+                break;
+            }
+        }
+
+        if (!targetConvId) {
+            const newConv = await db.conversation.create({
+                data: {
+                    participants: {
+                        create: [ { userId: user.userId }, { userId: receiverId } ]
+                    }
+                }
+            });
+            targetConvId = newConv.id;
+        }
+
+        // Insert Message
+        const message = await db.message.create({
             data: {
+                conversationId: targetConvId,
                 senderId: user.userId,
-                receiverId,
-                text: messageText.trim(),
+                content: messageText.trim(),
                 ...(attachmentsCreate && { attachments: attachmentsCreate })
             },
             include: {
                 attachments: {
-                    include: {
-                        receipt: true
-                    }
+                    include: { receipt: true }
                 }
             }
         });
 
-        // ------------------------------------------------------------------
         // Fire Notification (Non-blocking)
-        // ------------------------------------------------------------------
         if (user.userId !== receiverId) {
             try {
                 const receiverPref = await db.user.findUnique({
@@ -173,20 +211,17 @@ export async function POST(
                         where: { id: user.userId },
                         select: { name: true }
                     });
-                    const senderName = sender?.name || 'A user';
+                    const senderName = sender?.name || 'A connection';
 
                     const rawText = messageText.trim();
-                    const excerpt = rawText.length > 60
-                        ? rawText.slice(0, 60) + '...'
-                        : rawText;
-
+                    const excerpt = rawText.length > 60 ? rawText.slice(0, 60) + '...' : rawText;
                     const finalExcerpt = excerpt || (attachmentType === 'RECEIPT' ? '[Receipt attached]' : '[Bundle attached]');
 
                     await db.notification.create({
                         data: {
                             userId: receiverId,
                             type: 'MESSAGE_RECEIVED',
-                            title: 'New Message',
+                            title: 'New Secure Message',
                             message: `${senderName}: ${finalExcerpt}`,
                             link: `/dashboard/connections`,
                             read: false

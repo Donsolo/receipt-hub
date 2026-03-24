@@ -3,11 +3,16 @@
 import { useEffect, useState, useRef } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { clsx } from 'clsx';
 
 interface PublicInvoice {
     id: string;
     clientName: string;
     clientEmail: string | null;
+    clientCompany: string | null;
+    clientPhone: string | null;
+    clientAddress: string | null;
+    clientPropertyAddress: string | null;
     title: string;
     description: string | null;
     currency: string;
@@ -247,9 +252,27 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                         </div>
 
                         <div className="text-left sm:text-right w-full sm:w-auto p-4 sm:p-0 bg-white dark:bg-transparent rounded-xl ring-1 ring-black/5 sm:ring-0 dark:ring-0">
-                            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-[var(--muted)] mb-1">Billed To</p>
-                            <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">{invoice.clientName}</p>
-                            {invoice.clientEmail && <p className="text-sm text-gray-500 dark:text-[var(--muted)] mt-0.5">{invoice.clientEmail}</p>}
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-[var(--muted)] mb-2">Billed To</p>
+                            
+                            {invoice.clientCompany && <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-tight">{invoice.clientCompany}</p>}
+                            <p className={clsx("font-extrabold text-gray-900 dark:text-white", invoice.clientCompany ? "text-sm text-gray-600 dark:text-[var(--muted)] mt-0.5 font-medium" : "text-base sm:text-lg")}>{invoice.clientName}</p>
+                            
+                            {(invoice.clientEmail || invoice.clientPhone) && (
+                                <div className="mt-1 space-y-0.5 text-left sm:text-right">
+                                    {invoice.clientEmail && <p className="text-sm text-gray-500 dark:text-[var(--muted)]">{invoice.clientEmail}</p>}
+                                    {invoice.clientPhone && <p className="text-sm text-gray-500 dark:text-[var(--muted)]">{invoice.clientPhone}</p>}
+                                </div>
+                            )}
+
+                            {invoice.clientAddress && <pre className="text-sm text-gray-500 dark:text-[var(--muted)] font-sans mt-2 whitespace-pre-wrap leading-relaxed text-left sm:text-right">{invoice.clientAddress}</pre>}
+                            
+                            {/* Property Addr */}
+                            {invoice.clientPropertyAddress && (
+                                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[var(--border)]/50 text-left sm:text-right">
+                                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-[var(--muted)] mb-1">Service Address</p>
+                                    <pre className="text-sm text-gray-500 dark:text-[var(--muted)] font-sans whitespace-pre-wrap leading-relaxed text-left sm:text-right">{invoice.clientPropertyAddress}</pre>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
