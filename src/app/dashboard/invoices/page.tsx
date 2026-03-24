@@ -31,11 +31,18 @@ export default async function InvoicesHub() {
         );
     }
 
-    const invoices = await db.invoice.findMany({
-        where: { userId: authUser.userId },
-        orderBy: { createdAt: 'desc' },
-        include: { items: true }
-    });
+    let invoices: any[] = [];
+    let fetchError: string | null = null;
+    try {
+        invoices = await db.invoice.findMany({
+            where: { userId: authUser.userId },
+            orderBy: { createdAt: 'desc' },
+            include: { items: true }
+        });
+    } catch (e: any) {
+        console.error('SERVER ACTION CRASH - Invoice Fetch Failed:', e);
+        fetchError = e?.message || String(e) || 'Unknown Database Error';
+    }
 
     return (
         <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)]">
@@ -54,7 +61,22 @@ export default async function InvoicesHub() {
                     </Link>
                 </PageHeaderCard>
 
-                {invoices.length === 0 ? (
+                {fetchError ? (
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 flex flex-col items-start shadow-sm">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center text-red-500 shrink-0">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                            </div>
+                            <h2 className="text-xl font-bold text-red-500">Database Synchronization Error</h2>
+                        </div>
+                        <p className="text-[var(--text)] text-sm mb-4">
+                            The server failed to securely retrieve your invoice data. This is typically caused by a pending Prisma schema migration on the deployment environment.
+                        </p>
+                        <div className="w-full bg-black/40 dark:bg-black/80 rounded-xl p-4 overflow-auto border border-red-500/20">
+                            <pre className="text-xs text-red-300 font-mono whitespace-pre-wrap">{fetchError}</pre>
+                        </div>
+                    </div>
+                ) : invoices.length === 0 ? (
                     <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-12 flex flex-col items-center justify-center text-center shadow-sm">
                         <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mb-6 border border-blue-500/20">
                             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
