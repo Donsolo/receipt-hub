@@ -31,9 +31,14 @@ export default async function Dashboard() {
     // Fetch invoices if Pro user
     let userInvoices: any[] = [];
     if (isPro) {
-        userInvoices = await db.invoice.findMany({
-            where: { userId: authUser.userId }
-        });
+        try {
+            userInvoices = await db.invoice.findMany({
+                where: { userId: authUser.userId }
+            });
+        } catch (e) {
+            console.error('Failed to fetch invoices in Dashboard. Schema might be pending migration:', e);
+            userInvoices = []; // Fallback gracefully
+        }
     }
 
     // --- Smart Greeting Logic ---
