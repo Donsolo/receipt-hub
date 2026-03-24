@@ -28,6 +28,14 @@ export default async function Dashboard() {
     // Fetch receipts for stats
     const receipts = await getReceipts("");
 
+    // Fetch invoices if Pro user
+    let userInvoices: any[] = [];
+    if (isPro) {
+        userInvoices = await db.invoice.findMany({
+            where: { userId: authUser.userId }
+        });
+    }
+
     // --- Smart Greeting Logic ---
     const tzTimeStr = new Date().toLocaleString("en-US", { timeZone: user?.timezone || 'America/New_York', hour: 'numeric', hour12: false });
     let currentHour = parseInt(tzTimeStr, 10);
@@ -142,6 +150,45 @@ export default async function Dashboard() {
                                 </div>
                             </div>
                         </Link>
+
+                        {/* Invoices (PRO ONLY) */}
+                        {isPro && (
+                            <Link href="/dashboard/invoices" className="block group h-full">
+                                <div className="bg-[var(--bg)] border border-[var(--border)] rounded-xl px-5 py-6 hover:bg-[var(--card-hover)] hover:-translate-y-1 hover:shadow-lg shadow-md transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                    <div className="flex justify-between items-start mb-4 relative z-10">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-12 w-12 shrink-0 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500/20 shadow-inner border border-indigo-500/10 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Invoices</h2>
+                                                <p className="text-[11px] text-[var(--muted)] font-medium uppercase tracking-wider mt-0.5">Billing Engine</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex-1 flex flex-col justify-end relative z-10 pt-2 border-t border-[var(--border)] mt-2">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <span className="block text-[10px] uppercase font-bold text-[var(--muted)] mb-1">Total Invoices</span>
+                                                <span className="text-xl font-bold text-[var(--text)]">{userInvoices.length}</span>
+                                            </div>
+                                            <div>
+                                                <span className="block text-[10px] uppercase font-bold text-[var(--muted)] mb-1">Paid / Pending</span>
+                                                <div className="flex items-center gap-1.5 text-sm font-semibold">
+                                                    <span className="text-emerald-500">{userInvoices.filter(i => i.status === 'PAID').length}</span>
+                                                    <span className="text-[var(--muted)] font-normal">/</span>
+                                                    <span className="text-amber-500">{userInvoices.filter(i => i.status !== 'PAID').length}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+                        )}
 
                         {/* Reports */}
                         <Link href="/dashboard/reports" className="block group h-full">

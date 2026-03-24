@@ -171,10 +171,12 @@ function NotificationBell() {
     );
 }
 
-export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boolean; role?: string }) {
+export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticated: boolean; role?: string; isPro?: boolean }) {
     const pathname = usePathname();
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    if (pathname?.startsWith('/invoice/')) return null;
 
     const handleLogout = async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
@@ -185,6 +187,7 @@ export default function Navbar({ isAuthenticated, role }: { isAuthenticated: boo
     const authLinks = [
         { href: '/dashboard', label: 'Dashboard' },
         { href: '/history', label: 'Receipts' },
+        ...(isPro ? [{ href: '/dashboard/invoices', label: 'Invoices' }] : []),
         { href: '/dashboard/connections', label: 'Network' },
         { href: '/dashboard/messages', label: 'Messages' },
         { href: '/dashboard/profile', label: 'Profile' }

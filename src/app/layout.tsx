@@ -79,6 +79,7 @@ export default async function RootLayout({
   const token = cookieStore.get('auth_token')?.value;
   let isAuthenticated = false;
   let userRole: string | undefined;
+  let isPro = false;
 
   let initialTheme: "dark" | "light" | "system" = "dark";
 
@@ -87,6 +88,7 @@ export default async function RootLayout({
     if (payload) {
       isAuthenticated = true;
       userRole = payload.role as string;
+      isPro = (payload.plan === "PRO" && payload.planStatus !== "inactive") || payload.role === "ADMIN" || payload.role === "SUPER_ADMIN";
 
       // Extract theme from DB
       const dbUser = await db.user.findUnique({
@@ -144,7 +146,7 @@ export default async function RootLayout({
                   }}
                 />
                 <NotificationToasts />
-                <Navbar isAuthenticated={isAuthenticated} role={userRole} />
+                <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} />
                 <div className="flex-1 flex flex-col w-full relative">
                   <main className="flex-grow w-full flex flex-col relative">
                     {children}
@@ -174,7 +176,7 @@ export default async function RootLayout({
                   }),
                 }}
               />
-              <Navbar isAuthenticated={isAuthenticated} role={userRole} />
+              <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} />
               <div className="flex-1 flex flex-col w-full relative">
                 <main className="flex-grow w-full flex flex-col relative">
                   {children}

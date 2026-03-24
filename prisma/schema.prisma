@@ -44,6 +44,7 @@ model User {
   pollVotes                PollVote[]
   receipts                 Receipt[]
   savedReceiptItems        SavedReceiptItem[]
+  invoices                 Invoice[]
 }
 
 model Category {
@@ -348,4 +349,57 @@ enum NotificationType {
   MESSAGE_RECEIVED
   SYSTEM
   ADMIN
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  CANCELLED
+}
+
+model Invoice {
+  id                 String            @id @default(cuid())
+  userId             String
+  clientName         String
+  clientEmail        String?
+  title              String
+  description        String?
+  status             InvoiceStatus     @default(DRAFT)
+  currency           String            @default("USD")
+  subtotal           Float
+  tax                Float?
+  total              Float
+  issueDate          DateTime
+  dueDate            DateTime?
+  notes              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  isConverted        Boolean           @default(false)
+  convertedReceiptId String?
+  publicToken        String?           @unique
+  publicTokenExpiresAt DateTime?
+  paymentConfirmed   Boolean           @default(false)
+  paymentConfirmedAt DateTime?
+  paymentSignature   String?
+  paymentMethodNote  String?
+  
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items              InvoiceLineItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model InvoiceLineItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  name        String
+  description String?
+  quantity    Int
+  unitPrice   Float
+  total       Float
+  
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
