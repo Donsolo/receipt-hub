@@ -38,7 +38,7 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
     const router = useRouter();
     const isEdit = !!initialData?.id;
 
-    const [step, setStep] = useState(1);
+    const [step, setStep] = useState(isEdit ? 3 : 1);
     const [isSaving, setIsSaving] = useState(false);
 
     // Step 1: Client Info
@@ -163,15 +163,25 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
                     </div>
                     {[1, 2, 3, 4].map((s) => (
                         <div key={s} className="relative z-10 flex flex-col items-center gap-2">
-                            <div className={clsx(
-                                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 shadow-sm",
-                                step === s ? "bg-blue-600 text-white shadow-blue-500/30 scale-110" : 
-                                step > s ? "bg-emerald-500 text-white" : "bg-[var(--card)] border-2 border-[var(--border)] text-[var(--muted)]"
-                            )}>
+                            <button 
+                                type="button"
+                                onClick={() => {
+                                    if (isEdit || s < step) {
+                                        setStep(s);
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }
+                                }}
+                                className={clsx(
+                                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                    step === s ? "bg-blue-600 text-white shadow-blue-500/30 scale-110" : 
+                                    step > s ? "bg-emerald-500 hover:bg-emerald-400 text-white cursor-pointer" : "bg-[var(--card)] border-2 border-[var(--border)] text-[var(--muted)]",
+                                    (isEdit || s < step) && step !== s ? "cursor-pointer hover:border-blue-400 hover:text-blue-500" : (step < s ? "cursor-default" : "")
+                                )}
+                            >
                                 {step > s ? (
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 ) : s}
-                            </div>
+                            </button>
                         </div>
                     ))}
                 </div>
