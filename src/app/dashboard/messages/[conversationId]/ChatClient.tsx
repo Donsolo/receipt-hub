@@ -397,9 +397,33 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                                     <div className="group relative">
                                         {msg.content && (
                                             <div className={`px-[14px] py-[10px] text-[15px] leading-relaxed relative ${isSelf ? 'bg-indigo-600 text-white rounded-[18px] rounded-br-[4px] shadow-sm' : 'bg-white dark:bg-[var(--card)] text-gray-800 dark:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] rounded-[18px] rounded-bl-[4px] shadow-sm'}`}>
-                                                {msg.content.split('\n').map((line: string, i: number) => (
-                                                    <span key={i}>{line}{i !== msg.content.split('\n').length - 1 && <br />}</span>
-                                                ))}
+                                                {msg.content.split('\n').map((line: string, i: number, arr: any[]) => {
+                                                    const urlRegex = /(https?:\/\/[^\s]+)/g;
+                                                    const parts = line.split(urlRegex);
+                                                    
+                                                    return (
+                                                        <span key={i}>
+                                                            {parts.map((part, j) => {
+                                                                if (part.match(urlRegex)) {
+                                                                    return (
+                                                                        <a 
+                                                                            key={j} 
+                                                                            href={part} 
+                                                                            target="_blank" 
+                                                                            rel="noopener noreferrer" 
+                                                                            className={isSelf ? "underline hover:text-indigo-200 break-all font-medium transition-colors" : "text-indigo-600 hover:text-indigo-800 underline dark:text-indigo-400 dark:hover:text-indigo-300 break-all font-medium transition-colors"}
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                        >
+                                                                            {part}
+                                                                        </a>
+                                                                    );
+                                                                }
+                                                                return <span key={j}>{part}</span>;
+                                                            })}
+                                                            {i !== arr.length - 1 && <br />}
+                                                        </span>
+                                                    );
+                                                })}
                                             </div>
                                         )}
 
