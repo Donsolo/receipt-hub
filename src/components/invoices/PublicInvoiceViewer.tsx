@@ -226,13 +226,26 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
     const isPaid = invoice.status === 'PAID';
 
     return (
-        <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col pt-8 sm:pt-16 pb-24 px-4 sm:px-6">
+        <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col pt-4 sm:pt-8 bg-gray-50/50 dark:bg-[#0b1220] print:bg-white print:dark:bg-white">
+            
+            {/* Print Toolbar */}
+            <div className="w-full flex justify-end px-4 sm:px-6 mb-4 print:hidden">
+                <button 
+                    onClick={() => window.print()}
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[var(--card)] hover:bg-gray-50 dark:hover:bg-white/5 text-gray-700 dark:text-[var(--text)] text-sm font-bold rounded-xl shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-all"
+                >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                    Print Invoice
+                </button>
+            </div>
+
+            <div className="flex-1 w-full flex flex-col pb-24 px-4 sm:px-6 print:p-0 print:m-0 print:block">
             
             {/* Main Premium Card */}
-            <div className="bg-white dark:bg-[var(--card)] rounded-3xl shadow-2xl shadow-indigo-500/5 ring-1 ring-black/5 dark:ring-white/5 overflow-hidden flex flex-col relative z-10 transition-all duration-500">
+            <div className="bg-white dark:bg-[var(--card)] rounded-3xl shadow-2xl shadow-indigo-500/5 ring-1 ring-black/5 dark:ring-white/5 overflow-hidden flex flex-col relative z-10 transition-all duration-500 print:shadow-none print:ring-0 print:rounded-none">
                 
                 {/* Header Strip */}
-                <div className="px-6 py-8 sm:p-10 border-b border-gray-100 dark:border-[var(--border)] relative overflow-hidden bg-gray-50/50 dark:bg-black/20">
+                <div className="px-6 py-8 sm:p-10 border-b border-gray-100 dark:border-[var(--border)] relative overflow-hidden bg-gray-50/50 dark:bg-black/20 print:bg-transparent print:border-gray-200">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                     
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative z-10">
@@ -278,10 +291,10 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                 </div>
 
                 {/* Dates & Reference Block */}
-                <div className="px-6 py-6 sm:px-10 grid grid-cols-2 md:grid-cols-4 gap-6 bg-white dark:bg-transparent border-b border-gray-100 dark:border-[var(--border)]">
+                <div className="px-6 py-6 sm:px-10 grid grid-cols-2 md:grid-cols-4 gap-6 bg-white dark:bg-transparent border-b border-gray-100 dark:border-[var(--border)] print:border-gray-200">
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-[var(--muted)] mb-1">Date Issued</p>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">{format(new Date(invoice.issueDate), 'MMM d, yyyy')}</p>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-[var(--muted)] print:text-gray-500 mb-1">Date Issued</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white print:text-black">{format(new Date(invoice.issueDate), 'MMM d, yyyy')}</p>
                     </div>
                     {invoice.dueDate && (
                         <div>
@@ -307,16 +320,16 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                                     <th className="py-3 text-xs font-bold text-gray-500 dark:text-[var(--muted)] uppercase tracking-wider text-right w-32">Amount</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50 dark:divide-[var(--border)]/50">
+                            <tbody className="divide-y divide-gray-50 dark:divide-[var(--border)]/50 print:divide-gray-200">
                                 {invoice.items.map((item) => (
-                                    <tr key={item.id} className="group">
+                                    <tr key={item.id} className="group print:break-inside-avoid">
                                         <td className="py-5">
-                                            <div className="font-semibold text-gray-900 dark:text-[var(--text)]">{item.name}</div>
-                                            {item.description && <div className="text-xs text-gray-500 dark:text-[var(--muted)] mt-1">{item.description}</div>}
+                                            <div className="font-semibold text-gray-900 dark:text-[var(--text)] print:text-black">{item.name}</div>
+                                            {item.description && <div className="text-xs text-gray-500 dark:text-[var(--muted)] print:text-gray-600 mt-1">{item.description}</div>}
                                         </td>
-                                        <td className="py-5 text-center text-sm font-medium text-gray-700 dark:text-[var(--text)]">{item.quantity}</td>
-                                        <td className="py-5 text-right text-sm font-medium text-gray-700 dark:text-[var(--text)]">{formatCurrency(item.unitPrice, invoice.currency)}</td>
-                                        <td className="py-5 text-right font-bold text-gray-900 dark:text-[var(--text)]">{formatCurrency(item.total, invoice.currency)}</td>
+                                        <td className="py-5 text-center text-sm font-medium text-gray-700 dark:text-[var(--text)] print:text-gray-800">{item.quantity}</td>
+                                        <td className="py-5 text-right text-sm font-medium text-gray-700 dark:text-[var(--text)] print:text-gray-800">{formatCurrency(item.unitPrice, invoice.currency)}</td>
+                                        <td className="py-5 text-right font-bold text-gray-900 dark:text-[var(--text)] print:text-black">{formatCurrency(item.total, invoice.currency)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -324,11 +337,11 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                     </div>
 
                     {/* Math Block */}
-                    <div className="mt-8 flex justify-end">
-                        <div className="w-full sm:w-80 bg-gray-50 dark:bg-black/20 rounded-2xl p-6 ring-1 ring-black/5 dark:ring-white/5">
+                    <div className="mt-8 flex justify-end print:break-inside-avoid">
+                        <div className="w-full sm:w-80 bg-gray-50 dark:bg-black/20 rounded-2xl p-6 ring-1 ring-black/5 dark:ring-white/5 print:bg-transparent print:ring-0 print:border-t print:border-gray-200 print:rounded-none">
                             <div className="flex justify-between items-center mb-3">
-                                <span className="text-sm text-gray-500 dark:text-[var(--muted)] font-medium">Subtotal</span>
-                                <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">{formatCurrency(invoice.subtotal, invoice.currency)}</span>
+                                <span className="text-sm text-gray-500 dark:text-[var(--muted)] font-medium print:text-gray-600">Subtotal</span>
+                                <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums print:text-black">{formatCurrency(invoice.subtotal, invoice.currency)}</span>
                             </div>
                             <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-[var(--border)]">
                                 <span className="text-sm text-gray-500 dark:text-[var(--muted)] font-medium">Tax</span>
@@ -353,7 +366,7 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                 </div>
 
                 {/* Footer Action Section */}
-                <div className="bg-gray-50 dark:bg-[#0b1220] px-6 py-8 sm:p-10 border-t border-gray-200 dark:border-[var(--border)] relative overflow-hidden">
+                <div className="bg-gray-50 dark:bg-[#0b1220] px-6 py-8 sm:p-10 border-t border-gray-200 dark:border-[var(--border)] relative overflow-hidden print:hidden">
                     {/* Success Conditionals */}
                     {isPaid || invoice.paymentConfirmed || isConfirmedLocal ? (
                         <div className="flex flex-col items-center justify-center text-center animate-in fade-in duration-500">
@@ -426,7 +439,7 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
             </div>
 
             {/* Verihub CTA (Watermark Footer) */}
-            <div className="mt-16 flex flex-col items-center justify-center text-center pb-8 transition-all duration-500">
+            <div className="mt-16 flex flex-col items-center justify-center text-center pb-8 transition-all duration-500 print:hidden">
                 <div className="flex flex-col items-center gap-4 bg-white/60 dark:bg-black/20 p-8 rounded-3xl ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-md max-w-sm w-full shadow-lg shadow-black/5">
                     <img src="/assets/text-logo.png" alt="Verihub" className="h-6 w-auto dark:invert mb-1" />
                     <h4 className="text-lg font-bold text-gray-900 dark:text-white">Start using Verihub</h4>
@@ -438,6 +451,7 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                 </div>
             </div>
 
+            </div>
         </div>
     );
 }
