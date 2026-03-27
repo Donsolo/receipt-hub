@@ -229,13 +229,21 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
         <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col pt-4 sm:pt-8 bg-gray-50/50 dark:bg-[#0b1220] print:bg-white print:dark:bg-white">
             
             {/* Print Toolbar */}
-            <div className="w-full flex justify-end px-4 sm:px-6 mb-4 print:hidden">
+            <div className="w-full flex justify-end items-center gap-3 px-4 sm:px-6 mb-4 print:hidden">
+                <a 
+                    href={`/api/public/invoice/${token}/pdf`}
+                    download
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 text-sm font-bold rounded-xl shadow-sm transition-all"
+                >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    Download PDF
+                </a>
                 <button 
                     onClick={() => window.print()}
                     className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[var(--card)] hover:bg-gray-50 dark:hover:bg-white/5 text-gray-700 dark:text-[var(--text)] text-sm font-bold rounded-xl shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-all"
                 >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                    Print Invoice
+                    Print
                 </button>
             </div>
 
