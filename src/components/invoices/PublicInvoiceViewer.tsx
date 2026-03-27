@@ -250,8 +250,10 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                     
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative z-10">
                         <div>
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4
-                                {isPaid ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20'}">
+                            <span className={clsx(
+                                "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4",
+                                isPaid ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20" : "bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20"
+                            )}>
                                 {isPaid ? 'Payment Complete' : 'Pending Payment'}
                             </span>
                             <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight">

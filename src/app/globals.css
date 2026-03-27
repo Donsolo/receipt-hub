@@ -49,6 +49,20 @@ body {
   --header-icon-hover-bg: #182338;
 }
 
+@media print {
+  :root, [data-theme="dark"], [data-theme="light"] {
+    --bg: #FFFFFF !important;
+    --card: #FFFFFF !important;
+    --card-hover: #FFFFFF !important;
+    --text: #000000 !important;
+    --muted: #4B5563 !important;
+    --border: #E5E7EB !important;
+    /* Maintain header overrides to explicitly be light for print if headers ever show up */
+    --header-bg: #FFFFFF !important;
+    --header-text: #000000 !important;
+  }
+}
+
 @theme inline {
   --color-bg-primary: var(--bg);
   --color-bg-card: var(--card);
