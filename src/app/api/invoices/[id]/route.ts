@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { db as prisma } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -114,6 +115,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             include: { items: true }
         });
 
+        revalidatePath('/dashboard/invoices');
         return NextResponse.json({ success: true, invoice: updatedInvoice }, { status: 200 });
 
     } catch (error: any) {
@@ -150,6 +152,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
             where: { id: invoice.id }
         });
 
+        revalidatePath('/dashboard/invoices');
         return NextResponse.json({ success: true, deletedId: invoice.id }, { status: 200 });
     } catch (error: any) {
         console.error('Delete Invoice Error:', error);

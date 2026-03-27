@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { db as prisma } from '@/lib/db';
 import crypto from 'crypto';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(req: Request) {
     try {
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
             }
         });
 
+        revalidatePath('/dashboard/invoices');
         return NextResponse.json({ success: true, invoice }, { status: 201 });
     } catch (error: any) {
         console.error('Create Invoice Error:', error);
