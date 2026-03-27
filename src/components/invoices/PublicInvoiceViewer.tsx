@@ -358,7 +358,10 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                                 <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">{formatCurrency(invoice.tax, invoice.currency)}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-base font-bold text-gray-900 dark:text-white">Total Due</span>
+                                <div className="flex flex-col">
+                                    <span className="text-base font-bold text-gray-900 dark:text-white">Total Due</span>
+                                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 dark:text-[var(--muted)]/80 uppercase tracking-widest mt-0.5">Pay Total</span>
+                                </div>
                                 <span className="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400 tabular-nums tracking-tight">
                                     {formatCurrency(invoice.total, invoice.currency)}
                                 </span>
