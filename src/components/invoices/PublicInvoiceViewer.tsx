@@ -351,7 +351,7 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-base font-bold text-gray-900 dark:text-white">Total Due</span>
-                                <span className="text-2xl font-black text-blue-600 dark:text-blue-400 tabular-nums tracking-tight">
+                                <span className="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400 tabular-nums tracking-tight">
                                     {formatCurrency(invoice.total, invoice.currency)}
                                 </span>
                             </div>

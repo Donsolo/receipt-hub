@@ -511,7 +511,7 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
 
                                 <div className="flex justify-between items-end pt-3 text-[var(--text)] border-t border-[var(--border)]">
                                     <span className="font-bold uppercase tracking-wider text-xs">Total Amount</span>
-                                    <span className="text-2xl font-black tabular-nums tracking-tight">${total.toFixed(2)}</span>
+                                    <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight">${total.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
