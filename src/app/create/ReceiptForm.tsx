@@ -821,14 +821,30 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                                     <div className="p-6 space-y-4">
                                         <div>
                                             <label className="block text-xs font-medium text-[var(--muted)] uppercase mb-2">Item Name</label>
-                                            <input
-                                                type="text"
-                                                autoFocus
-                                                value={item.description}
-                                                onChange={e => updateItem(item.id, 'description', e.target.value)}
-                                                className="w-full border border-[var(--border)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg text-sm px-4 py-3 bg-[var(--card)] text-[var(--text)]"
-                                                placeholder="Brief description..."
-                                            />
+                                            <div className="relative" ref={wrapperRef}>
+                                                <input
+                                                    type="text"
+                                                    autoFocus
+                                                    value={item.description}
+                                                    onChange={e => updateItem(item.id, 'description', e.target.value)}
+                                                    onKeyDown={e => handleKeyDown(e, item.id)}
+                                                    className="w-full border border-[var(--border)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg text-sm px-4 py-3 bg-[var(--card)] text-[var(--text)]"
+                                                    placeholder="Brief description..."
+                                                />
+                                                {features.smartCategories && activeInputId === item.id && suggestions.length > 0 && (
+                                                    <ul className="absolute z-[110] w-full bg-[var(--card)] border border-[var(--border)] mt-1 rounded-lg shadow-xl overflow-y-auto py-1 max-h-48">
+                                                        {suggestions.map((s, idx) => (
+                                                            <li
+                                                                key={idx}
+                                                                onClick={(e) => { e.stopPropagation(); handleSelectSuggestion(item.id, s); }}
+                                                                className={`px-4 py-2.5 text-sm cursor-pointer transition-colors ${idx === activeSuggestionIndex ? 'bg-blue-600 text-white' : 'text-[var(--text)] hover:bg-[var(--card-hover)]'}`}
+                                                            >
+                                                                {s}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>

@@ -1,9 +1,20 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
+
+function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+        return () => clearTimeout(handler);
+    }, [value, delay]);
+    return debouncedValue;
+}
 
 export interface InvoiceItem {
     id: string;
@@ -61,6 +72,45 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
     const [tax, setTax] = useState(initialData?.tax || 0);
     const [notes, setNotes] = useState(initialData?.notes || '');
 
+    // Smart Autofill State
+    const [activeInputId, setActiveInputId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+    const debouncedQuery = useDebounce(searchQuery, 250);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (!activeInputId) {
+                setSuggestions([]);
+                return;
+            }
+            try {
+                const queryStr = debouncedQuery ? debouncedQuery : "";
+                const res = await fetch(`/api/items/suggest?q=${encodeURIComponent(queryStr)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setSuggestions(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch suggestions", error);
+            }
+        };
+        fetchSuggestions();
+    }, [debouncedQuery, activeInputId]);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                setSuggestions([]);
+                setActiveInputId(null);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     // Calculations
     const subtotal = useMemo(() => {
         return items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unitPrice)), 0);
@@ -80,6 +130,37 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
 
     const updateItem = (id: string, field: keyof InvoiceItem, value: any) => {
         setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+
+        if (field === 'name') {
+            setActiveInputId(id);
+            setSearchQuery(value as string);
+            setActiveSuggestionIndex(-1);
+            if (!value) setSuggestions([]);
+        }
+    };
+
+    const handleSelectSuggestion = (id: string, value: string) => {
+        updateItem(id, 'name', value);
+        setSuggestions([]);
+        setActiveInputId(null);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent, id: string) => {
+        if (!activeInputId || suggestions.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActiveSuggestionIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveSuggestionIndex(prev => (prev > 0 ? prev - 1 : -1));
+        } else if (e.key === 'Enter' && activeSuggestionIndex >= 0) {
+            e.preventDefault();
+            handleSelectSuggestion(id, suggestions[activeSuggestionIndex]);
+        } else if (e.key === 'Escape') {
+            setSuggestions([]);
+            setActiveInputId(null);
+        }
     };
 
     const handleNext = () => {
@@ -376,14 +457,30 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
                                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                                         <div className="sm:col-span-12">
                                             <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1.5">Item Name</label>
-                                            <input 
-                                                type="text" 
-                                                value={item.name} 
-                                                onChange={(e) => updateItem(item.id, 'name', e.target.value)}
-                                                placeholder="e.g. Server Hosting (1 Year)"
-                                                className="w-full bg-transparent border-b border-[var(--border)] focus:border-blue-500 text-[var(--text)] px-1 py-2 outline-none transition-colors font-semibold"
-                                                autoFocus={index === items.length - 1}
-                                            />
+                                            <div className="relative" ref={wrapperRef}>
+                                                <input 
+                                                    type="text" 
+                                                    value={item.name} 
+                                                    onChange={(e) => updateItem(item.id, 'name', e.target.value)}
+                                                    onKeyDown={e => handleKeyDown(e, item.id)}
+                                                    placeholder="e.g. Server Hosting (1 Year)"
+                                                    className="w-full bg-transparent border-b border-[var(--border)] focus:border-blue-500 text-[var(--text)] px-1 py-2 outline-none transition-colors font-semibold"
+                                                    autoFocus={index === items.length - 1}
+                                                />
+                                                {isPro && activeInputId === item.id && suggestions.length > 0 && (
+                                                    <ul className="absolute z-[110] w-full bg-[var(--card)] border border-[var(--border)] mt-2 rounded-lg shadow-xl overflow-y-auto py-1 max-h-48 text-left">
+                                                        {suggestions.map((s, idx) => (
+                                                            <li
+                                                                key={idx}
+                                                                onClick={(e) => { e.stopPropagation(); handleSelectSuggestion(item.id, s); }}
+                                                                className={`px-4 py-2.5 text-sm cursor-pointer transition-colors ${idx === activeSuggestionIndex ? 'bg-blue-600 text-white' : 'text-[var(--text)] hover:bg-[var(--card-hover)]'}`}
+                                                            >
+                                                                {s}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="sm:col-span-3">
                                             <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1.5">Qty</label>
