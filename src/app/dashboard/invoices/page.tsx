@@ -114,7 +114,10 @@ export default async function InvoicesHub() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="font-semibold text-[var(--text)]">{inv.title}</div>
-                                                <div className="text-xs text-[var(--muted)] mt-0.5">{inv.clientName}</div>
+                                                <div className="text-xs text-[var(--muted)] mt-0.5">
+                                                    {inv.invoiceNumber && <span className="font-mono text-[var(--muted)]/80 mr-1.5">#{inv.invoiceNumber}</span>}
+                                                    {inv.clientName}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-[var(--muted)] whitespace-nowrap">
                                                 {format(new Date(inv.issueDate), 'MMM d, yyyy')}

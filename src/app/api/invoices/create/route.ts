@@ -4,6 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { db as prisma } from '@/lib/db';
 import crypto from 'crypto';
 import { revalidatePath } from 'next/cache';
+import { getNextSequenceData } from '@/lib/actions';
 
 export async function POST(req: Request) {
     try {
@@ -41,6 +42,9 @@ export async function POST(req: Request) {
         const calculatedTax = Number(tax) || 0;
         const calculatedTotal = calculatedSubtotal + calculatedTax;
 
+        // Generate Document Sequence Number
+        const seqData = await getNextSequenceData(user.userId, 'INVOICE');
+
         // Generate safe 30-day URL Token
         const tokenValue = crypto.randomUUID();
         const expirationDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -48,6 +52,8 @@ export async function POST(req: Request) {
         const invoice = await prisma.invoice.create({
             data: {
                 userId: user.userId,
+                invoiceNumber: seqData.documentNumber,
+                sequenceNumber: seqData.sequenceNumber,
                 clientName,
                 clientEmail: clientEmail || null,
                 clientCompany: clientCompany || null,

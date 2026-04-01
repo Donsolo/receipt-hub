@@ -45,20 +45,53 @@ export async function updateBusinessProfile(data: {
     revalidatePath("/receipt/[id]", "page");
 }
 
-export async function getNextReceiptNumber() {
-    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
-    const prefix = `RH-${dateStr}-`;
-
-    const lastReceipt = await db.receipt.findFirst({
-        where: { receiptNumber: { startsWith: prefix } },
-        orderBy: { receiptNumber: "desc" },
+export async function generateDocumentPrefix(userId: string) {
+    const user = await db.user.findUnique({
+        where: { id: userId },
+        select: { plan: true, businessName: true }
     });
 
-    if (lastReceipt && lastReceipt.receiptNumber) {
-        const lastNum = parseInt(lastReceipt.receiptNumber.split("-").pop() || "0", 10);
-        return `${prefix}${String(lastNum + 1).padStart(4, "0")}`;
+    if (user?.plan === 'PRO' && user.businessName) {
+        const alpha = user.businessName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        if (alpha.length >= 2) {
+            return `${alpha.substring(0, 3)}-`;
+        }
     }
-    return `${prefix}0001`;
+    return 'VH-';
+}
+
+export async function getNextSequenceData(userId: string, type: 'RECEIPT' | 'INVOICE') {
+    let lastSeq = 0;
+    
+    if (type === 'RECEIPT') {
+        const lastReceipt = await db.receipt.findFirst({
+            where: { userId, sequenceNumber: { not: null } },
+            orderBy: { sequenceNumber: 'desc' }
+        });
+        if (lastReceipt?.sequenceNumber) lastSeq = lastReceipt.sequenceNumber;
+    } else {
+        const lastInvoice = await db.invoice.findFirst({
+            where: { userId, sequenceNumber: { not: null } },
+            orderBy: { sequenceNumber: 'desc' }
+        });
+        if (lastInvoice?.sequenceNumber) lastSeq = lastInvoice.sequenceNumber;
+    }
+
+    if (lastSeq === 0) lastSeq = 8224;
+
+    const nextSeq = lastSeq + 1;
+    const prefix = await generateDocumentPrefix(userId);
+
+    return {
+        sequenceNumber: nextSeq,
+        documentNumber: `${prefix}${nextSeq}`
+    };
+}
+
+export async function getNextReceiptNumber(userId?: string) {
+    if (!userId) return 'VH-8225';
+    const data = await getNextSequenceData(userId, 'RECEIPT');
+    return data.documentNumber;
 }
 
 export async function createReceipt(formData: {
@@ -83,10 +116,18 @@ export async function createReceipt(formData: {
 
     if (!user) throw new Error("Unauthorized");
 
+    let sequenceNumberValue = null;
+    if (formData.receiptNumber) {
+        const parts = formData.receiptNumber.split('-');
+        const parsed = parseInt(parts[parts.length - 1], 10);
+        if (!isNaN(parsed)) sequenceNumberValue = parsed;
+    }
+
     const receipt = await db.receipt.create({
         data: {
             userId: user.userId,
             receiptNumber: formData.receiptNumber,
+            sequenceNumber: sequenceNumberValue,
             date: formData.date,
             clientName: formData.clientName,
             categoryId: formData.categoryId,

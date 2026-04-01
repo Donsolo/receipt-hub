@@ -62,6 +62,7 @@ model Category {
 model Receipt {
   id              String              @id @default(cuid())
   receiptNumber   String?             @unique
+  sequenceNumber  Int?
   userId          String
   categoryId      String?
   imageUrl        String?
@@ -360,6 +361,8 @@ enum InvoiceStatus {
 
 model Invoice {
   id                 String            @id @default(cuid())
+  invoiceNumber      String?           @unique
+  sequenceNumber     Int?
   userId             String
   clientName         String
   clientEmail        String?
