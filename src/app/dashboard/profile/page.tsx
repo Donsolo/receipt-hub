@@ -17,6 +17,8 @@ type UserProfile = {
     name?: string | null;
     role: string;
     timezone: string;
+    plan?: string;
+    planStatus?: string;
 };
 
 export default function ProfilePage() {
