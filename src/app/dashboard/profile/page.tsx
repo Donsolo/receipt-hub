@@ -322,8 +322,8 @@ export default function ProfilePage() {
                                 <form onSubmit={handleSave} className="flex flex-col flex-1">
                                     <div className="px-6 sm:px-8 py-6 space-y-6 flex-1">
 
-                                        {/* 1. Business Logo (Admins Only) */}
-                                        {(role === 'ADMIN' || role === 'SUPER_ADMIN') && (
+                                        {/* 1. Business Logo (Pro Feature) */}
+                                        {((profile.plan === 'PRO' && profile.planStatus !== 'inactive') || role === 'ADMIN' || role === 'SUPER_ADMIN') && (
                                             <div>
                                                 <label className="block text-sm font-medium text-[var(--text)] mb-2">
                                                     Business Logo <span className="inline-flex items-center ml-1.5 px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">Pro</span>
