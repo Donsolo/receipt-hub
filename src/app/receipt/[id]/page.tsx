@@ -75,6 +75,11 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
                             <h1 className="text-xl font-bold text-gray-900">
                                 {receipt.user?.businessName || receipt.user?.email?.split('@')[0] || business.businessName}
                             </h1>
+                            {(receipt.user?.businessRegistrationNumber || business.businessRegistrationNumber) && (
+                                <p className="text-[11px] font-medium text-[var(--muted)] mt-0.5">
+                                    Reg/EIN no: {receipt.user?.businessRegistrationNumber || business.businessRegistrationNumber}
+                                </p>
+                            )}
                             {(receipt.user?.businessAddress || business.businessAddress) && (
                                 <p className="mt-1 text-sm text-[var(--muted)] whitespace-pre-wrap leading-relaxed">{receipt.user?.businessAddress || business.businessAddress}</p>
                             )}
@@ -123,13 +128,28 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
                             <span className="text-[var(--muted)]">Subtotal</span>
                             <span className="text-gray-900 font-medium tabular-nums">{Number(receipt.subtotal).toFixed(2)}</span>
                         </div>
+                        {receipt.discountType && receipt.discountType !== 'none' && (
+                            <div className="flex justify-between text-sm items-center">
+                                <span className="text-red-500 font-medium tracking-tight">
+                                    Discount {receipt.discountType === 'percent' ? `(${Number(receipt.discountValue)}%)` : ''}
+                                </span>
+                                <span className="text-red-500 font-medium tabular-nums">
+                                    -{Number(receipt.discountType === 'percent' ? receipt.subtotal * (receipt.discountValue / 100) : receipt.discountValue).toFixed(2)}
+                                </span>
+                            </div>
+                        )}
                         {receipt.taxType !== 'none' && (
                             <div className="flex justify-between text-sm items-center">
                                 <span className="text-[var(--muted)]">
                                     Tax {receipt.taxType === 'percent' ? `(${Number(receipt.taxValue)}%)` : ''}
                                 </span>
                                 <span className="text-gray-900 font-medium tabular-nums">
-                                    {(Number(receipt.total) - Number(receipt.subtotal)).toFixed(2)}
+                                    {/* Compute exact tax value directly from stored metrics to prevent backward calculation issues */}
+                                    {Number(
+                                        receipt.taxType === 'percent' 
+                                            ? Math.max(0, receipt.subtotal - (receipt.discountType === 'percent' ? receipt.subtotal * (receipt.discountValue / 100) : (receipt.discountType === 'flat' ? receipt.discountValue : 0))) * (receipt.taxValue / 100)
+                                            : receipt.taxValue
+                                    ).toFixed(2)}
                                 </span>
                             </div>
                         )}

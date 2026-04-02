@@ -26,6 +26,7 @@ export async function updateBusinessProfile(data: {
     businessPhone?: string;
     businessEmail?: string;
     logoPath?: string;
+    businessRegistrationNumber?: string;
 }) {
     const profile = await db.businessProfile.findFirst();
     if (profile) {
@@ -37,6 +38,7 @@ export async function updateBusinessProfile(data: {
                 businessPhone: data.businessPhone ?? "",
                 businessEmail: data.businessEmail ?? "",
                 logoPath: data.logoPath ?? null,
+                businessRegistrationNumber: data.businessRegistrationNumber ?? null,
             }
         });
     }
@@ -101,6 +103,8 @@ export async function createReceipt(formData: {
     notes?: string;
     taxType: string;
     taxValue?: number;
+    discountType?: string;
+    discountValue?: number;
     categoryId?: string | null;
     subtotal: number;
     total: number;
@@ -134,6 +138,8 @@ export async function createReceipt(formData: {
             notes: formData.notes,
             taxType: formData.taxType,
             taxValue: formData.taxValue,
+            discountType: formData.discountType,
+            discountValue: formData.discountValue,
             subtotal: formData.subtotal,
             total: formData.total,
             items: {
@@ -223,7 +229,7 @@ export async function getReceipt(id: string) {
             user: {
                 select: {
                     email: true,
-                    ...({ businessName: true, businessPhone: true, businessAddress: true, businessLogoPath: true } as any)
+                    ...({ businessName: true, businessPhone: true, businessAddress: true, businessLogoPath: true, businessRegistrationNumber: true } as any)
                 }
             }
         },
@@ -238,6 +244,8 @@ export async function updateReceipt(id: string, formData: {
     notes?: string;
     taxType: string;
     taxValue?: number;
+    discountType?: string;
+    discountValue?: number;
     categoryId?: string | null;
     subtotal: number;
     total: number;
@@ -261,6 +269,8 @@ export async function updateReceipt(id: string, formData: {
             notes: formData.notes,
             taxType: formData.taxType,
             taxValue: formData.taxValue,
+            discountType: formData.discountType,
+            discountValue: formData.discountValue,
             subtotal: formData.subtotal,
             total: formData.total,
             items: {

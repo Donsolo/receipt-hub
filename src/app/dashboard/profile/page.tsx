@@ -14,6 +14,7 @@ type UserProfile = {
     businessPhone: string | null;
     businessAddress: string | null;
     businessLogoPath: string | null;
+    businessRegistrationNumber: string | null;
     name?: string | null;
     role: string;
     timezone: string;
@@ -46,6 +47,7 @@ export default function ProfilePage() {
     // Form state
     const [name, setName] = useState('');
     const [businessName, setBusinessName] = useState('');
+    const [businessRegistrationNumber, setBusinessRegistrationNumber] = useState('');
     const [businessPhone, setBusinessPhone] = useState('');
     const [businessAddress, setBusinessAddress] = useState('');
     const [businessLogoPath, setBusinessLogoPath] = useState<string | null>(null);
@@ -122,6 +124,7 @@ export default function ProfilePage() {
                     setBusinessPhone(data.businessPhone || '');
                     setBusinessAddress(data.businessAddress || '');
                     setBusinessLogoPath(data.businessLogoPath || null);
+                    setBusinessRegistrationNumber(data.businessRegistrationNumber || '');
                     setTimezone(data.timezone || 'America/New_York');
 
                     // Fetch notification preferences directly after profile works
@@ -171,6 +174,7 @@ export default function ProfilePage() {
                     businessPhone: businessPhone.trim() || null,
                     businessAddress: businessAddress.trim() || null,
                     businessLogoPath: businessLogoPath,
+                    businessRegistrationNumber: businessRegistrationNumber.trim() || null,
                     timezone: timezone,
                 })
             });
@@ -184,6 +188,7 @@ export default function ProfilePage() {
                     businessPhone: updated.businessPhone,
                     businessAddress: updated.businessAddress,
                     businessLogoPath: updated.businessLogoPath,
+                    businessRegistrationNumber: updated.businessRegistrationNumber,
                     timezone: updated.timezone || 'America/New_York',
                     role: updated.role || role // retain role in UI state
                 } : null);
@@ -238,6 +243,7 @@ export default function ProfilePage() {
         businessPhone !== (profile.businessPhone || '') ||
         businessAddress !== (profile.businessAddress || '') ||
         businessLogoPath !== profile.businessLogoPath ||
+        businessRegistrationNumber !== (profile.businessRegistrationNumber || '') ||
         timezone !== (profile.timezone || 'America/New_York');
 
     return (
@@ -381,6 +387,24 @@ export default function ProfilePage() {
                                             <p className="mt-2 text-[12px] text-[var(--muted)]">
                                                 Preview text will reflect this name on PDFs.
                                             </p>
+                                        </div>
+
+                                        {/* 2b. Business Registration Number */}
+                                        <div>
+                                            <label htmlFor="businessRegistrationNumber" className="block text-sm font-medium text-[var(--text)]">
+                                                EIN/Registration Number <span className="text-[var(--muted)] font-normal ml-1">(optional)</span>
+                                            </label>
+                                            <div className="mt-1.5">
+                                                <input
+                                                    type="text"
+                                                    id="businessRegistrationNumber"
+                                                    name="businessRegistrationNumber"
+                                                    value={businessRegistrationNumber}
+                                                    onChange={(e) => setBusinessRegistrationNumber(e.target.value)}
+                                                    className="block w-full rounded-md border border-[var(--border)] shadow-inner bg-[var(--card)] px-4 py-2.5 text-[var(--text)] placeholder-gray-500 focus:border-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:bg-[var(--card-hover)] transition-colors text-[15px]"
+                                                    placeholder="ein, contractor no, etc"
+                                                />
+                                            </div>
                                         </div>
 
                                         {/* 2. Business Phone */}

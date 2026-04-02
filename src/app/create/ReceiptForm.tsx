@@ -23,6 +23,8 @@ export interface ReceiptData {
     notes?: string | null;
     taxType: string;
     taxValue?: number | null; // Decimal | null
+    discountType?: string;
+    discountValue?: number | null;
     categoryId?: string | null;
     items?: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
 }
@@ -115,6 +117,8 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
     // Totals
     const [taxType, setTaxType] = useState<"none" | "percent" | "flat">(initialData.taxType as any || "none");
     const [taxValue, setTaxValue] = useState<number>(initialData.taxValue ? Number(initialData.taxValue) : 0);
+    const [discountType, setDiscountType] = useState<"none" | "percent" | "flat">(initialData.discountType as any || "none");
+    const [discountValue, setDiscountValue] = useState<number>(initialData.discountValue ? Number(initialData.discountValue) : 0);
 
     // Auto-Populate State
     const [activeInputId, setActiveInputId] = useState<string | null>(null);
@@ -161,14 +165,24 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
     // Derived state
     const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
 
+    let calculatedDiscount = 0;
+    // Assume `discountType` and `discountValue` exist in state
+    if (discountType === "percent") {
+        calculatedDiscount = subtotal * (discountValue / 100);
+    } else if (discountType === "flat") {
+        calculatedDiscount = discountValue;
+    }
+
+    const subtotalAfterDiscount = Math.max(0, subtotal - calculatedDiscount);
+
     let calculatedTax = 0;
     if (taxType === "percent") {
-        calculatedTax = subtotal * (taxValue / 100);
+        calculatedTax = subtotalAfterDiscount * (taxValue / 100);
     } else if (taxType === "flat") {
         calculatedTax = taxValue;
     }
 
-    const total = subtotal + calculatedTax;
+    const total = subtotalAfterDiscount + calculatedTax;
 
     // Update line totals when qty/price changes
     const updateItem = (id: string, field: keyof ReceiptItem, value: any) => {
@@ -241,6 +255,8 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
             notes,
             taxType,
             taxValue,
+            discountType,
+            discountValue,
             subtotal,
             total,
             items: items.map(({ description, quantity, unitPrice, lineTotal }) => ({
@@ -603,6 +619,34 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                             <div className="flex justify-between items-center text-sm text-[var(--muted)]">
                                 <span>Subtotal</span>
                                 <span className="font-medium text-[var(--text)]">{subtotal.toFixed(2)}</span>
+                            </div>
+
+                            <div className="flex justify-between items-center text-sm text-[var(--muted)]">
+                                <div className="flex items-center space-x-3">
+                                    <label htmlFor="discountType" className="font-medium text-red-400">Discount:</label>
+                                    <select
+                                        id="discountType"
+                                        value={discountType}
+                                        onChange={e => setDiscountType(e.target.value as any)}
+                                        className="text-sm border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500/40 py-1 pl-2 pr-8 bg-[var(--card)] text-[var(--text)] transition-all duration-150"
+                                    >
+                                        <option value="none">None</option>
+                                        <option value="percent">%</option>
+                                        <option value="flat">Flat ($)</option>
+                                    </select>
+                                    {discountType !== 'none' && (
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            value={discountValue}
+                                            onChange={e => setDiscountValue(Number(e.target.value))}
+                                            placeholder="0.00"
+                                            className="w-20 text-sm border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-blue-500/40 py-1 px-2 text-right bg-[var(--card)] text-[var(--text)] transition-all duration-150"
+                                        />
+                                    )}
+                                </div>
+                                <span className="font-medium text-red-400">-{calculatedDiscount.toFixed(2)}</span>
                             </div>
 
                             <div className="flex justify-between items-center text-sm text-[var(--muted)]">

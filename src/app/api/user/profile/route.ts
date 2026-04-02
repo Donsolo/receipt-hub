@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
         const profile = await db.user.findUnique({
             where: { id: user.userId },
-            select: { email: true, createdAt: true, plan: true, planStatus: true, ...({ name: true, businessName: true, businessPhone: true, businessAddress: true, businessLogoPath: true, timezone: true } as any) }
+            select: { email: true, createdAt: true, plan: true, planStatus: true, ...({ name: true, businessName: true, businessPhone: true, businessAddress: true, businessLogoPath: true, businessRegistrationNumber: true, timezone: true } as any) }
         });
 
         if (!profile) return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -42,7 +42,7 @@ export async function PATCH(request: Request) {
         try { await ensureActivated(user); } catch (e: any) { if (e.message === 'CORE_ACTIVATION_REQUIRED') return NextResponse.json({ error: 'Core activation required' }, { status: 403 }); throw e; }
 
         const body = await request.json();
-        const { name, businessName, businessPhone, businessAddress, businessLogoPath, timezone } = body;
+        const { name, businessName, businessPhone, businessAddress, businessLogoPath, businessRegistrationNumber, timezone } = body;
 
         const updatedUser = await db.user.update({
             where: { id: user.userId },
@@ -53,6 +53,7 @@ export async function PATCH(request: Request) {
                     businessPhone: businessPhone || null,
                     businessAddress: businessAddress || null,
                     businessLogoPath: businessLogoPath || null,
+                    businessRegistrationNumber: businessRegistrationNumber || null,
                     timezone: timezone || 'America/New_York',
                 } as any)
             },

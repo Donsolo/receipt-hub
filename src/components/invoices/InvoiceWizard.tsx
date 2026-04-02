@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
+import { compressToWebp } from '@/lib/imageOpt';
 
 function useDebounce<T>(value: T, delay: number): T {
     const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -26,6 +27,9 @@ export interface InvoiceItem {
 
 export interface InvoiceWizardProps {
     isPro?: boolean;
+    businessName?: string;
+    businessLogoPath?: string;
+    businessRegistrationNumber?: string;
     initialData?: {
         id?: string;
         clientName: string;
@@ -39,13 +43,16 @@ export interface InvoiceWizardProps {
         issueDate: string;
         dueDate: string;
         notes: string;
+        attachedPhotos?: string[];
         tax: number;
+        discountType?: string;
+        discountValue?: number;
         items: InvoiceItem[];
         status?: string;
     };
 }
 
-export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWizardProps) {
+export default function InvoiceWizard({ isPro = false, businessName, businessLogoPath, businessRegistrationNumber, initialData }: InvoiceWizardProps) {
     const router = useRouter();
     const isEdit = !!initialData?.id;
 
@@ -70,7 +77,10 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
     // Step 3: Items
     const [items, setItems] = useState<InvoiceItem[]>(initialData?.items?.length ? initialData.items : [{ id: '1', name: '', description: '', quantity: 1, unitPrice: 0 }]);
     const [tax, setTax] = useState(initialData?.tax || 0);
+    const [discountType, setDiscountType] = useState<"none" | "percent" | "flat">(initialData?.discountType as any || "none");
+    const [discountValue, setDiscountValue] = useState<number>(initialData?.discountValue || 0);
     const [notes, setNotes] = useState(initialData?.notes || '');
+    const [attachedPhotos, setAttachedPhotos] = useState<string[]>(initialData?.attachedPhotos || []);
 
     // Smart Autofill State
     const [activeInputId, setActiveInputId] = useState<string | null>(null);
@@ -116,7 +126,17 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
         return items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unitPrice)), 0);
     }, [items]);
 
-    const total = subtotal + Number(tax);
+    const calculatedDiscount = useMemo(() => {
+        if (discountType === "percent") {
+            return subtotal * ((discountValue || 0) / 100);
+        } else if (discountType === "flat") {
+            return discountValue || 0;
+        }
+        return 0;
+    }, [subtotal, discountType, discountValue]);
+
+    const subtotalAfterDiscount = Math.max(0, subtotal - calculatedDiscount);
+    const total = subtotalAfterDiscount + Number(tax);
 
     // Handlers
     const addItem = () => {
@@ -163,6 +183,21 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
         }
     };
 
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (!files.length) return;
+
+        try {
+            const compressedPhotos = await Promise.all(
+                files.map(file => compressToWebp(file))
+            );
+            setAttachedPhotos(prev => [...prev, ...compressedPhotos]);
+        } catch (error) {
+            console.error("Failed to compress and upload photos", error);
+            alert("Failed to process one or more photos. Please try again.");
+        }
+    };
+
     const handleNext = () => {
         if (step === 1 && !clientName.trim()) return alert('Client Name is required');
         if (step === 2 && (!title.trim() || !issueDate)) return alert('Title and Issue Date are required');
@@ -197,8 +232,11 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
                 description,
                 issueDate: new Date(issueDate).toISOString(),
                 dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
+                discountType,
+                discountValue,
                 tax: Number(tax),
                 notes,
+                attachedPhotos,
                 status: targetStatus,
                 items
             };
@@ -545,6 +583,25 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
 
                             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-[var(--border)] pb-6 mb-6">
                                 <div>
+                                    {/* Sender Info / Business Profile */}
+                                    {(businessLogoPath || businessName) && (
+                                        <div className="flex items-center gap-3 mb-6">
+                                            {businessLogoPath && (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img src={businessLogoPath} alt="Business Logo" className="h-10 w-auto object-contain rounded-lg ring-1 ring-black/5 dark:ring-white/10 p-1 bg-white dark:bg-black/20" />
+                                            )}
+                                            {businessName && (
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-extrabold text-[var(--text)] tracking-tight leading-none">{businessName}</span>
+                                                    {businessRegistrationNumber && (
+                                                        <span className="text-[11px] text-[var(--muted)] font-medium mt-1">Reg/EIN no: {businessRegistrationNumber}</span>
+                                                    )}
+                                                    <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-bold mt-1">Invoice Sender</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <h3 className="text-sm font-bold text-[var(--muted)] uppercase tracking-wider mb-2">Billed To</h3>
                                     {clientCompany && <p className="text-lg font-bold text-[var(--text)] leading-tight">{clientCompany}</p>}
                                     <p className={clsx("font-bold text-[var(--text)]", clientCompany ? "text-sm text-[var(--muted)] font-medium mt-0.5" : "text-lg")}>{clientName}</p>
@@ -589,6 +646,41 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
                                     <span>Subtotal</span>
                                     <span className="tabular-nums">${subtotal.toFixed(2)}</span>
                                 </div>
+
+                                <div className="flex items-center justify-between text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[var(--muted)] text-xs font-bold uppercase tracking-wider">Discount</span>
+                                        <select
+                                            value={discountType}
+                                            onChange={(e) => setDiscountType(e.target.value as any)}
+                                            className="bg-[var(--card)] border border-[var(--border)] rounded px-1.5 py-1 text-xs outline-none text-[var(--text)]"
+                                        >
+                                            <option value="none">None</option>
+                                            <option value="percent">%</option>
+                                            <option value="flat">$ Flat</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex items-center gap-2 max-w-[120px]">
+                                        {discountType !== 'none' && (
+                                            <>
+                                                {discountType === 'flat' && <span className="text-[var(--muted)]">$</span>}
+                                                {discountType === 'percent' && <span className="text-[var(--muted)]">%</span>}
+                                                <input 
+                                                    type="number" 
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={discountValue === 0 ? '' : discountValue}
+                                                    onChange={(e) => setDiscountValue(Number(e.target.value))}
+                                                    className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-2 py-1 outline-none text-right tabular-nums focus:border-blue-500 transition-colors"
+                                                    placeholder="0.00"
+                                                />
+                                            </>
+                                        )}
+                                        <span className="text-red-400 font-medium tabular-nums w-16 text-right">
+                                            -{calculatedDiscount.toFixed(2)}
+                                        </span>
+                                    </div>
+                                </div>
                                 
                                 <div className="flex items-center justify-between text-sm">
                                     <span className="text-[var(--muted)]">Calculated Tax</span>
@@ -622,6 +714,34 @@ export default function InvoiceWizard({ isPro = false, initialData }: InvoiceWiz
                                 rows={2}
                                 className="w-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 placeholder:text-[var(--muted)]/50 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all resize-none text-sm"
                             />
+                        </div>
+
+                        {/* Attachments Section */}
+                        <div className="pt-2">
+                            <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-2">Attachments (Photos Only)</label>
+                            <label className="flex items-center justify-center w-full min-h-[80px] border-2 border-dashed border-[var(--border)] rounded-2xl cursor-pointer hover:bg-[var(--card)] hover:border-blue-500/50 transition-all text-center p-6 group">
+                                <span className="text-sm font-semibold text-[var(--muted)] group-hover:text-blue-500 transition-colors">
+                                    Click here to upload photos
+                                </span>
+                                <input type="file" multiple accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                            </label>
+                            
+                            {attachedPhotos.length > 0 && (
+                                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-4">
+                                    {attachedPhotos.map((photo, i) => (
+                                        <div key={i} className="relative group rounded-xl overflow-hidden shadow-sm border border-[var(--border)] aspect-square bg-[var(--card)]">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={photo} alt="Attachment" className="w-full h-full object-cover" />
+                                            <button 
+                                                onClick={() => setAttachedPhotos(prev => prev.filter((_, idx) => idx !== i))}
+                                                className="absolute top-1 right-1 bg-red-500/90 hover:bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                     </div>

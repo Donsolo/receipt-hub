@@ -23,6 +23,7 @@ model User {
   businessName             String?
   businessPhone            String?
   businessLogoPath         String?
+  businessRegistrationNumber String?
   name                     String?
   theme                    String                    @default("dark")
   timezone                 String                    @default("America/New_York")
@@ -71,6 +72,8 @@ model Receipt {
   notes           String?
   taxType         String              @default("none")
   taxValue        Float?
+  discountType    String              @default("none")
+  discountValue   Float?
   subtotal        Float               @default(0)
   total           Float               @default(0)
   createdAt       DateTime            @default(now())
@@ -104,7 +107,8 @@ model BusinessProfile {
   businessAddress String?
   businessPhone   String?
   businessEmail   String?
-  logoPath        String?
+  logoPath                 String?
+  businessRegistrationNumber String?
 }
 
 model Connection {
@@ -374,6 +378,8 @@ model Invoice {
   description        String?
   status             InvoiceStatus     @default(DRAFT)
   currency           String            @default("USD")
+  discountType       String            @default("none")
+  discountValue      Float?
   subtotal           Float
   tax                Float?
   total              Float
@@ -390,6 +396,7 @@ model Invoice {
   paymentConfirmedAt DateTime?
   paymentSignature   String?
   paymentMethodNote  String?
+  attachedPhotos     Json?             @default("[]")
   
   user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   items              InvoiceLineItem[]

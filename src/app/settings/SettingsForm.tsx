@@ -11,6 +11,7 @@ interface BusinessProfile {
     businessPhone: string | null;
     businessEmail: string | null;
     logoPath: string | null;
+    businessRegistrationNumber?: string | null;
 }
 
 export default function SettingsForm({ initialData }: { initialData: BusinessProfile }) {
@@ -52,6 +53,7 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
             businessAddress: formData.get("businessAddress") as string,
             businessPhone: formData.get("businessPhone") as string,
             businessEmail: formData.get("businessEmail") as string,
+            businessRegistrationNumber: formData.get("businessRegistrationNumber") as string,
             logoPath: logo || undefined, // from state
         };
 
@@ -112,6 +114,21 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
                     id="businessName"
                     required
                     defaultValue={initialData.businessName}
+                    className="block w-full border-[var(--border)] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)]"
+                />
+            </div>
+
+            {/* Business Registration Number */}
+            <div>
+                <label htmlFor="businessRegistrationNumber" className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">
+                    EIN/Registration Number
+                </label>
+                <input
+                    type="text"
+                    name="businessRegistrationNumber"
+                    id="businessRegistrationNumber"
+                    defaultValue={initialData.businessRegistrationNumber || ""}
+                    placeholder="ein, contractor no, etc"
                     className="block w-full border-[var(--border)] rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 text-[var(--text)] bg-[var(--card)]"
                 />
             </div>

@@ -18,16 +18,22 @@ interface PublicInvoice {
     description: string | null;
     currency: string;
     subtotal: number;
+    discountType?: string;
+    discountValue?: number;
     tax: number;
     total: number;
     issueDate: string;
     dueDate: string | null;
     notes: string | null;
+    attachedPhotos?: any;
     status: string;
     isConverted: boolean;
     paymentConfirmed: boolean;
     paymentConfirmedAt: string | null;
     createdAt: string;
+    businessName?: string | null;
+    businessLogoPath?: string | null;
+    businessRegistrationNumber?: string | null;
     items: {
         id: string;
         name: string;
@@ -259,6 +265,25 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                     
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative z-10">
                         <div>
+                            {/* Business Profile / Sender Identity */}
+                            {(invoice.businessLogoPath || invoice.businessName) && (
+                                <div className="flex items-center gap-3 mb-6">
+                                    {invoice.businessLogoPath && (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={invoice.businessLogoPath} alt="Business Logo" className="h-12 w-auto object-contain rounded-lg ring-1 ring-black/5 dark:ring-white/10 p-1 bg-white dark:bg-black/20" />
+                                    )}
+                                    {invoice.businessName && (
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-extrabold text-gray-900 dark:text-white tracking-tight leading-none">{invoice.businessName}</span>
+                                            {invoice.businessRegistrationNumber && (
+                                                <span className="text-[11px] text-gray-500 dark:text-[var(--muted)] font-medium mt-1">Reg/EIN no: {invoice.businessRegistrationNumber}</span>
+                                            )}
+                                            <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-[var(--muted)] font-bold mt-1">Invoice Sender</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             <div className="flex items-center gap-3 mb-4">
                                 <span className={clsx(
                                     "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest",
@@ -361,6 +386,23 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                                 <span className="text-sm text-gray-500 dark:text-[var(--muted)] font-medium print:text-gray-600">Subtotal</span>
                                 <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums print:text-black">{formatCurrency(invoice.subtotal, invoice.currency)}</span>
                             </div>
+                            
+                            {invoice.discountType && invoice.discountType !== 'none' && (
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-sm text-red-500 dark:text-red-400 font-medium print:text-gray-600">
+                                        Discount {invoice.discountType === 'percent' && `(${invoice.discountValue}%)`}
+                                    </span>
+                                    <span className="text-sm font-semibold text-red-500 dark:text-red-400 tabular-nums print:text-black">
+                                        -{formatCurrency(
+                                            invoice.discountType === 'percent' 
+                                                ? invoice.subtotal * ((invoice.discountValue || 0) / 100) 
+                                                : invoice.discountValue || 0,
+                                            invoice.currency
+                                        )}
+                                    </span>
+                                </div>
+                            )}
+
                             <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-[var(--border)]">
                                 <span className="text-sm text-gray-500 dark:text-[var(--muted)] font-medium">Tax</span>
                                 <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">{formatCurrency(invoice.tax, invoice.currency)}</span>
@@ -382,6 +424,21 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                         <div className="mt-10 pt-6 border-t border-gray-100 dark:border-[var(--border)]">
                             <p className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-[var(--muted)] mb-2">Additional Notes</p>
                             <p className="text-sm text-gray-600 dark:text-[var(--muted)] whitespace-pre-wrap leading-relaxed">{invoice.notes}</p>
+                        </div>
+                    )}
+
+                    {/* Attachments */}
+                    {invoice.attachedPhotos && Array.isArray(invoice.attachedPhotos) && invoice.attachedPhotos.length > 0 && (
+                        <div className="mt-10 pt-6 border-t border-gray-100 dark:border-[var(--border)]">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-[var(--muted)] mb-4">Attached Photos</p>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                {invoice.attachedPhotos.map((photo: string, i: number) => (
+                                    <a key={i} href={photo} target="_blank" rel="noreferrer" className="block relative aspect-square rounded-xl overflow-hidden border border-gray-200 dark:border-[var(--border)] hover:opacity-90 transition-opacity">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img src={photo} alt={`Attachment ${i + 1}`} className="w-full h-full object-cover" />
+                                    </a>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>

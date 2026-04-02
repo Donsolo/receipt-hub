@@ -2,6 +2,7 @@ import InvoiceWizard from '@/components/invoices/InvoiceWizard';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { db } from '@/lib/db';
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +21,21 @@ export default async function CreateInvoicePage() {
         redirect('/dashboard/invoices');
     }
 
+    const userRecord = await db.user.findUnique({
+        where: { id: authUser.userId },
+        select: { businessName: true, businessLogoPath: true, businessRegistrationNumber: true, email: true }
+    });
+
+    const globalProfile = await db.businessProfile.findFirst();
+
     return (
         <div className="min-h-screen bg-[var(--bg)] pt-8 pb-32">
-            <InvoiceWizard isPro={isPro} />
+            <InvoiceWizard 
+                isPro={isPro} 
+                businessName={userRecord?.businessName || userRecord?.email?.split('@')[0] || globalProfile?.businessName || undefined}
+                businessLogoPath={userRecord?.businessLogoPath || globalProfile?.logoPath || undefined}
+                businessRegistrationNumber={userRecord?.businessRegistrationNumber || globalProfile?.businessRegistrationNumber || undefined}
+            />
         </div>
     );
 }

@@ -51,7 +51,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         }
 
         const body = await req.json();
-        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, issueDate, dueDate, notes, status, items } = body;
+        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, status, attachedPhotos, items } = body;
 
         let dataToUpdate: any = {};
 
@@ -68,6 +68,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         if (dueDate !== undefined) dataToUpdate.dueDate = dueDate ? new Date(dueDate) : null;
         if (notes !== undefined) dataToUpdate.notes = notes || null;
         if (status !== undefined) dataToUpdate.status = status;
+
+        if (discountType !== undefined) dataToUpdate.discountType = discountType;
+        if (discountValue !== undefined) dataToUpdate.discountValue = Number(discountValue) || 0;
+        
+        if (attachedPhotos !== undefined && Array.isArray(attachedPhotos)) dataToUpdate.attachedPhotos = attachedPhotos;
 
         // Handle mathematical items payload enforcement
         if (items && Array.isArray(items)) {
@@ -86,8 +91,19 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 };
             });
 
+            let activeDiscountType = dataToUpdate.discountType ?? invoice.discountType;
+            let activeDiscountValue = dataToUpdate.discountValue !== undefined ? dataToUpdate.discountValue : invoice.discountValue;
+
+            let calculatedDiscount = 0;
+            if (activeDiscountType === "percent") {
+                calculatedDiscount = calculatedSubtotal * ((activeDiscountValue || 0) / 100);
+            } else if (activeDiscountType === "flat") {
+                calculatedDiscount = activeDiscountValue || 0;
+            }
+
+            const subtotalAfterDiscount = Math.max(0, calculatedSubtotal - calculatedDiscount);
             const calculatedTax = tax !== undefined ? Number(tax) : Number(invoice.tax || 0);
-            const calculatedTotal = calculatedSubtotal + calculatedTax;
+            const calculatedTotal = subtotalAfterDiscount + calculatedTax;
 
             dataToUpdate.subtotal = calculatedSubtotal;
             dataToUpdate.tax = calculatedTax;

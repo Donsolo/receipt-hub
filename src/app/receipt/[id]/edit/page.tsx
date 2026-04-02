@@ -28,6 +28,8 @@ export default async function EditReceiptPage(props: { params: Promise<{ id: str
         notes: receipt.notes || "",
         taxType: receipt.taxType,
         taxValue: receipt.taxValue ? Number(receipt.taxValue) : null,
+        discountType: receipt.discountType,
+        discountValue: receipt.discountValue ? Number(receipt.discountValue) : null,
         items: receipt.items.map((item: any) => ({
             description: item.description,
             quantity: item.quantity,

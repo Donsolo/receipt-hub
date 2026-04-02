@@ -45,7 +45,10 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
         issueDate: invoice.issueDate.toISOString(),
         dueDate: invoice.dueDate ? invoice.dueDate.toISOString() : '',
         notes: invoice.notes || '',
+        attachedPhotos: invoice.attachedPhotos ? (invoice.attachedPhotos as string[]) : undefined,
         tax: invoice.tax || 0,
+        discountType: invoice.discountType || "none",
+        discountValue: invoice.discountValue || 0,
         status: invoice.status,
         items: invoice.items.map(i => ({
             id: i.id,
@@ -56,9 +59,22 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
         }))
     };
 
+    const userRecord = await db.user.findUnique({
+        where: { id: authUser.userId },
+        select: { businessName: true, businessLogoPath: true, businessRegistrationNumber: true, email: true }
+    });
+
+    const globalProfile = await db.businessProfile.findFirst();
+
     return (
         <div className="min-h-screen bg-[var(--bg)] pt-8 pb-32">
-            <InvoiceWizard isPro={isPro} initialData={initialData} />
+            <InvoiceWizard 
+                isPro={isPro} 
+                businessName={userRecord?.businessName || userRecord?.email?.split('@')[0] || globalProfile?.businessName || undefined}
+                businessLogoPath={userRecord?.businessLogoPath || globalProfile?.logoPath || undefined}
+                businessRegistrationNumber={userRecord?.businessRegistrationNumber || globalProfile?.businessRegistrationNumber || undefined}
+                initialData={initialData} 
+            />
         </div>
     );
 }

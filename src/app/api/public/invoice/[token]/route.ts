@@ -17,7 +17,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
 
         const invoice = await prisma.invoice.findUnique({
             where: { publicToken: token },
-            include: { items: true }
+            include: { items: true, user: true }
         });
 
         if (!invoice) {
@@ -34,9 +34,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
             return NextResponse.json({ success: false, error: 'This invoice has been voided/cancelled' }, { status: 410 });
         }
 
+        const globalBusiness = await prisma.businessProfile.findFirst();
+
         // Construct Safe Payload (Stripping userId and internal PII metadata)
         const safeInvoice = {
             id: invoice.id,
+            invoiceNumber: invoice.invoiceNumber,
             clientName: invoice.clientName,
             clientEmail: invoice.clientEmail,
             clientCompany: invoice.clientCompany,
@@ -47,6 +50,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
             description: invoice.description,
             currency: invoice.currency,
             subtotal: invoice.subtotal,
+            discountType: invoice.discountType,
+            discountValue: invoice.discountValue,
             tax: invoice.tax,
             total: invoice.total,
             issueDate: invoice.issueDate,
@@ -57,6 +62,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
             paymentConfirmed: invoice.paymentConfirmed,
             paymentConfirmedAt: invoice.paymentConfirmedAt,
             createdAt: invoice.createdAt,
+            businessName: invoice.user?.businessName || invoice.user?.email?.split('@')[0] || globalBusiness?.businessName || null,
+            businessLogoPath: invoice.user?.businessLogoPath || globalBusiness?.logoPath || null,
+            businessRegistrationNumber: invoice.user?.businessRegistrationNumber || globalBusiness?.businessRegistrationNumber || null,
             items: invoice.items.map(i => ({
                 id: i.id,
                 name: i.name,

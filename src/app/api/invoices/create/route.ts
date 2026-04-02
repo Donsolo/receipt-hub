@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         if (!user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
 
         const body = await req.json();
-        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, issueDate, dueDate, notes, items } = body;
+        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, attachedPhotos, items } = body;
 
         if (!clientName || !title || !issueDate || !items || !Array.isArray(items) || items.length === 0) {
             return NextResponse.json({ success: false, error: 'Missing required fields or items' }, { status: 400 });
@@ -39,8 +39,20 @@ export async function POST(req: Request) {
             };
         });
 
+        // Discount Validation
+        let calculatedDiscount = 0;
+        const dT = discountType || "none";
+        const dV = Number(discountValue) || 0;
+
+        if (dT === "percent") {
+            calculatedDiscount = calculatedSubtotal * (dV / 100);
+        } else if (dT === "flat") {
+            calculatedDiscount = dV;
+        }
+
+        const subtotalAfterDiscount = Math.max(0, calculatedSubtotal - calculatedDiscount);
         const calculatedTax = Number(tax) || 0;
-        const calculatedTotal = calculatedSubtotal + calculatedTax;
+        const calculatedTotal = subtotalAfterDiscount + calculatedTax;
 
         // Generate Document Sequence Number
         const seqData = await getNextSequenceData(user.userId, 'INVOICE');
@@ -63,12 +75,15 @@ export async function POST(req: Request) {
                 title,
                 description: description || null,
                 currency: currency || "USD",
+                discountType: dT,
+                discountValue: dV,
                 subtotal: calculatedSubtotal,
                 tax: calculatedTax,
                 total: calculatedTotal,
                 issueDate: new Date(issueDate),
                 dueDate: dueDate ? new Date(dueDate) : null,
                 notes: notes || null,
+                attachedPhotos: attachedPhotos && Array.isArray(attachedPhotos) ? attachedPhotos : undefined,
                 status: 'DRAFT', // Defaults to DRAFT
                 publicToken: tokenValue,
                 publicTokenExpiresAt: expirationDate,
