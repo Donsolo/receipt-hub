@@ -111,10 +111,11 @@ export default function InvoiceActions({ invoice }: { invoice: { id: string; sta
         <>
             <div className="flex items-center justify-center gap-2">
                 
-                {/* View & Print */}
+                {/* View Original Invoice */}
                 {invoice.publicToken ? (
-                    <Link href={`/invoice/${invoice.publicToken}`} target="_blank" className="text-[var(--muted)] hover:text-blue-500 transition-colors p-1" title="View & Print Invoice">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    <Link href={`/invoice/${invoice.publicToken}`} target="_blank" className="flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-blue-500 bg-gray-100 hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-blue-500/10 px-2.5 py-1 rounded-md transition-colors" title="View Original Invoice">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        <span className="hidden xl:inline">View</span>
                     </Link>
                 ) : (
                     <button onClick={handleCopyLink} disabled={isLoading} className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-blue-500")} title="Generate Link to View">

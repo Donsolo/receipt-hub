@@ -65,6 +65,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
             businessName: invoice.user?.businessName || invoice.user?.email?.split('@')[0] || globalBusiness?.businessName || null,
             businessLogoPath: invoice.user?.businessLogoPath || globalBusiness?.logoPath || null,
             businessRegistrationNumber: invoice.user?.businessRegistrationNumber || globalBusiness?.businessRegistrationNumber || null,
+            attachedPhotos: invoice.attachedPhotos,
             items: invoice.items.map(i => ({
                 id: i.id,
                 name: i.name,

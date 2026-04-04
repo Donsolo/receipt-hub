@@ -453,7 +453,7 @@ export default function PublicInvoiceViewer({ token }: { token: string }) {
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Payment Confirmed ✅</h3>
                             <p className="text-sm text-gray-500 dark:text-[var(--muted)] max-w-sm">
-                                This transaction has been officially settled and converted into an audit-ready receipt by the issuer.
+                                This invoice has been officially settled. Thank you for your business!
                             </p>
                         </div>
                     ) : (
