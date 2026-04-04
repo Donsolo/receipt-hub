@@ -29,6 +29,11 @@ Designed to be fast, undeniably premium, and highly secure.
 - **One-Click PDF Export:** Instantly generate clean, printable PDFs of any invoice or receipt.
 - **Optimized Media Attachments:** Client-side WebP image scaling to attach photos directly to invoices for proof of work.
 
+### 🧠 AI & Automation
+- **Smart Line Categorization:** Automated, intelligent extraction and categorization of items from uploaded receipts.
+- **Receipt OCR Parsing:** Upload a photo of a receipt and have the system automatically draft a digitized, line-by-line digital receipt.
+- **Automated Conversions:** Instantly transition settled, paid professional invoices accurately into locked, immutable receipts.
+
 ### 🌐 The Business Network
 - **Peer-to-Peer Inbox:** Search, verify, and connect with other businesses on the platform.
 - **Instant Secure Dispatch:** Bypass email entirely by beaming invoices directly into a client's secure Verihub vault.
