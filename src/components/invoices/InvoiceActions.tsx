@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { clsx } from 'clsx';
 
-export default function InvoiceActions({ invoice }: { invoice: { id: string; status: string; isConverted: boolean; publicToken?: string | null } }) {
+export default function InvoiceActions({ invoice }: { invoice: { id: string; status: string; isConverted: boolean; publicToken?: string | null; convertedReceiptId?: string | null } }) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     
@@ -178,7 +178,7 @@ export default function InvoiceActions({ invoice }: { invoice: { id: string; sta
 
                 {/* View Converted Receipt (If already Converted) */}
                 {invoice.isConverted && (
-                    <Link href={`/history`} className="text-blue-500 hover:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-2 py-0.5 rounded transition-colors text-xs font-bold whitespace-nowrap" title="View in Receipt Hub">
+                    <Link href={invoice.convertedReceiptId ? `/receipt/${invoice.convertedReceiptId}` : `/history`} className="text-blue-500 hover:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-2 py-0.5 rounded transition-colors text-xs font-bold whitespace-nowrap" title="View in Receipt Hub">
                         View Receipt
                     </Link>
                 )}

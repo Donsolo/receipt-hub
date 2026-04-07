@@ -126,7 +126,7 @@ export default async function InvoicesHub() {
                                                 <div className="font-bold text-[var(--text)] tabular-nums">${inv.total.toFixed(2)}</div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <InvoiceActions invoice={{ id: inv.id, status: inv.status, isConverted: inv.isConverted, publicToken: inv.publicToken }} />
+                                                <InvoiceActions invoice={{ id: inv.id, status: inv.status, isConverted: inv.isConverted, publicToken: inv.publicToken, convertedReceiptId: inv.convertedReceiptId }} />
                                             </td>
                                         </tr>
                                     ))}
