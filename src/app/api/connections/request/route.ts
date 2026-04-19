@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyToken, ensureActivated } from '@/lib/auth';
+import { sendNativePush } from '@/lib/push';
 
 export async function POST(request: Request) {
     try {
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
                 });
                 const senderName = sender?.name || 'A user';
 
-                await db.notification.create({
+                const notification = await db.notification.create({
                     data: {
                         userId: receiverId,
                         type: 'CONNECTION_REQUEST',
@@ -67,6 +68,16 @@ export async function POST(request: Request) {
                         read: false
                     }
                 });
+
+                const userDevices = await db.pushToken.findMany({ where: { userId: receiverId } });
+                const tokens = userDevices.map(d => d.token);
+                if (tokens.length > 0) {
+                    await sendNativePush(tokens, {
+                        title: notification.title,
+                        body: notification.message,
+                        data: { route: notification.link || '/' }
+                    });
+                }
             }
         } catch (notifErr) {
             console.error('Failed to dispatch connection request notification:', notifErr);

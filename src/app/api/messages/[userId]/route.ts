@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyToken, ensureActivated } from '@/lib/auth';
+import { sendNativePush } from '@/lib/push';
 
 export const dynamic = 'force-dynamic';
 
@@ -217,7 +218,7 @@ export async function POST(
                     const excerpt = rawText.length > 60 ? rawText.slice(0, 60) + '...' : rawText;
                     const finalExcerpt = excerpt || (attachmentType === 'RECEIPT' ? '[Receipt attached]' : '[Bundle attached]');
 
-                    await db.notification.create({
+                    const notification = await db.notification.create({
                         data: {
                             userId: receiverId,
                             type: 'MESSAGE_RECEIVED',
@@ -227,6 +228,16 @@ export async function POST(
                             read: false
                         }
                     });
+
+                    const userDevices = await db.pushToken.findMany({ where: { userId: receiverId } });
+                    const tokens = userDevices.map(d => d.token);
+                    if (tokens.length > 0) {
+                        await sendNativePush(tokens, {
+                            title: notification.title,
+                            body: notification.message,
+                            data: { route: notification.link || '/' }
+                        });
+                    }
                 }
             } catch (notifErr) {
                 console.error('Failed to dispatch message notification:', notifErr);

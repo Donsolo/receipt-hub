@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyToken, ensureActivated } from '@/lib/auth';
+import { sendNativePush } from '@/lib/push';
 
 export const dynamic = 'force-dynamic';
 
@@ -164,7 +165,7 @@ export async function POST(
             // Dispatch to all valid receivers
             for (const participant of otherParticipants) {
                 if (participant.user?.notifyMessages) {
-                    await db.notification.create({
+                    const notification = await db.notification.create({
                         data: {
                             userId: participant.userId,
                             type: 'MESSAGE_RECEIVED',
@@ -174,6 +175,16 @@ export async function POST(
                             read: false
                         }
                     });
+
+                    const userDevices = await db.pushToken.findMany({ where: { userId: participant.userId } });
+                    const tokens = userDevices.map(d => d.token);
+                    if (tokens.length > 0) {
+                        await sendNativePush(tokens, {
+                            title: notification.title,
+                            body: notification.message,
+                            data: { route: notification.link || '/' }
+                        });
+                    }
                 }
             }
         } catch (notifErr) {

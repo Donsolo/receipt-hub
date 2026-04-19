@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyToken, ensureActivated } from '@/lib/auth';
+import { sendNativePush } from '@/lib/push';
 
 export async function PATCH(
     request: Request,
@@ -61,7 +62,7 @@ export async function PATCH(
                     });
                     const receiverName = receiver?.name || 'A user';
 
-                    await db.notification.create({
+                    const notification = await db.notification.create({
                         data: {
                             userId: connection.requesterId,
                             type: 'CONNECTION_ACCEPTED',
@@ -71,6 +72,16 @@ export async function PATCH(
                             read: false
                         }
                     });
+
+                    const userDevices = await db.pushToken.findMany({ where: { userId: connection.requesterId } });
+                    const tokens = userDevices.map(d => d.token);
+                    if (tokens.length > 0) {
+                        await sendNativePush(tokens, {
+                            title: notification.title,
+                            body: notification.message,
+                            data: { route: notification.link || '/' }
+                        });
+                    }
                 }
             } catch (notifErr) {
                 console.error('Failed to dispatch connection accepted notification:', notifErr);

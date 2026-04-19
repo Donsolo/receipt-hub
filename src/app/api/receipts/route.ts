@@ -34,8 +34,10 @@ export async function POST(request: Request) {
             await (db as any).receiptItem.createMany({
                 data: items.map((item: any) => ({
                     receiptId: receipt.id,
-                    description: item.description,
-                    amount: item.amount,
+                    description: item.description || "Scanned Item",
+                    quantity: item.quantity || 1,
+                    unitPrice: parseFloat(item.amount || item.price || item.unitPrice || 0),
+                    lineTotal: parseFloat(item.amount || item.price || item.lineTotal || item.total || 0),
                 })),
             });
 

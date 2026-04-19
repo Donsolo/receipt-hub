@@ -25,11 +25,15 @@ interface NotificationContextProps {
 
 const NotificationContext = createContext<NotificationContextProps | undefined>(undefined);
 
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+    
+    const { requestPermissions } = usePushNotifications();
 
     const fetchNotifications = useCallback(async () => {
         try {
@@ -104,14 +108,22 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     useEffect(() => {
         refresh();
+        
+        // Contextually request native PUSH permission gracefully after 3.5 seconds
+        const promptTimer = setTimeout(() => {
+            requestPermissions();
+        }, 3500);
 
         // Poll every 30 seconds
         const intervalId = setInterval(() => {
             refresh();
         }, 30000);
 
-        return () => clearInterval(intervalId);
-    }, [refresh]);
+        return () => {
+            clearInterval(intervalId);
+            clearTimeout(promptTimer);
+        };
+    }, [refresh, requestPermissions]);
 
     return (
         <NotificationContext.Provider value={{

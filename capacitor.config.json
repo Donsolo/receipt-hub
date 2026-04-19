@@ -1,0 +1,15 @@
+{
+  "appId": "com.verihub.app",
+  "appName": "Verihub",
+  "webDir": "public",
+  "server": {
+    "url": "https://verihub.app",
+    "allowNavigation": [
+      "verihub.app",
+      "*.verihub.app",
+      "stripe.com",
+      "*.stripe.com",
+      "checkout.stripe.com"
+    ]
+  }
+}

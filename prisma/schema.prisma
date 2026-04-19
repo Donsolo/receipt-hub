@@ -46,6 +46,7 @@ model User {
   receipts                 Receipt[]
   savedReceiptItems        SavedReceiptItem[]
   invoices                 Invoice[]
+  pushTokens               PushToken[]
 }
 
 model Category {
@@ -62,7 +63,7 @@ model Category {
 
 model Receipt {
   id              String              @id @default(cuid())
-  receiptNumber   String?             @unique
+  receiptNumber   String?
   sequenceNumber  Int?
   userId          String
   categoryId      String?
@@ -89,6 +90,8 @@ model Receipt {
   category        Category?           @relation(fields: [categoryId], references: [id])
   user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   items           ReceiptItem[]
+
+  @@unique([userId, receiptNumber])
 }
 
 model ReceiptItem {
@@ -365,7 +368,7 @@ enum InvoiceStatus {
 
 model Invoice {
   id                 String            @id @default(cuid())
-  invoiceNumber      String?           @unique
+  invoiceNumber      String?
   sequenceNumber     Int?
   userId             String
   clientName         String
@@ -404,6 +407,7 @@ model Invoice {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+  @@unique([userId, invoiceNumber])
 }
 
 model InvoiceLineItem {
@@ -416,4 +420,16 @@ model InvoiceLineItem {
   total       Float
   
   invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String   @default("unknown")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

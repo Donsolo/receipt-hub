@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "635058665559",
+    "project_id": "verihub-d4499",
+    "storage_bucket": "verihub-d4499.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:635058665559:android:a98d982f4d9aac0fb40b12",
+        "android_client_info": {
+          "package_name": "com.verihub.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAButnJgPF5k_zzApqNyhn4rSJgVcmgk_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
