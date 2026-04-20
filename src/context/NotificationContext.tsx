@@ -43,7 +43,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 setNotifications(data);
             }
         } catch (error) {
-            console.error('Failed to fetch notifications:', error);
+            // Silent catch to prevent console spam during network disconnections or unauthenticated state
         }
     }, []);
 
@@ -55,7 +55,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 setUnreadCount(data.count || 0);
             }
         } catch (error) {
-            console.error('Failed to fetch unread count:', error);
+            // Silent catch to prevent console spam
         }
     }, []);
 
