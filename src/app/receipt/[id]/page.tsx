@@ -25,40 +25,43 @@ export default async function ReceiptViewPage(props: { params: Promise<{ id: str
     return (
         <div className="max-w-4xl mx-auto my-8">
             {/* Actions Bar (Hidden on Print) */}
-            <div className="mb-6 flex justify-between items-center print:hidden">
+            <div className="mb-8 flex justify-between items-center print:hidden">
                 <Link
                     href="/history"
-                    className="text-sm font-medium text-[var(--muted)] hover:text-gray-900 transition-colors"
+                    className={`inline-flex items-center border border-gray-200 shadow-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors ${!receipt.isFinalized ? 'px-5 py-2.5 text-base' : 'px-4 py-2 text-sm'}`}
                 >
-                    &larr; History
+                    &larr; Back to History
                 </Link>
                 <div className="flex space-x-3 items-center">
                     {receipt.isFinalized ? (
                         <>
-                            <div className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg border border-gray-200">
+                            <div className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg border border-gray-200">
                                 Finalized {receipt.finalizedAt ? format(new Date(receipt.finalizedAt), 'MMM d, yyyy') : ''}
                             </div>
                             <DuplicateButton receiptId={receipt.id} />
+                            <PrintButton />
+                            <a
+                                href={`/api/pdf/${receipt.id}`}
+                                target="_blank"
+                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                            >
+                                Download PDF
+                            </a>
                         </>
                     ) : (
                         <>
                             <Link
                                 href={`/receipt/${receipt.id}/edit`}
-                                className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                                className="inline-flex items-center px-6 py-2.5 border border-indigo-200 shadow-sm text-base font-semibold rounded-xl text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors"
                             >
-                                Edit
+                                Edit Receipt
                             </Link>
-                            <FinalizeButton receiptId={receipt.id} />
+                            <FinalizeButton 
+                                receiptId={receipt.id} 
+                                className="inline-flex items-center px-6 py-2.5 border border-transparent shadow-sm text-base font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                            />
                         </>
                     )}
-                    <PrintButton />
-                    <a
-                        href={`/api/pdf/${receipt.id}`}
-                        target="_blank"
-                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-[var(--text)] bg-[var(--bg)] hover:bg-[var(--card)] transition-colors"
-                    >
-                        Download PDF
-                    </a>
                 </div>
             </div>
 

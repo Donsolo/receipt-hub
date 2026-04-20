@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function FinalizeButton({ receiptId }: { receiptId: string }) {
+export default function FinalizeButton({ receiptId, className }: { receiptId: string; className?: string }) {
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const router = useRouter();
@@ -35,7 +35,7 @@ export default function FinalizeButton({ receiptId }: { receiptId: string }) {
         <>
             <button
                 onClick={() => setShowModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-[var(--text)] bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                className={className || "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-[var(--text)] bg-indigo-600 hover:bg-indigo-700 transition-colors"}
             >
                 Finalize
             </button>
