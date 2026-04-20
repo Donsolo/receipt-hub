@@ -3,7 +3,7 @@ import puppeteer from 'puppeteer';
 import { format } from 'date-fns';
 import fs from 'fs';
 import path from 'path';
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 import puppeteerCore from 'puppeteer-core';
 import { db } from '@/lib/db';
 
@@ -195,8 +195,10 @@ export async function GET(
 
     // Determine the environment and launch the appropriate Chromium binary
     if (process.env.NODE_ENV === 'production') {
-      // Use sparticuz/chromium within Vercel's serverless size limits
-      const executablePath = await chromium.executablePath();
+      // Use sparticuz/chromium-min within Vercel's serverless size limits
+      const executablePath = await chromium.executablePath(
+         'https://github.com/Sparticuz/chromium/releases/download/v133.0.0/chromium-v133.0.0-pack.tar'
+      );
       browser = await puppeteerCore.launch({
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
