@@ -203,7 +203,7 @@ export async function GET(
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
         executablePath: executablePath,
-        headless: chromium.headless === true ? true : 'new' as any,
+        headless: chromium.headless as any,
       });
     } else {
       // Use standard full puppeteer locally
