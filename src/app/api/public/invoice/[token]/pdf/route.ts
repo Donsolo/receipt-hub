@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 import puppeteerCore from 'puppeteer-core';
 import { db } from '@/lib/db';
 
@@ -31,7 +31,7 @@ export async function GET(
         let browser;
 
         if (process.env.NODE_ENV === 'production') {
-            const executablePath = await chromium.executablePath();
+            const executablePath = await chromium.executablePath('https://github.com/Sparticuz/chromium/releases/download/v133.0.0/chromium-v133.0.0-pack.tar');
             browser = await puppeteerCore.launch({
                 args: chromium.args,
                 defaultViewport: chromium.defaultViewport,
@@ -51,8 +51,8 @@ export async function GET(
         await page.emulateMediaType('print');
 
         await page.goto(targetUrl, {
-            waitUntil: 'networkidle0',
-            timeout: 30000
+            waitUntil: 'networkidle2',
+            timeout: 15000
         });
 
         // Add a slight delay to ensure all React hydration and canvas drawings complete
