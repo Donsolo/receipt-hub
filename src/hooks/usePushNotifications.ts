@@ -42,9 +42,13 @@ export function usePushNotifications() {
         let isMounted = true;
 
         const initializePush = async () => {
-            // Check status without explicitly prompting unless it's already 'granted'
             const status = await PushNotifications.checkPermissions();
-            if (status.receive === 'granted') {
+            if (status.receive === 'prompt') {
+                const requested = await PushNotifications.requestPermissions();
+                if (requested.receive === 'granted') {
+                    PushNotifications.register();
+                }
+            } else if (status.receive === 'granted') {
                 PushNotifications.register();
             }
 

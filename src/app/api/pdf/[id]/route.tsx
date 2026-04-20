@@ -217,8 +217,8 @@ export async function GET(
     // If the image is at /uploads/foo.png and we just say src="/uploads/foo.png", puppeteer doesn't know the domain.
     // We should ideally use a full URL. For now, assuming deployment or local usage where user configures properly.
     await page.setContent(fullHtml, {
-      waitUntil: 'networkidle0',
-      timeout: 30000
+      waitUntil: 'networkidle2',
+      timeout: 15000
     });
 
     const pdfBuffer = await page.pdf({
