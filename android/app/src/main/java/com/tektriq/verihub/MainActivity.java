@@ -1,4 +1,4 @@
-package com.verihub.app;
+package com.tektriq.verihub;
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;

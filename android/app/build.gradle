@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.verihub.app"
+    namespace "com.tektriq.verihub"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.verihub.app"
+        applicationId "com.tektriq.verihub"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
