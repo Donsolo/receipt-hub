@@ -583,7 +583,7 @@ export default function AdminPage() {
                                 <h3 className="text-sm font-semibold text-[var(--muted)] uppercase tracking-wider">Management Tools</h3>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {/* Hero Images Card */}
                                 <div className="bg-[var(--bg)]/50 border border-[var(--border)] rounded-md p-6 flex flex-col items-center justify-center text-center">
                                     <div className="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center mb-3">
@@ -637,6 +637,20 @@ export default function AdminPage() {
                                     <p className="text-sm text-[var(--muted)] mb-5 max-w-xs">Send platform-wide direct messages to users' inboxes.</p>
                                     <Link href="/admin/global-message" className="bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-500/20 text-sm font-medium px-6 py-2 rounded-md transition-colors w-full max-w-[200px]">
                                         Global Message
+                                    </Link>
+                                </div>
+
+                                {/* App Releases Card */}
+                                <div className="bg-[var(--bg)]/50 border border-[var(--border)] rounded-md p-6 flex flex-col items-center justify-center text-center">
+                                    <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mb-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                        </svg>
+                                    </div>
+                                    <h4 className="text-[var(--text)] font-medium mb-1">App Releases</h4>
+                                    <p className="text-sm text-[var(--muted)] mb-5 max-w-xs">Upload and distribute Beta APK files directly to testers.</p>
+                                    <Link href="/admin/app-releases" className="bg-orange-600/10 hover:bg-orange-600/20 text-orange-400 border border-orange-500/20 text-sm font-medium px-6 py-2 rounded-md transition-colors w-full max-w-[200px]">
+                                        App Releases
                                     </Link>
                                 </div>
                             </div>

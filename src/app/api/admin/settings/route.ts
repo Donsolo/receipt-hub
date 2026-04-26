@@ -43,6 +43,14 @@ export async function PATCH(request: Request) {
             });
         }
 
+        if (body.BETA_APK_URL !== undefined) {
+            await (db as any).systemSetting.upsert({
+                where: { key: 'BETA_APK_URL' },
+                update: { value: String(body.BETA_APK_URL) },
+                create: { key: 'BETA_APK_URL', value: String(body.BETA_APK_URL) }
+            });
+        }
+
         if (body.EARLY_ACCESS_OPEN !== undefined) {
             await (db as any).systemSetting.upsert({
                 where: { key: 'EARLY_ACCESS_OPEN' },

@@ -12,6 +12,7 @@ export async function getSystemSettings() {
         return {
             REQUIRE_ACTIVATION: settingsCache.REQUIRE_ACTIVATION === 'true',
             EARLY_ACCESS_OPEN: settingsCache.EARLY_ACCESS_OPEN === 'true',
+            BETA_APK_URL: settingsCache.BETA_APK_URL || null,
         };
     }
 
@@ -41,12 +42,14 @@ export async function getSystemSettings() {
         return {
             REQUIRE_ACTIVATION: map.REQUIRE_ACTIVATION === 'true',
             EARLY_ACCESS_OPEN: map.EARLY_ACCESS_OPEN === 'true',
+            BETA_APK_URL: map.BETA_APK_URL || null,
         };
     } catch (error) {
         console.error('Failed to fetch system settings, falling back to defaults:', error);
         return {
             REQUIRE_ACTIVATION: false,
             EARLY_ACCESS_OPEN: true,
+            BETA_APK_URL: null,
         };
     }
 }
