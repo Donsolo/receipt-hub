@@ -23,9 +23,12 @@ export default function BillingPage() {
             });
     }, []);
 
+    const [error, setError] = useState<string | null>(null);
+
     const handleUpgrade = async () => {
         try {
             setLoading(true);
+            setError(null);
             const res = await fetch('/api/billing/create-checkout-session', {
                 method: 'POST',
             });
@@ -34,12 +37,12 @@ export default function BillingPage() {
                 window.location.href = data.url;
             } else {
                 console.error(data.error);
-                alert('Failed to initialize checkout.');
+                setError(data.error || 'Failed to initialize checkout.');
                 setLoading(false);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert('Failed to initialize checkout.');
+            setError(error?.message || 'Failed to initialize checkout.');
             setLoading(false);
         }
     };
@@ -47,6 +50,7 @@ export default function BillingPage() {
     const handleManageBilling = async () => {
         try {
             setLoading(true);
+            setError(null);
             const res = await fetch('/api/billing/create-portal-session', {
                 method: 'POST',
             });
@@ -55,12 +59,12 @@ export default function BillingPage() {
                 window.location.href = data.url;
             } else {
                 console.error(data.error);
-                alert('Failed to open billing portal.');
+                setError(data.error || 'Failed to open billing portal.');
                 setLoading(false);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert('Failed to open billing portal.');
+            setError(error?.message || 'Failed to open billing portal.');
             setLoading(false);
         }
     };
@@ -74,6 +78,15 @@ export default function BillingPage() {
                         Back to Dashboard
                     </Link>
                 </div>
+
+                {error && (
+                    <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-500 text-sm flex items-center">
+                        <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{error}</span>
+                    </div>
+                )}
 
                 {fetching ? (
                     <div className="animate-pulse flex space-x-4">
