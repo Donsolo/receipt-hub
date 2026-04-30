@@ -14,6 +14,7 @@ type UnifiedUser = {
     receiptCount: number;
     storageMB: number;
     lastUploadDate: string | null;
+    stripeCustomerId?: string | null;
 };
 
 export default function AdminUsersPage() {
@@ -84,7 +85,8 @@ export default function AdminUsersPage() {
                         createdAt: u.createdAt,
                         role: u.role,
                         name: usageInfo?.name || u.email,
-                        plan: usageInfo?.plan || 'Core (Early Access)',
+                        plan: u.plan || 'CORE',
+                        stripeCustomerId: u.stripeCustomerId || null,
                         receiptCount: usageInfo?.receiptCount || 0,
                         storageMB: usageInfo?.storageMB || 0.0,
                         lastUploadDate: usageInfo?.lastUploadDate || null,
@@ -219,12 +221,19 @@ export default function AdminUsersPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-xs">
-                                                <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-medium border uppercase tracking-wider ${user.plan === 'Pro' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                                                    user.plan === 'Business' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                                        'bg-white/5 text-[var(--muted)] border-[var(--border)]'
-                                                    }`}>
-                                                    {user.plan}
-                                                </span>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className={`inline-flex w-fit items-center px-2 py-1 rounded text-[10px] font-medium border uppercase tracking-wider ${user.plan === 'PRO' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
+                                                        user.plan === 'Business' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                                            'bg-white/5 text-[var(--muted)] border-[var(--border)]'
+                                                        }`}>
+                                                        {user.plan}
+                                                    </span>
+                                                    {user.plan === 'PRO' && (
+                                                        <span className="text-[10px] text-[var(--muted)]">
+                                                            {user.stripeCustomerId ? 'Stripe Sub' : 'Manual/Admin'}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text)]">
                                                 {user.receiptCount.toLocaleString()}

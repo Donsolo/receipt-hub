@@ -17,7 +17,10 @@ export async function POST(req: Request) {
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
         if (!user.stripeCustomerId) {
-            return NextResponse.json({ error: 'No Stripe customer found for this user' }, { status: 400 });
+            return NextResponse.json({ 
+                error: 'NO_STRIPE_CUSTOMER',
+                message: 'This account has Pro access but is not linked to a Stripe subscription.' 
+            }, { status: 400 });
         }
 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://verihub.app';

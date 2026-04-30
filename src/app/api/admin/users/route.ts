@@ -20,6 +20,8 @@ export async function GET(request: Request) {
                 email: true,
                 createdAt: true,
                 role: true,
+                plan: true,
+                stripeCustomerId: true,
                 _count: {
                     select: { receipts: true },
                 },

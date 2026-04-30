@@ -6,6 +6,7 @@ import Link from 'next/link';
 export default function BillingPage() {
     const [loading, setLoading] = useState(false);
     const [plan, setPlan] = useState<'CORE' | 'PRO' | null>(null);
+    const [hasStripe, setHasStripe] = useState(false);
     const [fetching, setFetching] = useState(true);
 
     useEffect(() => {
@@ -14,6 +15,7 @@ export default function BillingPage() {
             .then(res => res.json())
             .then(data => {
                 setPlan(data.plan || 'CORE');
+                setHasStripe(!!data.stripeCustomerId);
                 setFetching(false);
             })
             .catch(() => {
@@ -156,7 +158,7 @@ export default function BillingPage() {
                                 >
                                     {loading ? 'Redirecting...' : 'Upgrade to Pro'}
                                 </button>
-                            ) : (
+                            ) : hasStripe ? (
                                 <button 
                                     onClick={handleManageBilling}
                                     disabled={loading}
@@ -164,6 +166,14 @@ export default function BillingPage() {
                                 >
                                     {loading ? 'Redirecting...' : 'Manage Billing'}
                                 </button>
+                            ) : (
+                                <div className="w-full py-3 px-4 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-300 rounded-lg text-sm border border-indigo-200 dark:border-indigo-800/50">
+                                    <div className="font-semibold mb-1 flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        Pro Access Active
+                                    </div>
+                                    This account has manual/admin Pro access. Billing portal is not available for this account.
+                                </div>
                             )}
                         </div>
                     </div>
