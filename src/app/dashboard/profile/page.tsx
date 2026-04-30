@@ -296,10 +296,15 @@ export default function ProfilePage() {
                                         <span className="text-[15px] font-medium text-gray-900 dark:text-[var(--text)]">{profile.email}</span>
                                     </div>
                                     <div className="flex flex-col border-b border-gray-200 dark:border-[var(--border)] pb-3">
-                                        <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-1">Current Plan</span>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Current Plan</span>
+                                            <Link href="/billing" className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+                                                Manage Billing
+                                            </Link>
+                                        </div>
                                         <div className="flex items-center">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-[var(--card-hover)] text-gray-700 dark:text-[var(--text)] border border-gray-200 dark:border-[var(--border)]">
-                                                Core (Early Access)
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border ${profile.plan === 'PRO' ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' : 'bg-gray-100 dark:bg-[var(--card-hover)] text-gray-700 dark:text-[var(--text)] border-gray-200 dark:border-[var(--border)]'}`}>
+                                                {profile.plan === 'PRO' ? 'Pro Plan' : 'Core Plan'}
                                             </span>
                                         </div>
                                     </div>
