@@ -47,6 +47,9 @@ export async function GET(
 
         const page = await browser.newPage();
         
+        // Add custom User-Agent to prevent analytics tracking
+        await page.setUserAgent('Verihub-PDF-Generator');
+        
         // Emulate print media type to strip background UI
         await page.emulateMediaType('print');
 

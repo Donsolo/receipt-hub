@@ -84,7 +84,8 @@ export async function POST(req: Request) {
                 dueDate: dueDate ? new Date(dueDate) : null,
                 notes: notes || null,
                 attachedPhotos: attachedPhotos && Array.isArray(attachedPhotos) ? attachedPhotos : undefined,
-                status: 'DRAFT', // Defaults to DRAFT
+                status: body.status === 'SENT' ? 'SENT' : 'DRAFT',
+                sentAt: body.status === 'SENT' ? new Date() : null,
                 publicToken: tokenValue,
                 publicTokenExpiresAt: expirationDate,
                 items: {

@@ -44,6 +44,12 @@ export async function PATCH(request: Request) {
         const body = await request.json();
         const { name, businessName, businessPhone, businessAddress, businessLogoPath, businessRegistrationNumber, timezone } = body;
 
+        const { canUseBusinessLogo } = await import('@/lib/auth');
+        let allowedLogoPath = businessLogoPath;
+        if (allowedLogoPath && !canUseBusinessLogo(user)) {
+            allowedLogoPath = null;
+        }
+
         const updatedUser = await db.user.update({
             where: { id: user.userId },
             data: {
@@ -52,7 +58,7 @@ export async function PATCH(request: Request) {
                     businessName: businessName || null,
                     businessPhone: businessPhone || null,
                     businessAddress: businessAddress || null,
-                    businessLogoPath: businessLogoPath || null,
+                    businessLogoPath: allowedLogoPath || null,
                     businessRegistrationNumber: businessRegistrationNumber || null,
                     timezone: timezone || 'America/New_York',
                 } as any)

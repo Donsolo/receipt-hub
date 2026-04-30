@@ -48,7 +48,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
                 status: 'PAID',
                 paymentConfirmed: true,
                 paymentConfirmedAt: new Date(),
-                paymentSignature: signature,
+                authorizedSignature: signature,
                 paymentMethodNote: isInitials ? 'TEXT_INITIALS' : 'CANVAS_SIGNATURE'
             }
         });

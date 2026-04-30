@@ -67,7 +67,21 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         if (issueDate !== undefined) dataToUpdate.issueDate = new Date(issueDate);
         if (dueDate !== undefined) dataToUpdate.dueDate = dueDate ? new Date(dueDate) : null;
         if (notes !== undefined) dataToUpdate.notes = notes || null;
-        if (status !== undefined) dataToUpdate.status = status;
+        if (status !== undefined) {
+            const STATUS_RANKS: Record<string, number> = { CANCELLED: -1, DRAFT: 0, SENT: 1, VIEWED: 2, PAID: 3 };
+            const currentRank = STATUS_RANKS[invoice.status] ?? 0;
+            const newRank = STATUS_RANKS[status] ?? 0;
+
+            // Prevent backward status transitions. PAID is terminal. CANCELLED is allowed unless PAID.
+            if (status === 'CANCELLED' && invoice.status !== 'PAID') {
+                dataToUpdate.status = status;
+            } else if (newRank >= currentRank) {
+                dataToUpdate.status = status;
+                if (status === 'SENT' && invoice.status !== 'SENT' && !invoice.sentAt) {
+                    dataToUpdate.sentAt = new Date();
+                }
+            }
+        }
 
         if (discountType !== undefined) dataToUpdate.discountType = discountType;
         if (discountValue !== undefined) dataToUpdate.discountValue = Number(discountValue) || 0;

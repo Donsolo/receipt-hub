@@ -12,7 +12,24 @@ export interface JWTPayload {
     isActivated?: boolean;
     isEarlyAccess?: boolean;
     activationSource?: string | null;
+    stripeCustomerId?: string | null;
+    stripeSubscriptionId?: string | null;
+    subscriptionStatus?: string | null;
+    currentPeriodEnd?: Date | null;
     [key: string]: any; // Jose requires Index signature
+}
+
+export function canUseProFeature(user: JWTPayload): boolean {
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') return true;
+    return user.plan === 'PRO';
+}
+
+export function canUseOCR(user: JWTPayload): boolean {
+    return canUseProFeature(user);
+}
+
+export function canUseBusinessLogo(user: JWTPayload): boolean {
+    return canUseProFeature(user);
 }
 
 export async function signToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): Promise<string> {
