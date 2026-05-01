@@ -17,17 +17,25 @@ export default async function BillingSuccessPage({
                     </svg>
                 </div>
                 
-                <h1 className="text-2xl font-bold text-[var(--text)] mb-2">Payment Received</h1>
+                <h1 className="text-2xl font-bold text-[var(--text)] mb-2">Payment received — Pro is activating</h1>
                 <p className="text-[var(--muted)] mb-8">
-                    Activating Pro. Your account is being upgraded. It may take a few moments for the new features to become available.
+                    Your account is being upgraded. It may take a few moments for the new features to become available.
                 </p>
 
-                <Link
-                    href="/dashboard"
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 transition-colors w-full"
-                >
-                    Return to Dashboard
-                </Link>
+                <div className="flex flex-col space-y-3">
+                    <Link
+                        href="/dashboard"
+                        className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 transition-colors w-full"
+                    >
+                        Go to Dashboard
+                    </Link>
+                    <Link
+                        href="/billing"
+                        className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium bg-[var(--border)] hover:bg-[var(--border)]/80 text-[var(--text)] transition-colors w-full"
+                    >
+                        Go to Billing
+                    </Link>
+                </div>
             </div>
         </div>
     );
