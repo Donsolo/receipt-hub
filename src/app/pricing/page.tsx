@@ -52,9 +52,9 @@ export default function PricingPage() {
                             
                             {[
                                 "Lifetime Core activation",
-                                "Unlimited Receipt Generation",
-                                "Basic Invoicing capabilities",
-                                "Private Cloud Vault storage",
+                                "Standard Receipt Generation",
+                                "Basic Cloud Vault Storage",
+                                "30-Day Summary Reports",
                                 "Client Directory Management",
                                 "Audit-Ready PDF Exports"
                             ].map((feature, i) => (
@@ -91,12 +91,13 @@ export default function PricingPage() {
                             <h4 className="text-sm font-semibold text-[var(--text)] uppercase tracking-wider mb-6">Everything in Core, plus:</h4>
                             
                             {[
-                                "AI-Powered Automated OCR Scanning",
-                                "Custom Logo Branding on all PDFs",
-                                "Smart Receipt Search Engine",
-                                "Advanced Business Analytics Dashboard",
-                                "Priority Customer Support Queue",
-                                "Zero Platform Fees on Storage"
+                                "Unlimited Invoice Generation",
+                                "Advanced Custom Reports",
+                                "Unlimited History Access",
+                                "Intelligent Item Memory",
+                                "Custom Logo Branding on PDFs",
+                                "AI-Powered OCR Scanning",
+                                "Priority Customer Support"
                             ].map((feature, i) => (
                                 <div key={i} className="flex items-start">
                                     <svg className="w-6 h-6 text-indigo-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

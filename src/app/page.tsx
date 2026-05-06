@@ -177,7 +177,7 @@ export default async function LandingPage() {
                             </li>
                             <li className="flex items-center text-[var(--muted)]">
                                 <svg className="w-5 h-5 text-indigo-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                Invoice Creation
+                                30-Day Summary Reports
                             </li>
                         </ul>
                     </div>
@@ -199,15 +199,15 @@ export default async function LandingPage() {
                         <ul className="space-y-3 mb-8">
                             <li className="flex items-center text-white">
                                 <svg className="w-5 h-5 text-indigo-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                AI-Powered OCR Scanning
+                                Unlimited Invoicing & Reports
                             </li>
                             <li className="flex items-center text-white">
                                 <svg className="w-5 h-5 text-indigo-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                Custom Business Logos
+                                Intelligent Item Memory
                             </li>
                             <li className="flex items-center text-white">
                                 <svg className="w-5 h-5 text-indigo-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                Priority Support & Analytics
+                                AI Scanning & Custom Logos
                             </li>
                         </ul>
                     </div>
