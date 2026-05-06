@@ -218,38 +218,42 @@ export default async function LandingPage() {
             </div>
         </div>
 
-        {/* Android Beta Promotional Section */}
+        {/* Google Play App Section */}
         <div className="w-full max-w-5xl mx-auto py-16 relative z-10 px-4 sm:px-6 lg:px-8">
-            <div className="relative bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-500/20 rounded-3xl p-8 sm:p-12 overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="relative bg-gradient-to-r from-slate-900 to-indigo-900/20 border border-slate-700/50 rounded-3xl p-8 sm:p-12 overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
                 {/* Decorative background glow */}
-                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-teal-500/10 rounded-full blur-[80px] pointer-events-none" />
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
+                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
 
                 <div className="max-w-xl relative z-10">
-                    <span className="inline-block py-1 px-3 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold tracking-wider uppercase mb-4 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
-                        Early Access Available
+                    <span className="inline-block py-1 px-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold tracking-wider uppercase mb-4 shadow-[0_0_10px_rgba(99,102,241,0.1)]">
+                        Now on Android
                     </span>
                     <h2 className="text-3xl font-extrabold text-white mb-4 tracking-tight">
-                        Experience Verihub natively on Android.
+                        Take Verihub on the go.
                     </h2>
-                    <p className="text-emerald-100/70 text-lg font-medium leading-relaxed mb-8">
-                        The official mobile application is currently in closed beta testing. Get advanced access to our highly-optimized mobile workflows today.
+                    <p className="text-slate-300 text-lg font-medium leading-relaxed mb-8">
+                        The official mobile application is now available on the Google Play store. Access your cloud vault, generate receipts, and manage your business from anywhere.
                     </p>
-                    <Link
-                        href="/download-beta"
-                        className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold text-lg transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transform hover:-translate-y-0.5"
+                    <a
+                        href="https://play.google.com/store/apps/details?id=com.tektriq.verihub"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block transition-transform hover:-translate-y-1 hover:drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
                     >
-                        Download Android Beta
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                    </Link>
+                        {/* Using standard img tag to avoid Next.js external domain config errors */}
+                        <img
+                            src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+                            alt="Get it on Google Play"
+                            className="h-[60px] w-auto object-contain"
+                        />
+                    </a>
                 </div>
 
                 <div className="hidden md:flex relative z-10 shrink-0 opacity-90 drop-shadow-2xl">
-                    <div className="w-32 h-32 bg-[var(--card)] rounded-full border-4 border-emerald-500/30 flex items-center justify-center shadow-inner">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1h3a2 2 0 012 2v2.174a1.996 1.996 0 00-.586.23l-7 4.666a2 2 0 01-2.022-.058L4.697 12H4a2 2 0 01-2-2V6a2 2 0 012-2h3V3a1 1 0 011-1zm1 5h2a1 1 0 011 1v1l-3 2v-4zm-4 4l-3-2V8a1 1 0 011-1h2v4z" clipRule="evenodd" />
+                    <div className="w-32 h-32 bg-[var(--card)] rounded-full border-4 border-indigo-500/30 flex items-center justify-center shadow-inner">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-14 w-14 text-indigo-400 pl-1" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17.523 15.341l-2.823-2.823 4.673-2.656a1.116 1.116 0 00.327-1.895l-7.394-4.2-2.823 2.823 8.04 4.57zm-14.838 2.072l2.823-2.823 8.358 4.75a1.116 1.116 0 001.56-.99V3.65a1.116 1.116 0 00-1.56-.99L2.685 7.41a1.116 1.116 0 000 1.942l4.674 2.657-2.823 2.823a1.116 1.116 0 00-.549 2.11z"/>
                         </svg>
                     </div>
                 </div>
