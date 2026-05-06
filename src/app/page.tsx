@@ -59,7 +59,7 @@ export default async function LandingPage() {
             />
           </div>
           <p className="text-base md:text-lg text-slate-200 max-w-[720px] mx-auto mb-10 leading-relaxed font-medium drop-shadow-sm">
-            Generate, store, and verify receipts with audit-ready precision and secure cloud architecture built for serious operators.
+            The intelligent financial operating system for modern businesses. Automate invoice generation, secure audit-ready receipts in the cloud, and unlock powerful analytics from a single, unified platform.
           </p>
           {/* modern enterprise CTAs */}
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center items-center w-full">
