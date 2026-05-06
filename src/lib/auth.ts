@@ -81,3 +81,29 @@ export function createAuthCookie(token: string) {
         path: '/',
     });
 }
+
+// ------------------------------------------------------------------
+// PASSWORD RESET TOKENS
+// ------------------------------------------------------------------
+
+export async function createPasswordResetToken(userId: string, currentPasswordHash: string): Promise<string> {
+    // Incorporating the current password hash into the secret ensures 
+    // the token is instantly invalidated once the password is changed.
+    const uniqueSecret = new TextEncoder().encode(JWT_SECRET + currentPasswordHash);
+    
+    return new SignJWT({ userId })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime('1h') // Token expires in 1 hour
+        .sign(uniqueSecret);
+}
+
+export async function verifyPasswordResetToken(token: string, currentPasswordHash: string): Promise<string | null> {
+    try {
+        const uniqueSecret = new TextEncoder().encode(JWT_SECRET + currentPasswordHash);
+        const { payload } = await jwtVerify(token, uniqueSecret);
+        return payload.userId as string;
+    } catch (error) {
+        return null;
+    }
+}
