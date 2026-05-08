@@ -51,7 +51,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         }
 
         const body = await req.json();
-        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, status, attachedPhotos, items } = body;
+        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, status, attachedPhotos, items, depositAmount, paymentMethod } = body;
 
         let dataToUpdate: any = {};
 
@@ -85,6 +85,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
         if (discountType !== undefined) dataToUpdate.discountType = discountType;
         if (discountValue !== undefined) dataToUpdate.discountValue = Number(discountValue) || 0;
+        if (depositAmount !== undefined) dataToUpdate.depositAmount = Number(depositAmount) || 0;
+        if (paymentMethod !== undefined) dataToUpdate.paymentMethod = paymentMethod || null;
         
         if (attachedPhotos !== undefined && Array.isArray(attachedPhotos)) dataToUpdate.attachedPhotos = attachedPhotos;
 

@@ -20,6 +20,8 @@ export interface InvoiceDocumentProps {
         discountValue?: number;
         tax: number;
         total: number;
+        depositAmount?: number;
+        paymentMethod?: string;
         issueDate: string;
         dueDate: string | null;
         notes: string | null;
@@ -55,8 +57,9 @@ export default function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
     const isOverdue = !isPaid && invoice.dueDate && new Date(invoice.dueDate) < new Date(new Date().setHours(0,0,0,0));
     
     // Smart Payment Logic
-    const amountPaid = isPaid ? invoice.total : 0;
-    const balanceDue = invoice.total - amountPaid;
+    const deposit = invoice.depositAmount || 0;
+    const amountPaid = isPaid ? invoice.total : deposit;
+    const balanceDue = Math.max(0, invoice.total - amountPaid);
 
     const formatCurrency = (amount: number, currency = 'USD') => {
         return new Intl.NumberFormat('en-US', {
@@ -310,8 +313,15 @@ export default function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
                         
                         {amountPaid > 0 && (
                             <div className="flex justify-between items-center mt-3 text-emerald-600 dark:text-emerald-400 print:text-emerald-700">
-                                <span className="text-sm font-medium">Amount Paid</span>
+                                <span className="text-sm font-medium">{!isPaid && deposit > 0 ? "Deposit Paid" : "Amount Paid"}</span>
                                 <span className="text-base font-semibold tabular-nums">-{formatCurrency(amountPaid, invoice.currency)}</span>
+                            </div>
+                        )}
+
+                        {invoice.paymentMethod && (
+                            <div className="flex justify-between items-center mt-1 text-slate-500 dark:text-slate-400 print:text-slate-500">
+                                <span className="text-[11px] font-medium uppercase tracking-wider">Payment Method</span>
+                                <span className="text-xs font-semibold">{invoice.paymentMethod}</span>
                             </div>
                         )}
 

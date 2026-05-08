@@ -392,6 +392,8 @@ model Invoice {
   subtotal           Float
   tax                Float?
   total              Float
+  depositAmount      Float?            @default(0)
+  paymentMethod      String?
   issueDate          DateTime
   dueDate            DateTime?
   notes              String?

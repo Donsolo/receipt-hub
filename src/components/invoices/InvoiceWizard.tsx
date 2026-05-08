@@ -45,6 +45,8 @@ export interface InvoiceWizardProps {
         notes: string;
         attachedPhotos?: string[];
         tax: number;
+        depositAmount?: number;
+        paymentMethod?: string;
         discountType?: string;
         discountValue?: number;
         items: InvoiceItem[];
@@ -79,6 +81,8 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
     const [tax, setTax] = useState(initialData?.tax || 0);
     const [discountType, setDiscountType] = useState<"none" | "percent" | "flat">(initialData?.discountType as any || "none");
     const [discountValue, setDiscountValue] = useState<number>(initialData?.discountValue || 0);
+    const [depositAmount, setDepositAmount] = useState<number>(initialData?.depositAmount || 0);
+    const [paymentMethod, setPaymentMethod] = useState<string>(initialData?.paymentMethod || '');
     const [notes, setNotes] = useState(initialData?.notes || '');
     const [attachedPhotos, setAttachedPhotos] = useState<string[]>(initialData?.attachedPhotos || []);
 
@@ -235,6 +239,8 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                 discountType,
                 discountValue,
                 tax: Number(tax),
+                depositAmount: Number(depositAmount),
+                paymentMethod,
                 notes,
                 attachedPhotos,
                 status: targetStatus,
@@ -702,6 +708,49 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                                     <span className="font-bold uppercase tracking-wider text-xs">Total Amount</span>
                                     <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight">${total.toFixed(2)}</span>
                                 </div>
+
+                                <div className="flex items-center justify-between text-sm pt-4 mt-2 border-t border-[var(--border)]/50 border-dashed">
+                                    <span className="text-[var(--muted)]">Deposit Paid (Upfront)</span>
+                                    <div className="flex items-center gap-2 max-w-[120px]">
+                                        <span className="text-[var(--muted)]">$</span>
+                                        <input 
+                                            type="number" 
+                                            min="0"
+                                            step="0.01"
+                                            value={depositAmount === 0 ? '' : depositAmount}
+                                            onChange={(e) => setDepositAmount(Number(e.target.value))}
+                                            className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-2 py-1 outline-none text-right tabular-nums focus:border-blue-500 transition-colors"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between text-sm pt-2">
+                                    <span className="text-[var(--muted)]">Payment Method</span>
+                                    <div className="flex items-center gap-2 max-w-[150px]">
+                                        <select
+                                            value={paymentMethod}
+                                            onChange={(e) => setPaymentMethod(e.target.value)}
+                                            className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-2 py-1 text-xs outline-none text-[var(--text)] focus:border-blue-500 transition-colors"
+                                        >
+                                            <option value="">None specified</option>
+                                            <option value="Cash">Cash</option>
+                                            <option value="Credit Card">Credit Card</option>
+                                            <option value="Bank Transfer">Bank Transfer</option>
+                                            <option value="Zelle">Zelle</option>
+                                            <option value="Cash App">Cash App</option>
+                                            <option value="Venmo">Venmo</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                {depositAmount > 0 && (
+                                    <div className="flex justify-between items-end pt-3 text-[var(--text)] border-t border-[var(--border)]">
+                                        <span className="font-bold uppercase tracking-wider text-xs text-blue-500">Balance Due</span>
+                                        <span className="text-xl font-black tabular-nums tracking-tight text-blue-500">${Math.max(0, total - depositAmount).toFixed(2)}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         if (!user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
 
         const body = await req.json();
-        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, attachedPhotos, items } = body;
+        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, attachedPhotos, items, depositAmount, paymentMethod } = body;
 
         if (!clientName || !title || !issueDate || !items || !Array.isArray(items) || items.length === 0) {
             return NextResponse.json({ success: false, error: 'Missing required fields or items' }, { status: 400 });
@@ -75,6 +75,8 @@ export async function POST(req: Request) {
                 title,
                 description: description || null,
                 currency: currency || "USD",
+                depositAmount: Number(depositAmount) || 0,
+                paymentMethod: paymentMethod || null,
                 discountType: dT,
                 discountValue: dV,
                 subtotal: calculatedSubtotal,
