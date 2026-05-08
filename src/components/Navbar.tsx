@@ -143,12 +143,12 @@ function NotificationBell() {
                                     <div className="flex justify-between items-start gap-4">
                                         <div className="flex-1 min-w-0">
                                             <p className={clsx(
-                                                "text-sm font-semibold truncate",
+                                                "text-[15px] sm:text-base font-semibold truncate",
                                                 !notif.read ? "text-[var(--text)]" : "text-[var(--text)] opacity-80"
                                             )}>
                                                 {notif.title}
                                             </p>
-                                            <p className="mt-1 text-xs text-[var(--muted)] line-clamp-2">
+                                            <p className="mt-1 text-xs sm:text-sm text-[var(--muted)] truncate">
                                                 {notif.message}
                                             </p>
                                             <p className="mt-2 text-[10px] text-[var(--muted)] font-medium">
@@ -336,7 +336,7 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
                                 key={link.href}
                                 href={link.href}
                                 onClick={() => setIsMenuOpen(false)}
-                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-[var(--card)] break-words"
+                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
                             >
                                 {link.label}
                             </Link>
@@ -346,7 +346,7 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
                                 <Link
                                     href="/admin"
                                     onClick={() => setIsMenuOpen(false)}
-                                    className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-[var(--card)] break-words"
+                                    className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
                                 >
                                     Admin CP
                                 </Link>
