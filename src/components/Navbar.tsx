@@ -89,7 +89,7 @@ function NotificationBell() {
             {/* Sliding Drawer */}
             <div
                 className={clsx(
-                    "fixed top-0 right-0 z-[101] h-full w-full sm:w-[360px] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out",
+                    "fixed top-0 right-0 z-[101] h-full w-[45vw] sm:w-[360px] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out",
                     isOpen ? "translate-x-0" : "translate-x-full"
                 )}
             >
@@ -300,16 +300,43 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
                 </div>
             </div>
 
-            {/* Mobile Menu Dropdown */}
-            {isAuthenticated && isMenuOpen && (
-                <div className="md:hidden absolute top-[60px] left-0 w-full bg-[var(--bg)] border-b border-[var(--border)] shadow-xl z-40">
-                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {/* Mobile Menu Backdrop */}
+            {isAuthenticated && (
+                <div
+                    className={clsx(
+                        "md:hidden fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm transition-opacity duration-300",
+                        isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                    )}
+                    onClick={() => setIsMenuOpen(false)}
+                />
+            )}
+
+            {/* Mobile Menu Drawer */}
+            {isAuthenticated && (
+                <div
+                    className={clsx(
+                        "md:hidden fixed top-0 right-0 z-[101] h-full w-[45vw] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out",
+                        isMenuOpen ? "translate-x-0" : "translate-x-full"
+                    )}
+                >
+                    <div className="flex items-center justify-between px-3 py-4 border-b border-[var(--border)] h-[60px]">
+                        <h2 className="text-sm font-semibold text-[var(--text)] truncate">Menu</h2>
+                        <button
+                            onClick={() => setIsMenuOpen(false)}
+                            className="p-1 rounded-md text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto px-2 pt-2 pb-3 space-y-1">
                         {mobileContextLinks.map((link) => (
                             <Link
                                 key={link.href}
                                 href={link.href}
                                 onClick={() => setIsMenuOpen(false)}
-                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--card)]"
+                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-[var(--card)] break-words"
                             >
                                 {link.label}
                             </Link>
@@ -319,7 +346,7 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
                                 <Link
                                     href="/admin"
                                     onClick={() => setIsMenuOpen(false)}
-                                    className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--card)]"
+                                    className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-[var(--card)] break-words"
                                 >
                                     Admin CP
                                 </Link>
