@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
+import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
 import InstallPrompt from '@/components/InstallPrompt';
 import { NotificationProvider } from '@/context/NotificationContext';
@@ -154,6 +155,7 @@ export default async function RootLayout({
                   <InstallPrompt />
                   <Footer />
                 </div>
+                <BottomNav isPro={isPro} />
               </div>
             </NotificationProvider>
           ) : (

@@ -732,6 +732,26 @@ export default function ProfilePage() {
                             </form>
                         </section>
                     </div>
+
+                    {/* SIGN OUT SECTION */}
+                    <div className="mt-8 mb-16">
+                        <section className="bg-red-500/5 border border-red-500/20 rounded-xl shadow-sm p-6 sm:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                            <div>
+                                <h2 className="text-lg font-semibold text-red-500">Sign Out</h2>
+                                <p className="text-sm text-[var(--muted)] mt-1">Securely log out of your account on this device.</p>
+                            </div>
+                            <button
+                                onClick={async () => {
+                                    await fetch('/api/auth/logout', { method: 'POST' });
+                                    router.refresh();
+                                    router.push('/');
+                                }}
+                                className="mt-4 sm:mt-0 inline-flex items-center px-6 py-2.5 border border-red-500/50 text-sm font-medium rounded-md text-red-500 bg-transparent hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                            >
+                                Sign Out
+                            </button>
+                        </section>
+                    </div>
                 </div>
             </div>
         </div>

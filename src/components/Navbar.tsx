@@ -193,6 +193,25 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
         { href: '/dashboard/profile', label: 'Profile' }
     ];
 
+    let mobileContextLinks: { href: string; label: string }[] = [];
+    if (pathname?.startsWith('/admin')) {
+        mobileContextLinks = [
+            { href: '/admin/hero-manager', label: 'Global Heros' },
+            { href: '/admin/announcements', label: 'Announcements & Popups' },
+            { href: '/admin/users', label: 'User Management' },
+            { href: '/admin/global-message', label: 'Global Messaging' },
+            { href: '/admin/app-releases', label: 'App Releases' }
+        ];
+    } else if (pathname?.startsWith('/dashboard/connections')) {
+        mobileContextLinks = [
+            { href: '/dashboard/messages', label: 'Messages' }
+        ];
+    } else {
+        mobileContextLinks = [
+            { href: '/dashboard', label: 'Dashboard Home' }
+        ];
+    }
+
     const guestLinks = [
         { href: '/login', label: 'Login' },
         { href: '/register', label: 'Register' },
@@ -283,9 +302,9 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
 
             {/* Mobile Menu Dropdown */}
             {isAuthenticated && isMenuOpen && (
-                <div className="md:hidden absolute top-16 left-0 w-full bg-[var(--bg)] border-b border-[var(--border)] shadow-xl">
+                <div className="md:hidden absolute top-[60px] left-0 w-full bg-[var(--bg)] border-b border-[var(--border)] shadow-xl z-40">
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                        {authLinks.map((link) => (
+                        {mobileContextLinks.map((link) => (
                             <Link
                                 key={link.href}
                                 href={link.href}
@@ -296,23 +315,16 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
                             </Link>
                         ))}
                         {role === 'ADMIN' || role === 'SUPER_ADMIN' ? (
-                            <Link
-                                href="/admin"
-                                onClick={() => setIsMenuOpen(false)}
-                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--card)]"
-                            >
-                                Admin
-                            </Link>
+                            <div className="pt-2 mt-2 border-t border-[var(--border)]">
+                                <Link
+                                    href="/admin"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--card)]"
+                                >
+                                    Admin CP
+                                </Link>
+                            </div>
                         ) : null}
-                        <button
-                            onClick={() => {
-                                setIsMenuOpen(false);
-                                handleLogout();
-                            }}
-                            className="text-[var(--text)] hover:text-[var(--text)] block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--card)]"
-                        >
-                            Sign Out
-                        </button>
                     </div>
                 </div>
             )}
