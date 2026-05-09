@@ -56,6 +56,7 @@ export default function VeroSuitePage() {
                 pageKey="vero" 
                 imageUrl="/images/vero-hero.jpg"
                 overlayOpacity={0.65}
+                blurStrength={0}
             />
 
             <div className="flex-1 w-full flex flex-col items-center px-4 sm:px-6 lg:px-8 py-8">
