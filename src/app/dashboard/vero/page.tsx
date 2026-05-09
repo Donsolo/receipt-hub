@@ -52,7 +52,11 @@ export default function VeroSuitePage() {
 
     return (
         <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)] relative pb-24 md:pb-8 overflow-x-hidden">
-            <HeroSection pageKey="vero" />
+            <HeroSection 
+                pageKey="vero" 
+                imageUrl="/images/vero-hero.jpg"
+                overlayOpacity={0.65}
+            />
 
             <div className="flex-1 w-full flex flex-col items-center px-4 sm:px-6 lg:px-8 py-8">
                 <div className="w-full max-w-7xl space-y-8 relative">
