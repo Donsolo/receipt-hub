@@ -65,7 +65,7 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
             <div className="h-24 md:hidden w-full flex-shrink-0" />
 
             <div className="md:hidden fixed bottom-4 left-4 right-4 z-50 pb-safe pointer-events-none">
-                <div className="bg-[var(--header-bg)]/75 backdrop-blur-xl border border-[var(--border)]/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-2xl flex items-center justify-around h-16 px-2 pointer-events-auto">
+                <div className="bg-[var(--header-bg)]/90 backdrop-blur-xl border border-[var(--border)]/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-2xl flex items-center justify-around h-16 px-2 pointer-events-auto">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                         
@@ -84,7 +84,7 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                                     )}>
                                         {item.icon}
                                     </div>
-                                    <span className={clsx("text-[10px] font-bold mt-1.5 transition-colors", isActive ? "text-indigo-500" : "text-[var(--text)] opacity-70")}>{item.label}</span>
+                                    <span className={clsx("text-[10px] font-bold mt-1.5 transition-colors", isActive ? "text-indigo-500" : "text-[var(--header-icon)] hover:text-[var(--header-icon-hover)]")}>{item.label}</span>
                                 </Link>
                             );
                         }
@@ -95,13 +95,13 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                                 href={item.href}
                                 className={clsx(
                                     "flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200",
-                                    isActive ? "text-indigo-500" : "text-[var(--text)] opacity-50 hover:opacity-100"
+                                    isActive ? "text-indigo-500" : "text-[var(--header-icon)] hover:text-[var(--header-icon-hover)]"
                                 )}
                             >
                                 <div className={clsx("transition-transform duration-300", isActive ? "scale-110 -translate-y-0.5" : "")}>
                                     {item.icon}
                                 </div>
-                                <span className={clsx("text-[10px] transition-all duration-300", isActive ? "font-semibold opacity-100" : "font-medium")}>
+                                <span className={clsx("text-[10px] transition-all duration-300", isActive ? "font-semibold" : "font-medium")}>
                                     {item.label}
                                 </span>
                             </Link>
