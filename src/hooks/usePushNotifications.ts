@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications, ActionPerformed, PushNotificationSchema, Token } from '@capacitor/push-notifications';
 import { useRouter } from 'next/navigation';
@@ -25,7 +25,7 @@ export function usePushNotifications() {
         }
     };
 
-    const requestPermissions = async () => {
+    const requestPermissions = useCallback(async () => {
         if (!Capacitor.isNativePlatform()) return false;
 
         const { receive } = await PushNotifications.requestPermissions();
@@ -34,7 +34,7 @@ export function usePushNotifications() {
             return true;
         }
         return false;
-    };
+    }, []);
 
     useEffect(() => {
         if (!Capacitor.isNativePlatform()) return;
