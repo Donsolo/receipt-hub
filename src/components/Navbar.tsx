@@ -188,6 +188,7 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
         { href: '/dashboard', label: 'Dashboard' },
         { href: '/history', label: 'Receipts' },
         ...(isPro ? [{ href: '/dashboard/invoices', label: 'Invoices' }] : []),
+        { href: '/dashboard/vero', label: isPro ? 'Vero Suite+' : 'Vero Suite' },
         { href: '/dashboard/connections', label: 'Network' },
         { href: '/dashboard/messages', label: 'Messages' },
         { href: '/dashboard/profile', label: 'Profile' }
