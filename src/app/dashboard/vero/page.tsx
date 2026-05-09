@@ -20,7 +20,9 @@ export default function VeroSuitePage() {
                 const res = await fetch('/api/user/profile');
                 if (res.ok) {
                     const data = await res.json();
-                    setIsPro(data.plan === 'PRO' && data.planStatus !== 'inactive');
+                    const isUserPro = data.plan === 'PRO' && data.planStatus !== 'inactive';
+                    setIsPro(isUserPro);
+                    document.title = isUserPro ? 'Vero Suite+ | Verihub' : 'Vero Suite | Verihub';
                 } else {
                     router.push('/login');
                 }

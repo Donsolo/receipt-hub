@@ -24,13 +24,23 @@ export default function CalculatorWidget({ type, onClose }: CalculatorWidgetProp
     };
 
     return (
-        <div 
-            className={clsx(
-                "fixed z-[60] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                "bottom-[100px] left-4 right-4 sm:right-auto sm:left-8 sm:bottom-8 sm:w-[380px] h-[75vh] sm:h-[600px] max-h-[600px]",
-                "bg-[var(--bg)] border border-[var(--border)] shadow-2xl rounded-3xl overflow-hidden flex flex-col",
-                isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-95 pointer-events-none"
-            )}
+        <>
+            {/* Backdrop overlay */}
+            <div 
+                className={clsx(
+                    "fixed inset-0 z-[50] bg-black/40 backdrop-blur-sm transition-opacity duration-300",
+                    isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+                )}
+                onClick={handleClose}
+            />
+
+            <div 
+                className={clsx(
+                    "fixed z-[60] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                    "bottom-[100px] left-4 right-4 sm:right-auto sm:left-8 sm:bottom-8 sm:w-[380px] h-[75vh] sm:h-[600px] max-h-[600px]",
+                    "bg-[var(--bg)] border border-[var(--border)] shadow-2xl rounded-3xl overflow-hidden flex flex-col",
+                    isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-95 pointer-events-none"
+                )}
             style={{
                 boxShadow: type === 'business' 
                     ? '0 25px 50px -12px rgba(245, 158, 11, 0.15), 0 0 0 1px var(--border)' 
@@ -69,5 +79,6 @@ export default function CalculatorWidget({ type, onClose }: CalculatorWidgetProp
                 {type === 'basic' ? <BasicCalculator /> : <BusinessCalculator />}
             </div>
         </div>
+        </>
     );
 }
