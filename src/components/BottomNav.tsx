@@ -30,6 +30,16 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
             )
         }] : []),
         {
+            href: '/dashboard/vero',
+            label: isPro ? 'Vero+' : 'Vero',
+            isSpecial: true,
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+            )
+        },
+        {
             href: '/dashboard/connections',
             label: 'Network',
             icon: (
@@ -52,23 +62,48 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
     return (
         <>
             {/* Spacer to prevent content from hiding behind the fixed bottom nav on mobile */}
-            <div className="h-16 md:hidden w-full flex-shrink-0" />
+            <div className="h-24 md:hidden w-full flex-shrink-0" />
 
-            <div className="md:hidden fixed bottom-0 left-0 w-full bg-[var(--header-bg)] border-t border-[var(--header-border)] z-50 pb-safe">
-                <div className="flex items-center justify-around h-16 px-2">
+            <div className="md:hidden fixed bottom-4 left-4 right-4 z-50 pb-safe pointer-events-none">
+                <div className="bg-[var(--header-bg)]/75 backdrop-blur-xl border border-[var(--border)]/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-2xl flex items-center justify-around h-16 px-2 pointer-events-auto">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                        
+                        if (item.isSpecial) {
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="flex flex-col items-center justify-center w-full h-full relative -mt-6 z-10"
+                                >
+                                    <div className={clsx(
+                                        "w-12 h-12 rounded-full flex items-center justify-center shadow-xl transition-all duration-300",
+                                        isActive 
+                                            ? "bg-indigo-600 text-white shadow-indigo-500/40 ring-4 ring-[var(--bg)] scale-105" 
+                                            : "bg-[var(--card)] text-indigo-500 border border-[var(--border)] shadow-black/5 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 ring-4 ring-[var(--bg)] hover:scale-105"
+                                    )}>
+                                        {item.icon}
+                                    </div>
+                                    <span className={clsx("text-[10px] font-bold mt-1.5 transition-colors", isActive ? "text-indigo-500" : "text-[var(--text)] opacity-70")}>{item.label}</span>
+                                </Link>
+                            );
+                        }
+
                         return (
                             <Link
                                 key={item.href}
                                 href={item.href}
                                 className={clsx(
-                                    "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors",
-                                    isActive ? "text-indigo-500" : "text-[var(--header-icon)] hover:text-[var(--header-icon-hover)]"
+                                    "flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200",
+                                    isActive ? "text-indigo-500" : "text-[var(--text)] opacity-50 hover:opacity-100"
                                 )}
                             >
-                                {item.icon}
-                                <span className="text-[10px] font-medium">{item.label}</span>
+                                <div className={clsx("transition-transform duration-300", isActive ? "scale-110 -translate-y-0.5" : "")}>
+                                    {item.icon}
+                                </div>
+                                <span className={clsx("text-[10px] transition-all duration-300", isActive ? "font-semibold opacity-100" : "font-medium")}>
+                                    {item.label}
+                                </span>
                             </Link>
                         );
                     })}
