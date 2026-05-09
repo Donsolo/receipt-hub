@@ -33,13 +33,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         // 3. Perform atomic conversion transaction
         const result = await prisma.$transaction(async (tx) => {
             
+            let paymentHistoryStr = '';
+            if (invoice.payments && Array.isArray(invoice.payments) && invoice.payments.length > 0) {
+                paymentHistoryStr = '\n\nPayment History:\n' + invoice.payments.map((p: any) => 
+                    `- $${Number(p.amount).toFixed(2)} via ${p.method} on ${p.date ? new Date(p.date).toLocaleDateString() : 'N/A'}`
+                ).join('\n');
+            } else if (invoice.paymentMethod) {
+                paymentHistoryStr = `\n\nPaid via: ${invoice.paymentMethod}`;
+            }
+
             // Create the new Receipt
             const newReceipt = await tx.receipt.create({
                 data: {
                     userId: invoice.userId,
                     date: invoice.issueDate,
                     clientName: invoice.clientName,
-                    notes: `Converted from Invoice: ${invoice.title}`,
+                    notes: `Converted from Invoice: ${invoice.title}${paymentHistoryStr}`,
                     taxType: invoice.tax && invoice.tax > 0 ? 'custom' : 'none',
                     taxValue: invoice.tax || 0,
                     subtotal: invoice.subtotal,

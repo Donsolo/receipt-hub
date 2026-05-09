@@ -25,6 +25,15 @@ export interface InvoiceItem {
     unitPrice: number;
 }
 
+export interface PaymentRecord {
+    id: string;
+    amount: number;
+    method: string;
+    date: string;
+    isDeposit: boolean;
+    note?: string;
+}
+
 export interface InvoiceWizardProps {
     isPro?: boolean;
     businessName?: string;
@@ -47,6 +56,7 @@ export interface InvoiceWizardProps {
         tax: number;
         depositAmount?: number;
         paymentMethod?: string;
+        payments?: PaymentRecord[];
         discountType?: string;
         discountValue?: number;
         items: InvoiceItem[];
@@ -81,8 +91,24 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
     const [tax, setTax] = useState(initialData?.tax || 0);
     const [discountType, setDiscountType] = useState<"none" | "percent" | "flat">(initialData?.discountType as any || "none");
     const [discountValue, setDiscountValue] = useState<number>(initialData?.discountValue || 0);
-    const [depositAmount, setDepositAmount] = useState<number>(initialData?.depositAmount || 0);
-    const [paymentMethod, setPaymentMethod] = useState<string>(initialData?.paymentMethod || '');
+    
+    // Payments & Installments State
+    const [payments, setPayments] = useState<PaymentRecord[]>(() => {
+        if (initialData?.payments?.length) return initialData.payments;
+        // Legacy migration
+        if (initialData?.depositAmount && initialData.depositAmount > 0) {
+            return [{
+                id: Math.random().toString(36).substr(2, 9),
+                amount: initialData.depositAmount,
+                method: initialData.paymentMethod || 'Other',
+                date: initialData.issueDate ? new Date(initialData.issueDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+                isDeposit: true,
+                note: 'Initial Deposit'
+            }];
+        }
+        return [];
+    });
+
     const [notes, setNotes] = useState(initialData?.notes || '');
     const [attachedPhotos, setAttachedPhotos] = useState<string[]>(initialData?.attachedPhotos || []);
 
@@ -141,8 +167,30 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
 
     const subtotalAfterDiscount = Math.max(0, subtotal - calculatedDiscount);
     const total = subtotalAfterDiscount + Number(tax);
+    
+    const totalPaid = useMemo(() => payments.reduce((sum, p) => sum + Number(p.amount || 0), 0), [payments]);
+    const balanceDue = Math.max(0, total - totalPaid);
 
     // Handlers
+    const addPayment = () => {
+        setPayments(prev => [...prev, { 
+            id: Math.random().toString(36).substr(2, 9), 
+            amount: 0, 
+            method: 'Credit Card', 
+            date: new Date().toISOString().slice(0, 10), 
+            isDeposit: prev.length === 0,
+            note: prev.length === 0 ? 'Upfront Deposit' : `Installment ${prev.length + 1}`
+        }]);
+    };
+
+    const removePayment = (id: string) => {
+        setPayments(prev => prev.filter(p => p.id !== id));
+    };
+
+    const updatePayment = (id: string, field: keyof PaymentRecord, value: any) => {
+        setPayments(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
+    };
+
     const addItem = () => {
         setItems(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), name: '', description: '', quantity: 1, unitPrice: 0 }]);
     };
@@ -239,8 +287,9 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                 discountType,
                 discountValue,
                 tax: Number(tax),
-                depositAmount: Number(depositAmount),
-                paymentMethod,
+                depositAmount: totalPaid > 0 ? payments[0]?.amount || 0 : 0, // Fallback for old schema
+                paymentMethod: payments.length > 0 ? payments[0].method : '',
+                payments,
                 notes,
                 attachedPhotos,
                 status: targetStatus,
@@ -709,47 +758,96 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                                     <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight">${total.toFixed(2)}</span>
                                 </div>
 
-                                <div className="flex items-center justify-between text-sm pt-4 mt-2 border-t border-[var(--border)]/50 border-dashed">
-                                    <span className="text-[var(--muted)]">Deposit Paid (Upfront)</span>
-                                    <div className="flex items-center gap-2 max-w-[120px]">
-                                        <span className="text-[var(--muted)]">$</span>
-                                        <input 
-                                            type="number" 
-                                            min="0"
-                                            step="0.01"
-                                            value={depositAmount === 0 ? '' : depositAmount}
-                                            onChange={(e) => setDepositAmount(Number(e.target.value))}
-                                            className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-2 py-1 outline-none text-right tabular-nums focus:border-blue-500 transition-colors"
-                                            placeholder="0.00"
-                                        />
+                                <div className="pt-4 mt-4 border-t border-[var(--border)]/50 border-dashed space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-bold text-[var(--text)]">Payments & Installments</span>
+                                        <button 
+                                            onClick={addPayment}
+                                            className="text-xs font-bold text-blue-500 hover:text-blue-600 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+                                        >
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                                            Add Payment
+                                        </button>
                                     </div>
+
+                                    {payments.length === 0 ? (
+                                        <div className="text-[11px] text-[var(--muted)] text-center py-2 italic bg-[var(--bg)] rounded-lg border border-[var(--border)]">
+                                            No payments recorded yet.
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {payments.map((p, idx) => (
+                                                <div key={p.id} className="flex flex-col sm:flex-row gap-2 sm:items-center bg-[var(--bg)] p-2.5 rounded-xl border border-[var(--border)] relative group">
+                                                    <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                                        <div className="col-span-2 sm:col-span-1">
+                                                            <input 
+                                                                type="date"
+                                                                value={p.date}
+                                                                onChange={e => updatePayment(p.id, 'date', e.target.value)}
+                                                                className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-2 py-1 text-xs outline-none focus:border-blue-500"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <select
+                                                                value={p.method}
+                                                                onChange={e => updatePayment(p.id, 'method', e.target.value)}
+                                                                className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-2 py-1 text-xs outline-none focus:border-blue-500"
+                                                            >
+                                                                <option value="Cash">Cash</option>
+                                                                <option value="Credit Card">Credit Card</option>
+                                                                <option value="Bank Transfer">Bank Transfer</option>
+                                                                <option value="Zelle">Zelle</option>
+                                                                <option value="Cash App">Cash App</option>
+                                                                <option value="Venmo">Venmo</option>
+                                                                <option value="Check">Check</option>
+                                                                <option value="Other">Other</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="col-span-1 relative">
+                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[var(--muted)] text-xs">$</span>
+                                                            <input 
+                                                                type="number"
+                                                                min="0"
+                                                                step="0.01"
+                                                                value={p.amount === 0 ? '' : p.amount}
+                                                                onChange={e => updatePayment(p.id, 'amount', Number(e.target.value))}
+                                                                placeholder="0.00"
+                                                                className="w-full bg-[var(--card)] border border-[var(--border)] rounded pl-5 pr-2 py-1 text-xs outline-none focus:border-blue-500 tabular-nums"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-2 sm:col-span-1">
+                                                            <input 
+                                                                type="text"
+                                                                value={p.note || ''}
+                                                                onChange={e => updatePayment(p.id, 'note', e.target.value)}
+                                                                placeholder="Note (e.g. Deposit)"
+                                                                className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-2 py-1 text-xs outline-none focus:border-blue-500"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => removePayment(p.id)}
+                                                        className="absolute -top-2 -right-2 sm:relative sm:top-auto sm:right-auto bg-red-500 text-white rounded-full p-1 sm:bg-transparent sm:text-red-400 sm:hover:text-red-500 sm:hover:bg-red-500/10 transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100 shadow-md sm:shadow-none"
+                                                    >
+                                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="flex items-center justify-between text-sm pt-2">
-                                    <span className="text-[var(--muted)]">Payment Method</span>
-                                    <div className="flex items-center gap-2 max-w-[150px]">
-                                        <select
-                                            value={paymentMethod}
-                                            onChange={(e) => setPaymentMethod(e.target.value)}
-                                            className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-2 py-1 text-xs outline-none text-[var(--text)] focus:border-blue-500 transition-colors"
-                                        >
-                                            <option value="">None specified</option>
-                                            <option value="Cash">Cash</option>
-                                            <option value="Credit Card">Credit Card</option>
-                                            <option value="Bank Transfer">Bank Transfer</option>
-                                            <option value="Zelle">Zelle</option>
-                                            <option value="Cash App">Cash App</option>
-                                            <option value="Venmo">Venmo</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                {depositAmount > 0 && (
-                                    <div className="flex justify-between items-end pt-3 text-[var(--text)] border-t border-[var(--border)]">
-                                        <span className="font-bold uppercase tracking-wider text-xs text-blue-500">Balance Due</span>
-                                        <span className="text-xl font-black tabular-nums tracking-tight text-blue-500">${Math.max(0, total - depositAmount).toFixed(2)}</span>
-                                    </div>
+                                {totalPaid > 0 && (
+                                    <>
+                                        <div className="flex justify-between items-end pt-3 mt-2 text-[var(--text)] border-t border-[var(--border)]/50">
+                                            <span className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Total Paid</span>
+                                            <span className="text-lg font-bold tabular-nums tracking-tight text-[var(--muted)]">-${totalPaid.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-end pt-2 text-[var(--text)]">
+                                            <span className="font-bold uppercase tracking-wider text-xs text-blue-500">Balance Due</span>
+                                            <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-blue-500">${balanceDue.toFixed(2)}</span>
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         </div>

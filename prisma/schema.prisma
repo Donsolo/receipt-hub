@@ -411,6 +411,7 @@ model Invoice {
   authorizedSignature String?
   paymentMethodNote  String?
   attachedPhotos     Json?             @default("[]")
+  payments           Json?             @default("[]")
   
   user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   items              InvoiceLineItem[]

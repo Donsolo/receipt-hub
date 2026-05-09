@@ -26,6 +26,14 @@ export interface InvoiceDocumentProps {
         dueDate: string | null;
         notes: string | null;
         attachedPhotos?: any;
+        payments?: {
+            id: string;
+            amount: number;
+            method: string;
+            date: string;
+            isDeposit: boolean;
+            note?: string;
+        }[];
         status: string;
         isConverted: boolean;
         paymentConfirmed: boolean;
@@ -52,13 +60,22 @@ export interface InvoiceDocumentProps {
 export default function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
     const isPaid = invoice.status === 'PAID';
     const isDraft = invoice.status === 'DRAFT';
-    const isSent = invoice.status === 'SENT';
-    
     const isOverdue = !isPaid && invoice.dueDate && new Date(invoice.dueDate) < new Date(new Date().setHours(0,0,0,0));
     
     // Smart Payment Logic
-    const deposit = invoice.depositAmount || 0;
-    const amountPaid = isPaid ? invoice.total : deposit;
+    const payments = invoice.payments || [];
+    let amountPaid = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    
+    // Fallback for older invoices that only used depositAmount
+    if (amountPaid === 0 && invoice.depositAmount) {
+        amountPaid = invoice.depositAmount;
+    }
+    
+    // If status is PAID but no payments are recorded, assume total is paid
+    if (isPaid && amountPaid === 0) {
+        amountPaid = invoice.total;
+    }
+
     const balanceDue = Math.max(0, invoice.total - amountPaid);
 
     const formatCurrency = (amount: number, currency = 'USD') => {
@@ -311,14 +328,30 @@ export default function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
                             </span>
                         </div>
                         
-                        {amountPaid > 0 && (
+                        {payments && payments.length > 0 ? (
+                            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50 border-dashed print:border-slate-300">
+                                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 print:text-slate-500">Payment History</div>
+                                {payments.map((payment) => (
+                                    <div key={payment.id} className="flex justify-between items-center mt-1.5 text-emerald-600 dark:text-emerald-400 print:text-emerald-700 text-sm">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">{payment.date ? format(new Date(payment.date), 'MMM d, yyyy') : 'Payment'}</span>
+                                            <span className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-wider bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                                                {payment.method}
+                                            </span>
+                                            {payment.note && <span className="text-xs text-slate-400 italic hidden sm:inline">- {payment.note}</span>}
+                                        </div>
+                                        <span className="font-semibold tabular-nums">-{formatCurrency(payment.amount, invoice.currency)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : amountPaid > 0 ? (
                             <div className="flex justify-between items-center mt-3 text-emerald-600 dark:text-emerald-400 print:text-emerald-700">
-                                <span className="text-sm font-medium">{!isPaid && deposit > 0 ? "Deposit Paid" : "Amount Paid"}</span>
+                                <span className="text-sm font-medium">Amount Paid</span>
                                 <span className="text-base font-semibold tabular-nums">-{formatCurrency(amountPaid, invoice.currency)}</span>
                             </div>
-                        )}
+                        ) : null}
 
-                        {invoice.paymentMethod && (
+                        {invoice.paymentMethod && (!payments || payments.length === 0) && (
                             <div className="flex justify-between items-center mt-1 text-slate-500 dark:text-slate-400 print:text-slate-500">
                                 <span className="text-[11px] font-medium uppercase tracking-wider">Payment Method</span>
                                 <span className="text-xs font-semibold">{invoice.paymentMethod}</span>
