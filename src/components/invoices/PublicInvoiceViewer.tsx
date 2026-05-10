@@ -44,6 +44,9 @@ interface PublicInvoice {
     viewCount: number;
     lastViewedAt: string | null;
     sentAt: string | null;
+    depositAmount?: number;
+    paymentMethod?: string | null;
+    payments?: any;
     items: {
         id: string;
         name: string;

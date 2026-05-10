@@ -74,6 +74,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
             businessLogoPath: invoice.user?.plan === 'PRO' ? invoice.user.businessLogoPath : null,
             businessRegistrationNumber: invoice.user?.businessRegistrationNumber || null,
             attachedPhotos: invoice.attachedPhotos,
+            depositAmount: invoice.depositAmount,
+            paymentMethod: invoice.paymentMethod,
+            payments: invoice.payments,
             items: invoice.items.map(i => ({
                 id: i.id,
                 name: i.name,

@@ -20,8 +20,8 @@ export interface InvoiceDocumentProps {
         discountValue?: number;
         tax: number;
         total: number;
-        depositAmount?: number;
-        paymentMethod?: string;
+        depositAmount?: number | null;
+        paymentMethod?: string | null;
         issueDate: string;
         dueDate: string | null;
         notes: string | null;
