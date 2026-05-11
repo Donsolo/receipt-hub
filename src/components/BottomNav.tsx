@@ -83,6 +83,12 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                                     onClick={(e) => {
                                         if (isLongPress.current) {
                                             e.preventDefault();
+                                            return;
+                                        }
+                                        if (pathname === '/dashboard/vero') {
+                                            e.preventDefault();
+                                            setShowVeroOverlay(true);
+                                            setStartVoice(false);
                                         }
                                     }}
                                     onTouchStart={() => {

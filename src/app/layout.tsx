@@ -70,6 +70,7 @@ export const viewport = {
 import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import GlobalVeroBubble from '@/components/vero/GlobalVeroBubble';
 
 export default async function RootLayout({
   children,
@@ -156,6 +157,7 @@ export default async function RootLayout({
                   <Footer />
                 </div>
                 <BottomNav isPro={isPro} />
+                <GlobalVeroBubble isPro={isPro} />
               </div>
             </NotificationProvider>
           ) : (

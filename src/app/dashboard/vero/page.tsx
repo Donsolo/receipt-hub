@@ -6,7 +6,6 @@ import Link from 'next/link';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import HeroSection from '@/components/ui/HeroSection';
 import CalculatorWidget from '@/components/vero/CalculatorWidget';
-import VeroAssistant from '@/components/vero/VeroAssistant';
 
 export default function VeroSuitePage() {
     const router = useRouter();
@@ -67,12 +66,6 @@ export default function VeroSuitePage() {
                         description="Smart tools for receipts, invoices, and business decisions." 
                     />
 
-                    {/* Vero Assistant (PRO ONLY) */}
-                    {isPro && (
-                        <div className="w-full mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <VeroAssistant />
-                        </div>
-                    )}
 
                     {/* Tools Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
