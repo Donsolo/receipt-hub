@@ -35,7 +35,7 @@ Be concise, helpful, and extremely professional. Format your responses in clean 
 Do not hallucinate data. If you don't know the answer, use your available tools to check the database. 
 If a user asks about invoices, receipts, or clients, use the tools.`;
 
-        const result = streamText({
+        const result = await streamText({
             model: google('models/gemini-1.5-flash'),
             system: systemPrompt,
             messages,
