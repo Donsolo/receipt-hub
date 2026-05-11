@@ -3,8 +3,12 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { streamText, tool } from 'ai';
-import { google } from '@ai-sdk/google';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { z } from 'zod';
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || ''
+});
 
 export const maxDuration = 60;
 
