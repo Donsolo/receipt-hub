@@ -36,7 +36,7 @@ Do not hallucinate data. If you don't know the answer, use your available tools 
 If a user asks about invoices, receipts, or clients, use the tools.`;
 
         const result = streamText({
-            model: google('gemini-1.5-flash'),
+            model: google('models/gemini-1.5-flash'),
             system: systemPrompt,
             messages,
             // @ts-ignore
