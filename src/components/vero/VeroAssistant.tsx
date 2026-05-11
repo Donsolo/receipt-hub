@@ -78,7 +78,7 @@ export default function VeroAssistant({ initialInput = '', isOverlay = false }: 
         }
     };
 
-    const onSubmit = (e: React.FormEvent) => {
+    const onSubmit = (e: any) => {
         e.preventDefault();
         if (!input.trim()) return;
         handleSubmit(e);
