@@ -3,9 +3,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
+import { useState, useRef, useEffect } from 'react';
+import VeroAssistant from './vero/VeroAssistant';
 
 export default function BottomNav({ isPro }: { isPro?: boolean }) {
     const pathname = usePathname();
+    const [showVeroOverlay, setShowVeroOverlay] = useState(false);
+    const [startVoice, setStartVoice] = useState(false);
+    const pressTimer = useRef<NodeJS.Timeout | null>(null);
+    const isLongPress = useRef(false);
 
     // Do not show on invoice public view pages
     if (pathname?.startsWith('/invoice/')) return null;
@@ -74,6 +80,36 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                                 <Link
                                     key={item.href}
                                     href={item.href}
+                                    onClick={(e) => {
+                                        if (isLongPress.current) {
+                                            e.preventDefault();
+                                        }
+                                    }}
+                                    onTouchStart={() => {
+                                        isLongPress.current = false;
+                                        pressTimer.current = setTimeout(() => {
+                                            isLongPress.current = true;
+                                            setShowVeroOverlay(true);
+                                            setStartVoice(true);
+                                        }, 600);
+                                    }}
+                                    onTouchEnd={() => {
+                                        if (pressTimer.current) clearTimeout(pressTimer.current);
+                                    }}
+                                    onMouseDown={() => {
+                                        isLongPress.current = false;
+                                        pressTimer.current = setTimeout(() => {
+                                            isLongPress.current = true;
+                                            setShowVeroOverlay(true);
+                                            setStartVoice(true);
+                                        }, 600);
+                                    }}
+                                    onMouseUp={() => {
+                                        if (pressTimer.current) clearTimeout(pressTimer.current);
+                                    }}
+                                    onMouseLeave={() => {
+                                        if (pressTimer.current) clearTimeout(pressTimer.current);
+                                    }}
                                     className="flex flex-col items-center justify-center w-full h-full relative -mt-6 z-10"
                                 >
                                     <div className={clsx(
@@ -109,6 +145,22 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                     })}
                 </div>
             </div>
+
+            {/* Global Vero Overlay */}
+            {showVeroOverlay && isPro && (
+                <div className="fixed inset-0 z-[100] flex flex-col justify-end bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="w-full h-full absolute inset-0" onClick={() => setShowVeroOverlay(false)} />
+                    <div className="relative z-10 w-full animate-in slide-in-from-bottom-full duration-300">
+                        <VeroAssistant isOverlay={true} initialInput={startVoice ? " " : ""} />
+                        <button 
+                            onClick={() => setShowVeroOverlay(false)}
+                            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors"
+                        >
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

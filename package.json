@@ -13,6 +13,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.72",
     "@aws-sdk/client-s3": "^3.991.0",
     "@aws-sdk/s3-request-presigner": "^3.991.0",
     "@capacitor/android": "^8.3.0",
@@ -22,9 +23,11 @@
     "@capacitor/core": "^8.3.0",
     "@capacitor/push-notifications": "^8.0.3",
     "@capacitor/splash-screen": "^8.0.1",
+    "@google/generative-ai": "^0.24.1",
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^5.10.2",
     "@sparticuz/chromium": "^133.0.0",
+    "ai": "^6.0.177",
     "bcrypt": "^6.0.0",
     "clsx": "^2.1.1",
     "cookie": "^1.1.1",
@@ -38,6 +41,7 @@
     "puppeteer-core": "^24.37.5",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
     "sharp": "^0.34.5",
     "stripe": "^20.3.1",
     "tailwind-merge": "^3.4.0",
