@@ -50,10 +50,12 @@ export async function updateBusinessProfile(data: {
 export async function generateDocumentPrefix(userId: string) {
     const user = await db.user.findUnique({
         where: { id: userId },
-        select: { plan: true, businessName: true }
+        select: { plan: true, businessName: true, role: true }
     });
 
-    if (user?.plan === 'PRO' && user.businessName) {
+    const isPro = user?.plan === 'PRO' || user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+
+    if (isPro && user?.businessName) {
         const alpha = user.businessName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
         if (alpha.length >= 2) {
             return `${alpha.substring(0, 3)}-`;

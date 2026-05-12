@@ -71,7 +71,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
             businessEmail: invoice.user?.email || null,
             businessPhone: invoice.user?.businessPhone || null,
             businessAddress: invoice.user?.businessAddress || null,
-            businessLogoPath: invoice.user?.plan === 'PRO' ? invoice.user.businessLogoPath : null,
+            businessLogoPath: (invoice.user?.plan === 'PRO' || invoice.user?.role === 'ADMIN' || invoice.user?.role === 'SUPER_ADMIN') ? invoice.user.businessLogoPath : null,
             businessRegistrationNumber: invoice.user?.businessRegistrationNumber || null,
             attachedPhotos: invoice.attachedPhotos,
             depositAmount: invoice.depositAmount,
