@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 // @ts-ignore
 import ReactMarkdown from 'react-markdown';
 import { clsx } from 'clsx';
+import Image from 'next/image';
 
 export default function VeroAssistant({ initialInput = '', isOverlay = false }: { initialInput?: string, isOverlay?: boolean }) {
     const { messages, input, handleInputChange, handleSubmit, setInput, isLoading } = useChat({
@@ -92,9 +93,9 @@ export default function VeroAssistant({ initialInput = '', isOverlay = false }: 
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-black/20 backdrop-blur-md">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white relative">
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                        {isLoading && <span className="absolute top-0 right-0 w-3 h-3 bg-blue-400 border-2 border-white dark:border-[#0b1220] rounded-full animate-ping"></span>}
+                    <div className="w-10 h-10 rounded-full bg-[#0A0F1A] overflow-hidden flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white relative">
+                        <Image src="/images/vero-icon.png" alt="Vero Icon" fill className="object-cover" />
+                        {isLoading && <span className="absolute top-0 right-0 w-3 h-3 bg-blue-400 border-2 border-white dark:border-[#0b1220] rounded-full animate-ping z-10"></span>}
                     </div>
                     <div>
                         <h2 className="text-sm font-bold text-gray-900 dark:text-white">Vero Assistant</h2>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Image from 'next/image';
 import VeroAssistant from './VeroAssistant';
 
 export default function GlobalVeroBubble({ isPro }: { isPro: boolean }) {
@@ -14,15 +15,20 @@ export default function GlobalVeroBubble({ isPro }: { isPro: boolean }) {
             <div className="fixed bottom-6 right-6 z-[90] hidden md:flex items-center justify-center">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="w-14 h-14 rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-1 hover:scale-105 transition-all duration-300 flex items-center justify-center ring-4 ring-white/10 dark:ring-[#0B1220]"
+                    className="w-14 h-14 rounded-full overflow-hidden bg-[#0A0F1A] text-white shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-1 hover:scale-105 transition-all duration-300 flex items-center justify-center ring-4 ring-white/10 dark:ring-[#0B1220] relative group"
                     aria-label="Open Vero Assistant"
                 >
                     {isOpen ? (
-                        <svg className="w-6 h-6 animate-in fade-in" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        <div className="absolute inset-0 bg-indigo-600 flex items-center justify-center z-10 animate-in fade-in">
+                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </div>
                     ) : (
-                        <svg className="w-7 h-7 animate-in fade-in" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
+                        <Image 
+                            src="/images/vero-icon.png" 
+                            alt="Vero AI" 
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-300" 
+                        />
                     )}
                 </button>
             </div>
