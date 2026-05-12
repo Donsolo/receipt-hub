@@ -109,7 +109,7 @@ If a user asks about invoices, receipts, or clients, use the tools.`;
         });
 
         // @ts-ignore
-        return result.toDataStreamResponse();
+        return result.toAIStreamResponse();
     } catch (error: any) {
         console.error('Vero Chat Error:', error);
         return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
