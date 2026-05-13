@@ -9,15 +9,24 @@ import { clsx } from 'clsx';
 import Image from 'next/image';
 
 export default function VeroAssistant({ initialInput = '', isOverlay = false }: { initialInput?: string, isOverlay?: boolean }) {
+    const intros = [
+        "Hi! I am Vero, your AI business assistant. I can help you manage invoices, track receipts, and calculate finances. How can I help you today?",
+        "Hello! I'm Vero. Ready to review your latest invoices or track receipts?",
+        "Welcome back! I'm Vero, your Verihub assistant. What can I do for your business today?",
+        "Greetings! Vero here. Need a quick summary of your revenue or pending invoices?"
+    ];
+
+    const [initialMessages] = useState([
+        {
+            id: 'welcome',
+            role: 'assistant' as const,
+            content: intros[Math.floor(Math.random() * intros.length)]
+        }
+    ]);
+
     const { messages, input, handleInputChange, handleSubmit, setInput, isLoading } = useChat({
         api: '/api/vero/chat',
-        initialMessages: [
-            {
-                id: 'welcome',
-                role: 'assistant',
-                content: 'Hi! I am Vero, your AI business assistant. I can help you manage invoices, track receipts, and calculate finances. How can I help you today?'
-            }
-        ]
+        initialMessages: initialMessages
     });
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -108,7 +117,7 @@ export default function VeroAssistant({ initialInput = '', isOverlay = false }: 
 
             {/* Chat Area */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-                {messages.map((m: any) => (
+                {messages.filter((m: any) => m.content && m.content.trim() !== '').map((m: any) => (
                     <div key={m.id} className={clsx("flex w-full", m.role === 'user' ? "justify-end" : "justify-start")}>
                         <div className={clsx(
                             "max-w-[85%] sm:max-w-[75%] rounded-2xl px-5 py-3.5 shadow-sm text-sm leading-relaxed",

@@ -33,7 +33,8 @@ export async function POST(req: Request) {
 You are helping ${userProfile?.name || 'the user'} manage their business ${userProfile?.businessName ? `(${userProfile.businessName})` : ''}.
 Be concise, helpful, and extremely professional. Format your responses in clean markdown. 
 Do not hallucinate data. If you don't know the answer, use your available tools to check the database. 
-If a user asks about invoices, receipts, or clients, use the tools.`;
+If a user asks about a specific client (e.g. "summary of Maria"), use the searchInvoices tool with the client's name to fetch their data.
+If a user asks about invoices, receipts, or clients, ALWAYS use the tools to fetch real data before answering.`;
 
         const result = await streamText({
             model: google('models/gemini-2.5-flash'),
@@ -87,6 +88,28 @@ If a user asks about invoices, receipts, or clients, use the tools.`;
                             where: { userId: user.userId },
                             orderBy: { createdAt: 'desc' },
                             take: limit,
+                            select: { id: true, invoiceNumber: true, title: true, clientName: true, total: true, status: true, dueDate: true }
+                        });
+                        return invoices;
+                    }
+                }),
+                searchInvoices: tool({
+                    description: 'Search invoices by client name, email, or invoice number. Use this to summarize a specific client\'s invoices.',
+                    parameters: z.object({
+                        query: z.string().describe('The client name or search term')
+                    }),
+                    // @ts-ignore
+                    execute: async ({ query }: any) => {
+                        const invoices = await db.invoice.findMany({
+                            where: { 
+                                userId: user.userId,
+                                OR: [
+                                    { clientName: { contains: query, mode: 'insensitive' } },
+                                    { clientEmail: { contains: query, mode: 'insensitive' } },
+                                    { invoiceNumber: { contains: query, mode: 'insensitive' } },
+                                ]
+                            },
+                            orderBy: { createdAt: 'desc' },
                             select: { id: true, invoiceNumber: true, title: true, clientName: true, total: true, status: true, dueDate: true }
                         });
                         return invoices;
