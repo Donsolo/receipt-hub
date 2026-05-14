@@ -307,6 +307,8 @@ export default function VeroBackground() {
         
         // Initial setup
         const canvasEl = canvasRef.current;
+        if (!canvasEl) return;
+        
         const parent = canvasEl.parentElement;
         const dpr = window.devicePixelRatio || 1;
         if(parent) {
