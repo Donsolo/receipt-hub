@@ -151,6 +151,13 @@ export default function VeroSuitePage() {
                         </div>
                         
                         <button 
+                            onClick={() => {
+                                if (lastUsedTool === 'business') {
+                                    handleOpenTool('estimator');
+                                } else {
+                                    router.push('/dashboard/receipts');
+                                }
+                            }}
                             className="relative z-10 shrink-0 bg-[var(--text)] text-[var(--bg)] hover:opacity-90 px-4 py-2.5 rounded-xl text-sm font-medium transition-all w-full sm:w-auto shadow-md"
                         >
                             {lastUsedTool === 'business' ? 'Create Estimate' : lastUsedTool === 'basic' ? 'Scan Receipt' : 'Start Scanning'}
