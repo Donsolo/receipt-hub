@@ -2,15 +2,12 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
 import VeroAssistant from './VeroAssistant';
 
 export default function GlobalVeroBubble({ isPro }: { isPro: boolean }) {
     const [isOpen, setIsOpen] = useState(false);
-    const pathname = usePathname();
 
-    // Hide if not Pro, OR if user is on the Vero Suite page where Vero is embedded natively
-    if (!isPro || pathname === '/dashboard/vero') return null;
+    if (!isPro) return null;
 
     return (
         <>

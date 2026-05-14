@@ -4,6 +4,7 @@ import ConnectionsBackground from './ConnectionsBackground';
 import MessagesBackground from './MessagesBackground';
 import ProfileBackground from './ProfileBackground';
 import AboutBackground from './AboutBackground';
+import VeroBackground from './VeroBackground';
 
 interface HeroSectionProps {
     pageKey: string;
@@ -46,6 +47,7 @@ export default function HeroSection({
     const useMessagesLogic = pageKey === 'messages';
     const useProfileLogic = pageKey === 'profile';
     const useAboutLogic = pageKey === 'about';
+    const useVeroLogic = pageKey === 'vero';
     const heightClass = isLanding
         ? 'min-h-[320px] md:min-h-[440px]'
         : 'min-h-[200px] md:min-h-[260px]';
@@ -65,6 +67,8 @@ export default function HeroSection({
                 <ProfileBackground />
             ) : useAboutLogic ? (
                 <AboutBackground />
+            ) : useVeroLogic ? (
+                <VeroBackground />
             ) : finalImage ? (
                 <div
                     className="absolute inset-x-0 inset-y-0 z-0 bg-cover bg-center bg-no-repeat transform-gpu"
@@ -81,7 +85,7 @@ export default function HeroSection({
             )}
 
             {/* Overlay Layer */}
-            {!useFintech && !useReceiptsLogic && !useConnectionsLogic && !useMessagesLogic && !useProfileLogic && !useAboutLogic && (
+            {!useFintech && !useReceiptsLogic && !useConnectionsLogic && !useMessagesLogic && !useProfileLogic && !useAboutLogic && !useVeroLogic && (
                 <div
                     className="absolute inset-0 w-full h-full z-10 pointer-events-none"
                     style={{
