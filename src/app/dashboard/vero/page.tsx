@@ -6,6 +6,7 @@ import Link from 'next/link';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import HeroSection from '@/components/ui/HeroSection';
 import CalculatorWidget from '@/components/vero/CalculatorWidget';
+import VeroAssistant from '@/components/vero/VeroAssistant';
 
 export default function VeroSuitePage() {
     const router = useRouter();
@@ -67,129 +68,140 @@ export default function VeroSuitePage() {
                     />
 
 
-                    {/* Tools Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        
-                        {/* 1. Basic Calculator (CORE ONLY) */}
-                        {!isPro && (
-                            <div className="bg-[var(--bg)]/50 border border-[var(--border)] rounded-xl p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                    {/* Horizontal Tools Carousel */}
+                    <div className="relative w-full -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+                        <div className="flex overflow-x-auto gap-6 pb-6 pt-2 snap-x hide-scrollbar">
+                            
+                            {/* 1. Basic Calculator (CORE ONLY) */}
+                            {!isPro && (
+                                <div className="w-[280px] sm:w-[320px] shrink-0 snap-center bg-[var(--bg)]/50 border border-[var(--border)] rounded-2xl p-6 flex flex-col shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden group">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                                            Core
+                                        </span>
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Basic Calculator</h3>
+                                    <p className="text-sm text-[var(--muted)] mb-6 flex-1">Quick math and percentage calculations for your everyday receipt needs.</p>
+                                    <button 
+                                        onClick={() => setActiveWidget('basic')}
+                                        className="w-full bg-[var(--card)] hover:bg-[var(--card-hover)] text-[var(--text)] border border-[var(--border)] text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                                    >
+                                        Open Tool
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* 2. Business Calculator (PRO ONLY) */}
+                            {isPro && (
+                                <div className="w-[280px] sm:w-[320px] shrink-0 snap-center bg-gradient-to-br from-[var(--card)] to-[var(--bg)] border border-[var(--border)] rounded-2xl p-6 flex flex-col shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden group">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                            </svg>
+                                        </div>
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-sm shadow-amber-500/10">
+                                            Vero+
+                                        </span>
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Business Calculator</h3>
+                                    <p className="text-sm text-[var(--muted)] mb-6 flex-1">Advanced metrics, ROI projections, and bulk percentage tracking.</p>
+                                    
+                                    <button 
+                                        onClick={() => setActiveWidget('business')}
+                                        className="w-full bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                                    >
+                                        Open Tool
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* 3. Invoice Estimator */}
+                            <div className="w-[280px] sm:w-[320px] shrink-0 snap-center bg-[var(--bg)]/50 border border-[var(--border)] rounded-2xl p-6 flex flex-col shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden group">
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                         </svg>
                                     </div>
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
                                         Core
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Basic Calculator</h3>
-                                <p className="text-sm text-[var(--muted)] mb-6 flex-1">Quick math and percentage calculations for your everyday receipt needs.</p>
-                                <button 
-                                    onClick={() => setActiveWidget('basic')}
-                                    className="w-full bg-[var(--card)] hover:bg-[var(--card-hover)] text-[var(--text)] border border-[var(--border)] text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-                                >
+                                <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Invoice Estimator</h3>
+                                <p className="text-sm text-[var(--muted)] mb-6 flex-1">Draft up rough job estimates before generating a formal invoice.</p>
+                                <button className="w-full bg-[var(--card)] hover:bg-[var(--card-hover)] text-[var(--text)] border border-[var(--border)] text-sm font-medium px-4 py-2 rounded-lg transition-colors">
                                     Open Tool
                                 </button>
                             </div>
-                        )}
 
-                        {/* 2. Business Calculator (PRO ONLY) */}
-                        {isPro && (
-                            <div className="bg-gradient-to-b from-[var(--card)] to-[var(--bg)] border border-[var(--border)] rounded-xl p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                            {/* 4. Tax Estimator (PRO) */}
+                            <div className="w-[280px] sm:w-[320px] shrink-0 snap-center bg-gradient-to-br from-[var(--card)] to-[var(--bg)] border border-[var(--border)] rounded-2xl p-6 flex flex-col shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden group">
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-sm shadow-amber-500/10">
                                         Vero+
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Business Calculator</h3>
-                                <p className="text-sm text-[var(--muted)] mb-6 flex-1">Advanced metrics, ROI projections, and bulk percentage tracking.</p>
+                                <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Tax Estimator</h3>
+                                <p className="text-sm text-[var(--muted)] mb-6 flex-1">Calculate estimated quarterly taxes based on your invoiced revenue.</p>
                                 
-                                <button 
-                                    onClick={() => setActiveWidget('business')}
-                                    className="w-full bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-                                >
-                                    Open Tool
-                                </button>
+                                {isPro ? (
+                                    <button className="w-full bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                                        Open Tool
+                                    </button>
+                                ) : (
+                                    <Link href="/billing" className="w-full text-center bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm inline-block">
+                                        Unlock with Pro
+                                    </Link>
+                                )}
                             </div>
-                        )}
 
-                        {/* 3. Invoice Estimator */}
-                        <div className="bg-[var(--bg)]/50 border border-[var(--border)] rounded-xl p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                    </svg>
+                            {/* 5. Profit Margin Tool (PRO) */}
+                            <div className="w-[280px] sm:w-[320px] shrink-0 snap-center bg-gradient-to-br from-[var(--card)] to-[var(--bg)] border border-[var(--border)] rounded-2xl p-6 flex flex-col shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden group">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                                        </svg>
+                                    </div>
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-sm shadow-amber-500/10">
+                                        Vero+
+                                    </span>
                                 </div>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                    Core
-                                </span>
+                                <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Profit Margin Tool</h3>
+                                <p className="text-sm text-[var(--muted)] mb-6 flex-1">Analyze expenses vs revenue to determine true profit margins instantly.</p>
+                                
+                                {isPro ? (
+                                    <button className="w-full bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                                        Open Tool
+                                    </button>
+                                ) : (
+                                    <Link href="/billing" className="w-full text-center bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm inline-block">
+                                        Unlock with Pro
+                                    </Link>
+                                )}
                             </div>
-                            <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Invoice Estimator</h3>
-                            <p className="text-sm text-[var(--muted)] mb-6 flex-1">Draft up rough job estimates before generating a formal invoice.</p>
-                            <button className="w-full bg-[var(--card)] hover:bg-[var(--card-hover)] text-[var(--text)] border border-[var(--border)] text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-                                Open Tool
-                            </button>
                         </div>
 
-                        {/* 4. Tax Estimator (PRO) */}
-                        <div className="bg-gradient-to-b from-[var(--card)] to-[var(--bg)] border border-[var(--border)] rounded-xl p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                                    Vero+
-                                </span>
-                            </div>
-                            <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Tax Estimator</h3>
-                            <p className="text-sm text-[var(--muted)] mb-6 flex-1">Calculate estimated quarterly taxes based on your invoiced revenue.</p>
-                            
-                            {isPro ? (
-                                <button className="w-full bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-                                    Open Tool
-                                </button>
-                            ) : (
-                                <Link href="/billing" className="w-full text-center bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm inline-block">
-                                    Unlock with Pro
-                                </Link>
-                            )}
-                        </div>
+                        {/* Visual Gradient Fades for Carousel Scroll indication */}
+                        <div className="absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-[var(--bg)] to-transparent pointer-events-none hidden md:block"></div>
+                        <div className="absolute top-0 left-0 bottom-0 w-12 bg-gradient-to-r from-[var(--bg)] to-transparent pointer-events-none hidden md:block"></div>
+                    </div>
 
-                        {/* 5. Profit Margin Tool (PRO) */}
-                        <div className="bg-gradient-to-b from-[var(--card)] to-[var(--bg)] border border-[var(--border)] rounded-xl p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                                    </svg>
-                                </div>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                                    Vero+
-                                </span>
-                            </div>
-                            <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Profit Margin Tool</h3>
-                            <p className="text-sm text-[var(--muted)] mb-6 flex-1">Analyze expenses vs revenue to determine true profit margins instantly.</p>
-                            
-                            {isPro ? (
-                                <button className="w-full bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-                                    Open Tool
-                                </button>
-                            ) : (
-                                <Link href="/billing" className="w-full text-center bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm inline-block">
-                                    Unlock with Pro
-                                </Link>
-                            )}
-                        </div>
+                    {/* Vero Command Center (Embedded Chat) */}
+                    <div className="mt-8 flex-1 flex flex-col items-center justify-center w-full min-h-[500px]">
+                        <VeroAssistant isEmbedded={true} />
                     </div>
                 </div>
             </div>

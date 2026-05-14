@@ -8,7 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import { clsx } from 'clsx';
 import Image from 'next/image';
 
-export default function VeroAssistant({ initialInput = '', isOverlay = false }: { initialInput?: string, isOverlay?: boolean }) {
+export default function VeroAssistant({ initialInput = '', isOverlay = false, isEmbedded = false }: { initialInput?: string, isOverlay?: boolean, isEmbedded?: boolean }) {
     const intros = [
         "Hi! I am Vero, your AI business assistant. I can help you manage invoices, track receipts, and calculate finances. How can I help you today?",
         "Hello! I'm Vero. Ready to review your latest invoices or track receipts?",
@@ -97,7 +97,7 @@ export default function VeroAssistant({ initialInput = '', isOverlay = false }: 
     return (
         <div className={clsx(
             "flex flex-col overflow-hidden bg-white dark:bg-[#0b1220] ring-1 ring-black/5 dark:ring-white/10 shadow-2xl",
-            isOverlay ? "h-[80vh] rounded-t-3xl sm:rounded-3xl" : "h-[600px] rounded-3xl w-full max-w-4xl mx-auto"
+            isOverlay ? "h-[80vh] rounded-t-3xl sm:rounded-3xl" : isEmbedded ? "h-[600px] md:h-[700px] rounded-3xl w-full" : "h-[600px] rounded-3xl w-full max-w-4xl mx-auto"
         )}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-black/20 backdrop-blur-md">
