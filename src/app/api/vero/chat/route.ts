@@ -49,7 +49,7 @@ export async function POST(req: Request) {
         If a user asks for business advice, use the getBusinessInsights tool to get context first.`;
 
         const result = await streamText({
-            model: google('models/gemini-1.5-flash'),
+            model: google('models/gemini-2.5-flash'),
             system: systemPrompt,
             messages,
             // @ts-ignore

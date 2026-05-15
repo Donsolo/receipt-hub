@@ -332,25 +332,10 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
                         </button>
                     </div>
                     <div className="flex-1 overflow-y-auto px-2 pt-2 pb-3 space-y-1">
-                        {/* Main App Navigation */}
-                        <div className="pb-2 mb-2 border-b border-[var(--border)]">
-                            <div className="px-3 py-1 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">App Menu</div>
-                            {authLinks.map((link) => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    onClick={() => setIsMenuOpen(false)}
-                                    className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
-                        </div>
-
-                        {/* Context-aware Navigation */}
-                        {mobileContextLinks.length > 0 && (
-                            <div className="pb-2">
-                                <div className="px-3 py-1 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Context Menu</div>
+                        {/* Context-aware Navigation (Only show if in Admin CP) */}
+                        {pathname?.startsWith('/admin') && mobileContextLinks.length > 0 && (
+                            <div className="pb-2 mb-2 border-b border-[var(--border)]">
+                                <div className="px-3 py-1 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Admin Menu</div>
                                 {mobileContextLinks.map((link) => (
                                     <Link
                                         key={link.href}
@@ -364,17 +349,42 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
                             </div>
                         )}
 
-                        {role === 'ADMIN' || role === 'SUPER_ADMIN' ? (
-                            <div className="pt-2 mt-2 border-t border-[var(--border)]">
-                                <div className="px-3 py-1 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Admin Settings</div>
-                                <Link href="/admin/hero-manager" onClick={() => setIsMenuOpen(false)} className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words">Global Heros</Link>
-                                <Link href="/admin/announcements" onClick={() => setIsMenuOpen(false)} className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words">Announcements & Popups</Link>
-                                <Link href="/admin/users" onClick={() => setIsMenuOpen(false)} className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words">User Management</Link>
-                                <Link href="/admin/global-message" onClick={() => setIsMenuOpen(false)} className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words">Global Messaging</Link>
-                                <Link href="/admin/app-releases" onClick={() => setIsMenuOpen(false)} className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words">App Releases</Link>
-                                <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-indigo-600/20 text-indigo-400 break-words mt-2">Admin Dashboard</Link>
-                            </div>
-                        ) : null}
+                        {/* Global App Navigation */}
+                        <div className="pb-2">
+                            <div className="px-3 py-1 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Global Menu</div>
+                            <Link
+                                href="/dashboard"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
+                            >
+                                Dashboard
+                            </Link>
+                            <Link
+                                href="/dashboard/profile"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
+                            >
+                                Profile
+                            </Link>
+                            {role === 'ADMIN' || role === 'SUPER_ADMIN' ? (
+                                <Link
+                                    href="/admin"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-indigo-600/20 text-indigo-400 break-words"
+                                >
+                                    Admin CP
+                                </Link>
+                            ) : null}
+                            <button
+                                onClick={() => {
+                                    setIsMenuOpen(false);
+                                    handleLogout();
+                                }}
+                                className="text-left w-full text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words mt-2 border-t border-[var(--border)] pt-3"
+                            >
+                                Sign Out
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
