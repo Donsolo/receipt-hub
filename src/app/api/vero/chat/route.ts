@@ -128,16 +128,55 @@ export async function POST(req: Request) {
                     }
                 }),
                 getReceiptsSummary: tool({
-                    description: 'Get a summary of the user\'s receipts.',
+                    description: 'Get a comprehensive summary and breakdown of the user\'s receipts, including totals, categories, top vendors, and recent activity.',
                     parameters: z.object({}),
-                    // @ts-ignore
-                    execute: async (args: any) => {
+                    execute: async () => {
                         const receipts = await db.receipt.findMany({
                             where: { userId: user.userId },
-                            select: { total: true, categoryId: true }
+                            include: { category: true },
+                            orderBy: { date: 'desc' }
                         });
+                        
                         const totalAmount = receipts.reduce((sum, r) => sum + r.total, 0);
-                        return { totalReceipts: receipts.length, totalReceiptAmount: totalAmount };
+                        
+                        const byCategory: Record<string, { count: number, total: number }> = {};
+                        const byVendor: Record<string, { count: number, total: number }> = {};
+                        
+                        receipts.forEach(r => {
+                            const catName = r.category?.name || 'Uncategorized';
+                            if (!byCategory[catName]) byCategory[catName] = { count: 0, total: 0 };
+                            byCategory[catName].count++;
+                            byCategory[catName].total += r.total;
+                            
+                            const vendorName = r.clientName || 'Unknown Vendor';
+                            if (!byVendor[vendorName]) byVendor[vendorName] = { count: 0, total: 0 };
+                            byVendor[vendorName].count++;
+                            byVendor[vendorName].total += r.total;
+                        });
+
+                        const recent = receipts.slice(0, 5).map(r => ({
+                            vendor: r.clientName || 'Unknown',
+                            date: r.date,
+                            total: r.total,
+                            category: r.category?.name || 'Uncategorized'
+                        }));
+
+                        const sortedCategories = Object.entries(byCategory)
+                            .sort((a, b) => b[1].total - a[1].total)
+                            .map(([name, data]) => ({ name, ...data }));
+                            
+                        const sortedVendors = Object.entries(byVendor)
+                            .sort((a, b) => b[1].total - a[1].total)
+                            .slice(0, 5)
+                            .map(([name, data]) => ({ name, ...data }));
+
+                        return { 
+                            totalReceipts: receipts.length, 
+                            totalReceiptAmount: totalAmount,
+                            topCategories: sortedCategories,
+                            topVendors: sortedVendors,
+                            recentReceipts: recent
+                        };
                     }
                 }),
                 getReceiptsByCategory: tool({
