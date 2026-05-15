@@ -52,7 +52,6 @@ export async function POST(req: Request) {
             model: google('models/gemini-2.5-flash'),
             system: systemPrompt,
             messages,
-            // @ts-ignore
             maxSteps: 5,
             tools: {
                 getInvoiceSummary: tool({
@@ -192,7 +191,7 @@ export async function POST(req: Request) {
         });
 
         // @ts-ignore
-        return result.toAIStreamResponse();
+        return result.toDataStreamResponse();
     } catch (error: any) {
         console.error('Vero Chat Error:', error);
         return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
