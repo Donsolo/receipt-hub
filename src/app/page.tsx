@@ -104,6 +104,54 @@ export default async function LandingPage() {
           style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '64px 64px' }}
         />
 
+        {/* NEW: Vero Suite Advertising Hero Section */}
+        <div className="relative w-full max-w-5xl mx-auto mt-12 mb-8 px-4 sm:px-6 lg:px-8 z-10">
+          <style>{`
+              @keyframes shine {
+                  0% { transform: translateX(-200%) skewX(-20deg); }
+                  20% { transform: translateX(300%) skewX(-20deg); }
+                  100% { transform: translateX(300%) skewX(-20deg); }
+              }
+              .animate-shine {
+                  animation: shine 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+              }
+          `}</style>
+
+          <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full text-xs font-bold mb-4 shadow-sm shadow-indigo-500/5 backdrop-blur-sm">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse relative">
+                      <span className="absolute inset-0 rounded-full bg-indigo-500 animate-ping opacity-75"></span>
+                  </span>
+                  Powered by Vero AI
+              </div>
+              <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg">
+                  Introducing <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Vero Suite</span>
+              </h2>
+              <p className="text-slate-300 text-lg md:text-xl max-w-3xl mx-auto font-medium drop-shadow-md">
+                  Your all-in-one AI command center for smarter business finances. Scan receipts, manage invoices, and unlock actionable insights effortlessly.
+              </p>
+          </div>
+
+          <div className="relative rounded-[2rem] overflow-hidden shadow-[0_0_50px_rgba(79,70,229,0.2)] group transition-all duration-700 hover:shadow-[0_0_80px_rgba(79,70,229,0.3)] border border-slate-700/50 bg-[#0b1121]">
+              {/* The Image */}
+              <Image 
+                  src="/images/Vero Cards/Vero home landing hero.png" 
+                  alt="Vero Suite AI Command Center" 
+                  width={1200}
+                  height={675}
+                  className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+              />
+              
+              {/* Shine Overlay Effect */}
+              <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden rounded-[2rem]">
+                  <div className="absolute top-0 -inset-full h-full w-[150%] sm:w-1/2 z-5 block bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-80 animate-shine" />
+              </div>
+
+              {/* Inner shadow/border overlay */}
+              <div className="absolute inset-0 rounded-[2rem] border border-white/10 pointer-events-none z-20 mix-blend-overlay"></div>
+          </div>
+        </div>
+
         {/* Feature Strip Section - Moved OUTSIDE Hero */}
         <div className="relative w-full max-w-5xl mx-auto mt-8 mb-4">
           {/* Background Depth Element - Subtle blurred abstract mock */}
