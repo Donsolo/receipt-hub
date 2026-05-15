@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePlatform } from '@/lib/platform';
 
 export default function BillingPage() {
     const [loading, setLoading] = useState(false);
     const [plan, setPlan] = useState<'CORE' | 'PRO' | null>(null);
     const [hasStripe, setHasStripe] = useState(false);
     const [fetching, setFetching] = useState(true);
+    const { isNativeAndroid } = usePlatform();
 
     useEffect(() => {
         // Fetch user profile to determine current plan
@@ -164,21 +166,33 @@ export default function BillingPage() {
                             </ul>
                             
                             {plan === 'CORE' ? (
-                                <button 
-                                    onClick={handleUpgrade}
-                                    disabled={loading}
-                                    className="w-full py-3 px-4 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white rounded-lg font-medium transition-colors"
-                                >
-                                    {loading ? 'Redirecting...' : 'Upgrade to Pro'}
-                                </button>
+                                isNativeAndroid ? (
+                                    <div className="w-full py-3 px-4 bg-[var(--border)] text-[var(--muted)] text-sm rounded-lg font-medium text-center">
+                                        Billing is managed securely on the Verihub website. Visit verihub.app from your browser to manage your plan.
+                                    </div>
+                                ) : (
+                                    <button 
+                                        onClick={handleUpgrade}
+                                        disabled={loading}
+                                        className="w-full py-3 px-4 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white rounded-lg font-medium transition-colors"
+                                    >
+                                        {loading ? 'Redirecting...' : 'Upgrade to Pro'}
+                                    </button>
+                                )
                             ) : hasStripe ? (
-                                <button 
-                                    onClick={handleManageBilling}
-                                    disabled={loading}
-                                    className="w-full py-3 px-4 bg-[var(--border)] hover:bg-[var(--border)]/80 text-[var(--text)] rounded-lg font-medium transition-colors"
-                                >
-                                    {loading ? 'Redirecting...' : 'Manage Billing'}
-                                </button>
+                                isNativeAndroid ? (
+                                    <div className="w-full py-3 px-4 bg-[var(--border)] text-[var(--muted)] text-sm rounded-lg font-medium text-center">
+                                        Billing is managed securely on the Verihub website. Visit verihub.app from your browser to manage your plan.
+                                    </div>
+                                ) : (
+                                    <button 
+                                        onClick={handleManageBilling}
+                                        disabled={loading}
+                                        className="w-full py-3 px-4 bg-[var(--border)] hover:bg-[var(--border)]/80 text-[var(--text)] rounded-lg font-medium transition-colors"
+                                    >
+                                        {loading ? 'Redirecting...' : 'Manage Billing'}
+                                    </button>
+                                )
                             ) : (
                                 <div className="w-full py-3 px-4 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-300 rounded-lg text-sm border border-indigo-200 dark:border-indigo-800/50">
                                     <div className="font-semibold mb-1 flex items-center gap-2">

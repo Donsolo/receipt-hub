@@ -1,6 +1,10 @@
+"use client";
+
 import Link from 'next/link';
+import { usePlatform } from '@/lib/platform';
 
 export default function UpgradePage() {
+    const { isNativeAndroid } = usePlatform();
     return (
         <div className="min-h-screen bg-[var(--bg)] py-20 relative overflow-hidden flex justify-center w-full">
             {/* Background Effects */}
@@ -78,11 +82,16 @@ export default function UpgradePage() {
 
                 {/* CTA */}
                 <div className="flex flex-col items-center pt-8 border-t border-[var(--border)] w-full">
-                    {/* Placeholder button, non-functional */}
-                    <button className="px-8 py-4 rounded-xl font-bold text-base transition-all transform hover:-translate-y-0.5 shadow-[0_0_20px_rgba(234,179,8,0.2)] hover:shadow-[0_0_30px_rgba(234,179,8,0.4)]
-                        bg-yellow-500 hover:bg-yellow-400 text-[#0B1220]">
-                        Upgrade Mode (Coming Soon)
-                    </button>
+                    {isNativeAndroid ? (
+                        <div className="w-full max-w-md py-4 px-6 bg-[var(--card)] border border-[var(--border)] text-[var(--text)] text-sm rounded-xl font-medium text-center shadow-lg">
+                            Billing is managed securely on the Verihub website. Visit <span className="font-bold text-yellow-500">verihub.app</span> from your browser to manage your plan.
+                        </div>
+                    ) : (
+                        <button className="px-8 py-4 rounded-xl font-bold text-base transition-all transform hover:-translate-y-0.5 shadow-[0_0_20px_rgba(234,179,8,0.2)] hover:shadow-[0_0_30px_rgba(234,179,8,0.4)]
+                            bg-yellow-500 hover:bg-yellow-400 text-[#0B1220]">
+                            Upgrade Mode (Coming Soon)
+                        </button>
+                    )}
 
                     <Link href="/dashboard" className="text-sm text-[var(--muted)] mt-8 mb-4 hover:text-[var(--text)] transition-colors flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

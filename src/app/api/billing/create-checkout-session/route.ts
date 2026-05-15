@@ -6,6 +6,12 @@ import { db } from '@/lib/db';
 
 export async function POST(req: Request) {
     try {
+        const platformHeader = req.headers.get('x-verihub-platform');
+        if (platformHeader === 'android-native') {
+            console.warn("[PLAY_COMPLIANCE] Blocked Android native billing request (create-checkout-session)");
+            return NextResponse.json({ error: 'Billing unavailable in Android app.' }, { status: 403 });
+        }
+
         const cookieStore = await cookies();
         const token = cookieStore.get('auth_token')?.value;
         if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

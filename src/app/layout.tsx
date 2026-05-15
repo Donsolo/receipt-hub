@@ -71,6 +71,7 @@ import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import GlobalVeroBubble from '@/components/vero/GlobalVeroBubble';
+import NativeFetchInterceptor from '@/components/NativeFetchInterceptor';
 
 export default async function RootLayout({
   children,
@@ -126,6 +127,7 @@ export default async function RootLayout({
       </head>
       <ThemeProvider initialTheme={initialTheme}>
         <body className={`${inter.className} antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
+          <NativeFetchInterceptor />
           {isAuthenticated ? (
             <NotificationProvider>
               <div className="flex flex-col min-h-screen w-full relative">

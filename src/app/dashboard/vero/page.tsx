@@ -7,6 +7,7 @@ import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import HeroSection from '@/components/ui/HeroSection';
 import CalculatorWidget from '@/components/vero/CalculatorWidget';
 import VeroAssistant from '@/components/vero/VeroAssistant';
+import { usePlatform } from '@/lib/platform';
 
 export default function VeroSuitePage() {
     const router = useRouter();
@@ -16,6 +17,7 @@ export default function VeroSuitePage() {
     const [hasActivity, setHasActivity] = useState(false); // Controls dynamic workspace empty states
     const [userName, setUserName] = useState<string | null>(null);
     const [lastUsedTool, setLastUsedTool] = useState<'basic' | 'business' | 'estimator' | 'tax' | 'margin' | null>(null);
+    const { isNativeAndroid } = usePlatform();
 
     useEffect(() => {
         // Load session memory
@@ -257,10 +259,12 @@ export default function VeroSuitePage() {
                                         </div>
                                     </div>
                                     <div className="p-4 bg-[var(--bg)]/40 border-t border-[var(--border)] shrink-0 z-10 relative">
-                                        <Link href="/dashboard/billing" className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white border border-indigo-600 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors before:absolute before:-inset-y-[300px] before:-inset-x-0">
-                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                            Upgrade to Unlock
-                                        </Link>
+                                        {!isNativeAndroid && (
+                                            <Link href="/dashboard/billing" className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white border border-indigo-600 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors before:absolute before:-inset-y-[300px] before:-inset-x-0">
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                                Upgrade to Unlock
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -321,10 +325,12 @@ export default function VeroSuitePage() {
                                         </div>
                                     </div>
                                     <div className="p-4 bg-[var(--bg)]/40 border-t border-[var(--border)] shrink-0 z-10 relative">
-                                        <Link href="/dashboard/billing" className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white border border-indigo-600 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors before:absolute before:-inset-y-[300px] before:-inset-x-0">
-                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                            Upgrade to Unlock
-                                        </Link>
+                                        {!isNativeAndroid && (
+                                            <Link href="/dashboard/billing" className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white border border-indigo-600 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors before:absolute before:-inset-y-[300px] before:-inset-x-0">
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                                Upgrade to Unlock
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             )}

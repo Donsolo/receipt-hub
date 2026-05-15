@@ -1,7 +1,11 @@
+"use client";
+
 import Link from 'next/link';
 import FintechBackground from '@/components/ui/FintechBackground';
+import { usePlatform } from '@/lib/platform';
 
 export default function PricingPage() {
+    const { isNativeAndroid } = usePlatform();
     return (
         <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)]">
             <div className="absolute inset-0 z-0 pointer-events-none">
@@ -80,12 +84,18 @@ export default function PricingPage() {
                             <p className="text-[var(--muted)]">Advanced automated tooling and custom branding designed for high-volume operators.</p>
                         </div>
 
-                        <Link
-                            href="/register?plan=pro"
-                            className="w-full inline-flex justify-center items-center h-14 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-lg transition-colors duration-200 shadow-lg shadow-indigo-600/20 mb-8"
-                        >
-                            Select Pro
-                        </Link>
+                        {isNativeAndroid ? (
+                            <div className="w-full h-14 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-200 text-sm font-medium flex items-center justify-center text-center px-4 mb-8">
+                                Pro plans are managed exclusively on verihub.app
+                            </div>
+                        ) : (
+                            <Link
+                                href="/register?plan=pro"
+                                className="w-full inline-flex justify-center items-center h-14 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-lg transition-colors duration-200 shadow-lg shadow-indigo-600/20 mb-8"
+                            >
+                                Select Pro
+                            </Link>
+                        )}
 
                         <div className="space-y-4">
                             <h4 className="text-sm font-semibold text-[var(--text)] uppercase tracking-wider mb-6">Everything in Core, plus:</h4>
