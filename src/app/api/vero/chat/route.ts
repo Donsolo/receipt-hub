@@ -37,12 +37,17 @@ export async function POST(req: Request) {
         1. Summarize Data: Use your tools to fetch receipts and invoices. You can provide summaries by client, by date, or by category.
         2. Business Strategy: Provide the "best course of action" for business growth based on current revenue and spending trends.
         3. Platform Help: Provide step-by-step directions for using Verihub (e.g., "How do I create an invoice?", "How do I scan a receipt?").
-        4. Vero Suite: Guide users on using specialized tools like the Profit Margin Tool, Tax Estimator, and Business Calculator.
+        4. Vero Suite Knowledge: You must actively recommend and explain the tools available in the Vero Suite when applicable. The Vero Suite includes:
+           - Profit Margin Tool: Helps calculate net profit margins based on revenue and costs.
+           - Tax Estimator: Estimates upcoming tax liabilities based on income and expenses.
+           - Business Calculator: A suite of financial calculators for ROI, break-even analysis, and standard arithmetic.
+           - Invoice Estimator: Helps calculate quotes and estimates before sending official invoices.
+           Always remind users they can access these tools by navigating to the "Vero Suite" from the dashboard or app menu.
 
         Platform Navigation Help:
         - To scan a receipt: Click the "Scan" button in the history tab or the floating camera button on mobile.
         - To create an invoice: Go to the Invoices tab and click "Create New".
-        - To see business metrics: Go to the Vero Suite page.
+        - To access Vero Suite tools (Profit Margin, Tax Estimator, etc.): Navigate to the "Vero Suite" via the Dashboard menu.
 
         If a user asks about a specific client (e.g. "summary of Maria"), use the searchInvoices tool.
         If a user asks about spending categories, use the getReceiptsByCategory tool.
@@ -56,36 +61,63 @@ export async function POST(req: Request) {
             maxSteps: 5,
             tools: {
                 getInvoiceSummary: tool({
-                    description: 'Get a summary of the user\'s invoices (total count, paid, overdue, etc.) and total revenue.',
+                    description: 'Get a comprehensive summary of the user\'s invoices, including totals, revenue, unpaid balances, top clients, and overdue details.',
                     parameters: z.object({}),
-                    // @ts-ignore
-                    execute: async (args: any) => {
+                    execute: async () => {
                         const invoices = await db.invoice.findMany({
                             where: { userId: user.userId },
-                            select: { status: true, total: true, dueDate: true }
+                            select: { id: true, invoiceNumber: true, clientName: true, status: true, total: true, dueDate: true, createdAt: true }
                         });
                         
                         let totalRevenue = 0;
                         let unpaidBalance = 0;
                         let overdueCount = 0;
                         const now = new Date();
+                        
+                        const byClient: Record<string, { count: number, revenue: number, unpaid: number }> = {};
 
                         invoices.forEach(inv => {
+                            const clientName = inv.clientName || 'Unknown Client';
+                            if (!byClient[clientName]) byClient[clientName] = { count: 0, revenue: 0, unpaid: 0 };
+                            byClient[clientName].count++;
+                            
                             if (inv.status === 'PAID') {
                                 totalRevenue += inv.total;
-                            } else {
+                                byClient[clientName].revenue += inv.total;
+                            } else if (inv.status !== 'CANCELLED') {
                                 unpaidBalance += inv.total;
-                                if (inv.dueDate && inv.dueDate < now && inv.status !== 'CANCELLED') {
+                                byClient[clientName].unpaid += inv.total;
+                                if (inv.dueDate && inv.dueDate < now) {
                                     overdueCount++;
                                 }
                             }
                         });
 
+                        const sortedClientsByRevenue = Object.entries(byClient)
+                            .sort((a, b) => b[1].revenue - a[1].revenue)
+                            .slice(0, 5)
+                            .map(([name, data]) => ({ name, ...data }));
+                            
+                        const sortedClientsByUnpaid = Object.entries(byClient)
+                            .sort((a, b) => b[1].unpaid - a[1].unpaid)
+                            .filter(c => c[1].unpaid > 0)
+                            .slice(0, 5)
+                            .map(([name, data]) => ({ name, ...data }));
+                            
+                        const topOverdue = invoices
+                            .filter(i => i.status !== 'PAID' && i.status !== 'CANCELLED' && i.dueDate && i.dueDate < now)
+                            .sort((a, b) => (a.dueDate?.getTime() || 0) - (b.dueDate?.getTime() || 0))
+                            .slice(0, 5)
+                            .map(i => ({ client: i.clientName, amount: i.total, due: i.dueDate }));
+
                         return {
                             totalInvoices: invoices.length,
                             totalRevenueCollected: totalRevenue,
                             unpaidBalance: unpaidBalance,
-                            overdueInvoicesCount: overdueCount
+                            overdueInvoicesCount: overdueCount,
+                            topClientsByRevenue: sortedClientsByRevenue,
+                            topClientsWithUnpaidBalances: sortedClientsByUnpaid,
+                            urgentOverdueInvoices: topOverdue
                         };
                     },
                 }),
