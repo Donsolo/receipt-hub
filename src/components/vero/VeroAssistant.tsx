@@ -27,7 +27,7 @@ export default function VeroAssistant({ initialInput = '', isOverlay = false, is
     const { messages, input, handleInputChange, handleSubmit, setInput, isLoading } = useChat({
         api: '/api/vero/chat',
         initialMessages: initialMessages,
-        maxToolRoundtrips: 5
+        experimental_maxAutomaticRoundtrips: 5
     });
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
