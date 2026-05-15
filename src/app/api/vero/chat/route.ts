@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
         const result = await streamText({
             // @ts-ignore - Bypass type mismatch between ai and @ai-sdk/google versions
-            model: google('models/gemini-2.5-flash'),
+            model: google('models/gemini-2.5-flash-lite'),
             system: systemPrompt,
             messages,
             maxSteps: 5,
