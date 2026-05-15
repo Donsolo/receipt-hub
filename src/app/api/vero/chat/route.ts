@@ -49,6 +49,7 @@ export async function POST(req: Request) {
         If a user asks for business advice, use the getBusinessInsights tool to get context first.`;
 
         const result = await streamText({
+            // @ts-ignore - Bypass type mismatch between ai and @ai-sdk/google versions
             model: google('models/gemini-2.5-flash'),
             system: systemPrompt,
             messages,
