@@ -83,7 +83,7 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
                 setNewNote('');
                 // Optionally push to activity timeline locally to avoid refetch
                 setActivity([{
-                    id: \`note_\${data.note.id}\`,
+                    id: `note_${data.note.id}`,
                     type: 'NOTE_ADDED',
                     title: 'Note Added',
                     description: data.note.content,
@@ -102,7 +102,7 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
             const res = await fetch(`/api/contacts/${id}/notes/${noteId}`, { method: 'DELETE' });
             if (res.ok) {
                 setNotes(notes.filter(n => n.id !== noteId));
-                setActivity(activity.filter(a => a.id !== \`note_\${noteId}\`));
+                setActivity(activity.filter(a => a.id !== `note_${noteId}`));
             }
         } catch (err) {
             console.error(err);
@@ -179,11 +179,11 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div className="bg-white dark:bg-[#0b1220] p-4 rounded-xl ring-1 ring-black/5 dark:ring-white/10">
                     <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Lifetime Value</div>
-                    <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">$\{metrics?.totalSpent?.toFixed(2) || '0.00'}</div>
+                    <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">${metrics?.totalSpent?.toFixed(2) || '0.00'}</div>
                 </div>
                 <div className="bg-white dark:bg-[#0b1220] p-4 rounded-xl ring-1 ring-black/5 dark:ring-white/10">
                     <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Outstanding</div>
-                    <div className={\`text-2xl font-black \${metrics?.outstanding > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}\`}>$\{metrics?.outstanding?.toFixed(2) || '0.00'}</div>
+                    <div className={`text-2xl font-black ${metrics?.outstanding > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>${metrics?.outstanding?.toFixed(2) || '0.00'}</div>
                 </div>
                 <div className="bg-white dark:bg-[#0b1220] p-4 rounded-xl ring-1 ring-black/5 dark:ring-white/10">
                     <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Invoices</div>

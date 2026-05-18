@@ -205,7 +205,7 @@ export default function CustomerPortalViewer({ token, source, requestLogId }: Cu
                                         <div key={inst.id} className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors hover:bg-gray-50/50 dark:hover:bg-white/[0.01]">
                                             <div className="flex-1 text-center sm:text-left">
                                                 <div className="font-bold text-gray-900 dark:text-white text-lg">
-                                                    {inst.label || \`Installment \${index + 1}\`}
+                                                    {inst.label || `Installment ${index + 1}`}
                                                 </div>
                                                 {inst.dueDate && (
                                                     <div className="text-sm text-gray-500 dark:text-[var(--muted)] mt-1">
@@ -214,7 +214,7 @@ export default function CustomerPortalViewer({ token, source, requestLogId }: Cu
                                                 )}
                                             </div>
                                             <div className="text-xl font-black tabular-nums text-gray-900 dark:text-white">
-                                                \${inst.amount.toFixed(2)}
+                                                ${inst.amount.toFixed(2)}
                                             </div>
                                             <div className="w-full sm:w-auto">
                                                 {inst.status === 'PAID' ? (

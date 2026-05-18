@@ -21,7 +21,7 @@ export default function InvoiceAgingDashboard() {
     }, []);
 
     const copyLink = (token: string) => {
-        const link = \`\${window.location.origin}/portal/invoice/\${token}?src=copy\`;
+        const link = `${window.location.origin}/portal/invoice/${token}?src=copy`;
         navigator.clipboard.writeText(link);
         alert('Secure portal link copied to clipboard!');
     };
@@ -50,7 +50,7 @@ export default function InvoiceAgingDashboard() {
         if (!data || data.length === 0) return null;
         return (
             <section className="bg-white dark:bg-[#0b1220] rounded-2xl shadow-sm ring-1 ring-black/5 dark:ring-white/10 overflow-hidden mb-8">
-                <div className={\`px-6 py-4 border-b border-black/5 dark:border-white/10 flex items-center justify-between \${colorClass}\`}>
+                <div className={`px-6 py-4 border-b border-black/5 dark:border-white/10 flex items-center justify-between ${colorClass}`}>
                     <h3 className="font-bold">{title}</h3>
                     <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-bold">{data.length} Invoices</span>
                 </div>
@@ -58,11 +58,11 @@ export default function InvoiceAgingDashboard() {
                     {data.map(inv => (
                         <div key={inv.id} className="p-6 flex flex-col md:flex-row items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-white/[0.01]">
                             <div className="flex-1">
-                                <Link href={\`/dashboard/invoices/edit/\${inv.id}\`} className="font-bold text-gray-900 dark:text-white hover:text-indigo-500 hover:underline">
+                                <Link href={`/dashboard/invoices/edit/${inv.id}`} className="font-bold text-gray-900 dark:text-white hover:text-indigo-500 hover:underline">
                                     {inv.title || inv.invoiceNumber}
                                 </Link>
                                 <div className="text-sm text-gray-500 dark:text-[var(--muted)] mt-1">
-                                    {inv.clientName} {inv.clientEmail && \`(\${inv.clientEmail})\`}
+                                    {inv.clientName} {inv.clientEmail && `(${inv.clientEmail})`}
                                 </div>
                                 <div className="text-xs text-gray-400 mt-1">
                                     Due: {inv.dueDate ? format(new Date(inv.dueDate), 'MMM d, yyyy') : 'N/A'} • Last Reminder: {inv.lastPaymentReminderAt ? format(new Date(inv.lastPaymentReminderAt), 'MMM d') : 'Never'}
@@ -70,7 +70,7 @@ export default function InvoiceAgingDashboard() {
                             </div>
                             <div className="text-right">
                                 <div className="text-xl font-black tabular-nums text-gray-900 dark:text-white">
-                                    \${(inv.remainingBalance || inv.total).toFixed(2)}
+                                    ${(inv.remainingBalance || inv.total).toFixed(2)}
                                 </div>
                                 <div className="text-xs text-gray-500 uppercase font-bold tracking-wider">Remaining</div>
                             </div>
@@ -80,7 +80,7 @@ export default function InvoiceAgingDashboard() {
                                         Copy Link
                                     </button>
                                 )}
-                                <Link href={\`/dashboard/invoices/edit/\${inv.id}\`} className="flex-1 md:flex-none px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold transition-colors text-center">
+                                <Link href={`/dashboard/invoices/edit/${inv.id}`} className="flex-1 md:flex-none px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold transition-colors text-center">
                                     Manage
                                 </Link>
                             </div>
