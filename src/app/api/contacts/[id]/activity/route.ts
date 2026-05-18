@@ -18,7 +18,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
                 communicationLogs: true,
                 invoices: {
                     include: {
-                        payments: true,
                         installments: true,
                         paymentRequestLogs: true,
                         analyticsEvents: true
