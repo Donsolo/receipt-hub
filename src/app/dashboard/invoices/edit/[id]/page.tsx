@@ -1,4 +1,7 @@
 import InvoiceWizard from '@/components/invoices/InvoiceWizard';
+import InvoiceActivityLog from '@/components/invoices/InvoiceActivityLog';
+import PaymentPlanManager from '@/components/invoices/PaymentPlanManager';
+import PaymentInsightsCard from '@/components/invoices/PaymentInsightsCard';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -24,7 +27,12 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
 
     const invoice = await db.invoice.findUnique({
         where: { id },
-        include: { items: true }
+        include: { 
+            items: true,
+            installments: {
+                orderBy: { createdAt: 'asc' }
+            }
+        }
     });
 
     if (!invoice || invoice.userId !== authUser.userId || invoice.isConverted) {
@@ -78,6 +86,32 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
                 businessRegistrationNumber={userRecord?.businessRegistrationNumber || globalProfile?.businessRegistrationNumber || undefined}
                 initialData={initialData} 
             />
+
+            <div className="w-full max-w-3xl mx-auto px-4 sm:px-0">
+                {isPro && (
+                    <div className="mb-8">
+                        <PaymentInsightsCard invoiceId={invoice.id} />
+                    </div>
+                )}
+                
+                {isPro && (
+                    <PaymentPlanManager 
+                        invoiceId={invoice.id}
+                        invoiceTotal={invoice.total}
+                        initialPlanEnabled={invoice.paymentPlanEnabled}
+                        initialInstallments={invoice.installments.map(i => ({
+                            id: i.id,
+                            label: i.label,
+                            amount: i.amount,
+                            dueDate: i.dueDate ? i.dueDate.toISOString() : null,
+                            status: i.status
+                        }))}
+                    />
+                )}
+                
+                {/* Payment Request Activity Section */}
+                {isPro && <InvoiceActivityLog invoiceId={invoice.id} />}
+            </div>
         </div>
     );
 }

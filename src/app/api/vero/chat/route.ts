@@ -58,7 +58,6 @@ export async function POST(req: Request) {
             model: google('models/gemini-2.5-flash-lite'),
             system: systemPrompt,
             messages,
-            maxSteps: 5,
             tools: {
                 getInvoiceSummary: tool({
                     description: 'Get a comprehensive summary of the user\'s invoices, including totals, revenue, unpaid balances, top clients, and overdue details.',

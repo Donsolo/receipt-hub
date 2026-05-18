@@ -39,6 +39,7 @@ model User {
   notifyConnectionAccepted Boolean                   @default(true)
   notifyMessages           Boolean                   @default(true)
   notifySystem             Boolean                   @default(true)
+  agingDigestEnabled       Boolean                   @default(true)
   bundles                  Bundle[]
   categories               Category[]
   receivedConnections      Connection[]              @relation("Receiver")
@@ -51,6 +52,11 @@ model User {
   receipts                 Receipt[]
   savedReceiptItems        SavedReceiptItem[]
   invoices                 Invoice[]
+  customerContacts         CustomerContact[]
+  customerNotes            CustomerContactNote[]
+  customerTags             CustomerTag[]
+  customerCommunicationLogs CustomerCommunicationLog[]
+  customerCampaigns        CustomerEmailCampaign[]
   pushTokens               PushToken[]
 }
 
@@ -90,6 +96,7 @@ model Receipt {
   versionNumber   Int                 @default(1)
   ocrNormalized   Json?
   sourceType      String?             @default("manual")
+  sourceInvoiceId String?             @unique
   bundles         BundleReceipt[]
   messages        MessageAttachment[]
   category        Category?           @relation(fields: [categoryId], references: [id])
@@ -156,6 +163,8 @@ model Message {
   conversationId String
   senderId       String
   content        String
+  type           String              @default("TEXT")
+  metadata       Json?
   createdAt      DateTime            @default(now())
   deliveredAt    DateTime?
   readAt         DateTime?
@@ -377,6 +386,8 @@ model Invoice {
   invoiceNumber      String?
   sequenceNumber     Int?
   userId             String
+  customerContactId  String?
+  customerContact    CustomerContact?  @relation(fields: [customerContactId], references: [id], onDelete: SetNull)
   clientName         String
   clientEmail        String?
   clientCompany      String?
@@ -413,11 +424,37 @@ model Invoice {
   attachedPhotos     Json?             @default("[]")
   payments           Json?             @default("[]")
   
+  acceptOnlinePayment Boolean          @default(false)
+  paymentStatus       String           @default("UNPAID")
+  stripeCheckoutSessionId String?
+  stripePaymentIntentId String?
+  amountPaid          Float            @default(0)
+  remainingBalance    Float?
+  paymentEnabledAt    DateTime?
+  lastPaymentAt       DateTime?
+  
+  // Payment Reminders
+  paymentReminderEnabled Boolean       @default(false)
+  lastPaymentReminderAt  DateTime?
+  paymentReminderCount   Int           @default(0)
+  
+  // Installments
+  paymentPlanEnabled  Boolean          @default(false)
+  installments        InvoiceInstallment[]
+  
+  onlinePayments      InvoicePayment[]
+  paymentRequestLogs  InvoicePaymentRequestLog[]
+  analyticsEvents     InvoicePaymentAnalyticsEvent[]
+  
   user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   items              InvoiceLineItem[]
 
   @@index([userId])
   @@index([status])
+  @@index([paymentStatus])
+  @@index([dueDate])
+  @@index([customerContactId])
+  @@index([publicToken])
   @@index([createdAt])
   @@unique([userId, invoiceNumber])
 }
@@ -434,6 +471,36 @@ model InvoiceLineItem {
   invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
+model InvoicePayment {
+  id                      String   @id @default(cuid())
+
+  invoiceId               String
+  invoice                 Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  amount                  Float
+  currency                String   @default("USD")
+
+  paymentMethod           String?
+  stripePaymentIntentId   String?
+  stripeCheckoutSessionId String?
+
+  status                  String
+  // PENDING, SUCCEEDED, FAILED, REFUNDED
+
+  payerEmail              String?
+  payerName               String?
+
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  receiptGeneratedAt      DateTime?
+
+  @@index([invoiceId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([stripePaymentIntentId])
+  @@index([stripeCheckoutSessionId])
+}
+
 model PushToken {
   id        String   @id @default(cuid())
   userId    String
@@ -444,4 +511,235 @@ model PushToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+  
+model InvoicePaymentRequestLog {
+  id              String   @id @default(cuid())
+  invoiceId       String
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  channel         String   // "NETWORK", "EMAIL", "COPY_LINK"
+  recipientEmail  String?
+  recipientUserId String?
+  conversationId  String?
+  messageId       String?
+  action          String   // "REQUEST_SENT", "REMINDER_SENT", "LINK_COPIED"
+  status          String   @default("SENT") // "SENT", "FAILED", "BLOCKED"
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([recipientEmail])
+  @@index([recipientUserId])
+  @@index([channel])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model InvoiceInstallment {
+  id                      String   @id @default(cuid())
+
+  invoiceId               String
+  invoice                 Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  label                   String?
+  amount                  Float
+  dueDate                 DateTime?
+
+  status                  String   @default("UNPAID")
+  // UNPAID, PAYMENT_PENDING, PAID, OVERDUE, CANCELLED
+
+  stripeCheckoutSessionId String?
+  stripePaymentIntentId   String?
+
+  paidAt                  DateTime?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([invoiceId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([stripeCheckoutSessionId])
+  @@index([stripePaymentIntentId])
+}
+
+model InvoicePaymentAnalyticsEvent {
+  id            String   @id @default(cuid())
+  invoiceId     String
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  eventType     String   // PORTAL_VIEW, PAYMENT_CTA_CLICK, INVOICE_VIEW, BUNDLE_VIEW
+  channel       String?  // EMAIL, NETWORK, COPY_LINK, PUBLIC
+  installmentId String?
+  requestLogId  String?
+  userAgent     String?
+  ipHash        String?  // Hashed, never raw
+  referrer      String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([eventType])
+  @@index([channel])
+  @@index([requestLogId])
+  @@index([createdAt])
+}
+
+model CustomerContact {
+  id            String   @id @default(cuid())
+  ownerId       String
+  owner         User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  name          String?
+  firstName     String?
+  lastName      String?
+  email         String?
+  phone         String?
+  company       String?
+  addressLine1  String?
+  addressLine2  String?
+  city          String?
+  state         String?
+  postalCode    String?
+  country       String?
+
+  source        String? // MANUAL, CSV, SQUARE, JOIST, INVOICE
+  externalId    String?
+  notes         String?
+
+  invoices      Invoice[]
+  notesArray    CustomerContactNote[]
+  tags          CustomerContactTag[]
+  communicationLogs CustomerCommunicationLog[]
+  campaigns     CustomerEmailCampaignRecipient[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([email])
+  @@index([phone])
+  @@index([source])
+  @@index([createdAt])
+}
+
+model CustomerContactNote {
+  id                String          @id @default(cuid())
+  customerContactId String
+  customerContact   CustomerContact @relation(fields: [customerContactId], references: [id], onDelete: Cascade)
+  ownerId           String
+  owner             User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  content           String          @db.Text
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([customerContactId])
+  @@index([ownerId])
+}
+
+model CustomerTag {
+  id        String               @id @default(cuid())
+  ownerId   String
+  owner     User                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name      String
+  color     String?
+  createdAt DateTime             @default(now())
+  contacts  CustomerContactTag[]
+
+  @@unique([ownerId, name])
+}
+
+model CustomerContactTag {
+  customerContactId String
+  tagId             String
+  customerContact   CustomerContact @relation(fields: [customerContactId], references: [id], onDelete: Cascade)
+  tag               CustomerTag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([customerContactId, tagId])
+}
+
+model CustomerCommunicationLog {
+  id                String          @id @default(cuid())
+  ownerId           String
+  owner             User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  customerContactId String
+  customerContact   CustomerContact @relation(fields: [customerContactId], references: [id], onDelete: Cascade)
+  channel           String          // EMAIL, NETWORK, SMS_STUB
+  direction         String          @default("OUTBOUND")
+  subject           String?
+  contentPreview    String?         @db.Text
+  relatedInvoiceId  String?
+  relatedCampaignId String?
+  status            String?         // SENT, FAILED, BLOCKED
+  createdAt         DateTime        @default(now())
+
+  @@index([customerContactId])
+  @@index([ownerId])
+  @@index([channel])
+  @@index([createdAt])
+}
+
+model CustomerEmailCampaign {
+  id             String                           @id @default(cuid())
+  ownerId        String
+  owner          User                             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name           String
+  subject        String
+  previewText    String?
+  contentHtml    String?                          @db.Text
+  contentText    String?                          @db.Text
+  status         String                           @default("DRAFT") // DRAFT, SCHEDULED, SENDING, SENT, FAILED
+  recipientCount Int                              @default(0)
+  sentAt         DateTime?
+  createdAt      DateTime                         @default(now())
+  updatedAt      DateTime                         @updatedAt
+  recipients     CustomerEmailCampaignRecipient[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CustomerEmailCampaignRecipient {
+  id                String                @id @default(cuid())
+  campaignId        String
+  campaign          CustomerEmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  customerContactId String
+  customerContact   CustomerContact       @relation(fields: [customerContactId], references: [id], onDelete: Cascade)
+  email             String
+  status            String                @default("PENDING") // PENDING, SENT, FAILED, OPENED, CLICKED
+  openedAt          DateTime?
+  clickedAt         DateTime?
+  createdAt         DateTime              @default(now())
+
+  @@index([campaignId])
+  @@index([customerContactId])
+  @@index([status])
+}
+
+model StripeWebhookEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now())
+  status      String   @default("PROCESSED")
+  metadata    Json?
+
+  @@index([type])
+  @@index([processedAt])
+}
+
+model InternalJobRun {
+  id             String    @id @default(cuid())
+  jobName        String
+  status         String
+  startedAt      DateTime  @default(now())
+  finishedAt     DateTime?
+  processedCount Int       @default(0)
+  successCount   Int       @default(0)
+  failedCount    Int       @default(0)
+  skippedCount   Int       @default(0)
+  errorMessage   String?   @db.Text
+  metadata       Json?
+
+  @@index([jobName])
+  @@index([status])
+  @@index([startedAt])
 }

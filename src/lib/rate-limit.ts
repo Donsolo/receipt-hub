@@ -1,17 +1,23 @@
 const rateLimitMap = new Map<string, { count: number; timestamp: number }>();
 
-export function rateLimit(ip: string, limit = 20, windowMs = 15 * 60 * 1000) {
+export function rateLimit(key: string, limit = 20, windowMs = 15 * 60 * 1000) {
     const now = Date.now();
     const windowStart = now - windowMs;
     
     // Garbage collection on mapped entries
-    for (const [key, value] of rateLimitMap.entries()) {
+    // (In a real production environment with high traffic, use Redis. For MVP, Map is fine)
+    if (rateLimitMap.size > 10000) {
+        // Prevent memory leak if map gets too large
+        rateLimitMap.clear();
+    }
+
+    for (const [k, value] of rateLimitMap.entries()) {
         if (value.timestamp < windowStart) {
-            rateLimitMap.delete(key);
+            rateLimitMap.delete(k);
         }
     }
 
-    const currentReqs = rateLimitMap.get(ip) || { count: 0, timestamp: now };
+    const currentReqs = rateLimitMap.get(key) || { count: 0, timestamp: now };
     
     if (currentReqs.timestamp < windowStart) {
         currentReqs.count = 1;
@@ -20,6 +26,6 @@ export function rateLimit(ip: string, limit = 20, windowMs = 15 * 60 * 1000) {
         currentReqs.count++;
     }
 
-    rateLimitMap.set(ip, currentReqs);
+    rateLimitMap.set(key, currentReqs);
     return currentReqs.count > limit;
 }

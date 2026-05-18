@@ -17,7 +17,26 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
 
         const invoice = await prisma.invoice.findUnique({
             where: { publicToken: token },
-            include: { items: true, user: true }
+            include: { 
+                items: true, 
+                user: true,
+                onlinePayments: {
+                    select: {
+                        id: true,
+                        amount: true,
+                        currency: true,
+                        status: true,
+                        paymentMethod: true,
+                        payerName: true,
+                        payerEmail: true,
+                        createdAt: true,
+                    },
+                    orderBy: { createdAt: 'desc' }
+                },
+                installments: {
+                    orderBy: { createdAt: 'asc' }
+                }
+            }
         });
 
         if (!invoice) {
@@ -66,7 +85,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
             paymentConfirmed: invoice.paymentConfirmed,
             paymentConfirmedAt: invoice.paymentConfirmedAt,
             authorizedSignature: invoice.authorizedSignature,
+            
+            acceptOnlinePayment: invoice.acceptOnlinePayment,
+            paymentStatus: invoice.paymentStatus,
+            amountPaid: invoice.amountPaid,
+            remainingBalance: invoice.remainingBalance ?? (invoice.total - (invoice.amountPaid || 0)),
+            convertedReceiptId: invoice.convertedReceiptId,
+            
             publicToken: invoice.publicToken,
+            ownerIsPro: (invoice.user?.plan === 'PRO' && invoice.user?.planStatus !== 'inactive') || invoice.user?.role === 'ADMIN' || invoice.user?.role === 'SUPER_ADMIN',
             businessName: invoice.user?.businessName || invoice.user?.name || invoice.user?.email?.split('@')[0] || null,
             businessEmail: invoice.user?.email || null,
             businessPhone: invoice.user?.businessPhone || null,
@@ -77,6 +104,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
             depositAmount: invoice.depositAmount,
             paymentMethod: invoice.paymentMethod,
             payments: invoice.payments,
+            onlinePayments: invoice.onlinePayments,
+            paymentPlanEnabled: invoice.paymentPlanEnabled,
+            installments: invoice.installments.map(i => ({
+                id: i.id,
+                label: i.label,
+                amount: i.amount,
+                dueDate: i.dueDate,
+                status: i.status
+            })),
             items: invoice.items.map(i => ({
                 id: i.id,
                 name: i.name,

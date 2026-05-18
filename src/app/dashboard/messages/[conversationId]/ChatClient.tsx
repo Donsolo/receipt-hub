@@ -15,12 +15,91 @@ type UserParticipant = {
 type Message = {
     id: string;
     content: string;
+    type?: string;
+    metadata?: any;
     senderId: string;
     createdAt: string;
     deliveredAt: string | null;
     readAt: string | null;
     attachments: any[];
 };
+
+function PaymentRequestCard({ metadata, isSelf }: { metadata: any, isSelf: boolean }) {
+    const [liveData, setLiveData] = useState<any>(null);
+
+    const displayData = liveData || metadata;
+    const remaining = displayData.remainingBalance ?? metadata.remainingBalance;
+    const isPaid = displayData.paymentStatus === 'PAID' || remaining <= 0;
+
+    useEffect(() => {
+        if (!metadata?.invoiceToken || isPaid) return;
+
+        const checkStatus = () => {
+            fetch(`/api/public/invoice/${metadata.invoiceToken}/payment-summary`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.error) setLiveData(data);
+                })
+                .catch(() => {});
+        };
+
+        checkStatus(); // Initial check
+        const interval = setInterval(checkStatus, 10000); // Poll every 10 seconds
+        return () => clearInterval(interval);
+    }, [metadata?.invoiceToken, isPaid]);
+
+    return (
+        <div className={`w-[260px] sm:w-[300px] flex flex-col rounded-[18px] border overflow-hidden shadow-sm ${isSelf ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-white dark:bg-[var(--card)] border-gray-200 dark:border-[var(--border)] text-gray-800 dark:text-[var(--text)]'}`}>
+            <div className={`px-4 py-3 border-b ${isSelf ? 'border-indigo-500/50 bg-indigo-500/20' : 'border-gray-100 dark:border-[var(--border)] bg-gray-50/50 dark:bg-black/20'}`}>
+                <div className="flex items-center gap-2 mb-1">
+                    <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                    <span className="text-xs font-bold uppercase tracking-wider opacity-90">Payment Request</span>
+                </div>
+                <div className="font-semibold text-sm truncate opacity-90">{metadata.businessName}</div>
+                <div className="text-xs opacity-75 truncate">Invoice #{metadata.invoiceNumber}</div>
+            </div>
+            
+            <div className="p-4 flex flex-col items-center justify-center text-center">
+                <div className="text-xs font-medium opacity-75 mb-1">{isPaid ? 'Amount Paid' : 'Remaining Balance'}</div>
+                <div className={`text-3xl font-black tabular-nums tracking-tight mb-2 ${isPaid ? 'text-emerald-400' : ''}`}>
+                    ${(isPaid ? (displayData.amountPaid ?? metadata.amountPaid) : remaining).toFixed(2)}
+                </div>
+                
+                {isPaid ? (
+                    <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 text-xs font-bold border border-emerald-500/30">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        Paid in Full
+                    </div>
+                ) : (
+                    <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${isSelf ? 'bg-amber-500/20 text-amber-100 border-amber-500/30' : 'bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'}`}>
+                        <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                        Unpaid
+                    </div>
+                )}
+            </div>
+
+            <div className={`p-3 border-t ${isSelf ? 'border-indigo-500/50' : 'border-gray-100 dark:border-[var(--border)]'}`}>
+                {isPaid ? (
+                    displayData.convertedReceiptId ? (
+                        <a href={`/receipt/${displayData.convertedReceiptId}`} target="_blank" rel="noopener noreferrer" className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl font-bold text-sm transition-all ${isSelf ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10'}`}>
+                            View Receipt
+                        </a>
+                    ) : (
+                        <div className={`w-full text-center py-2 text-xs font-semibold opacity-75`}>Payment Confirmed</div>
+                    )
+                ) : (
+                    <a href={`/invoice/${metadata.invoiceToken}`} target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm bg-emerald-500 hover:bg-emerald-400 text-white shadow-sm hover:shadow-md transition-all border border-emerald-400">
+                        View & Pay Invoice
+                    </a>
+                )}
+                <div className="text-center mt-2 flex justify-center items-center gap-1 opacity-50">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    <span className="text-[10px]">Secure Verihub Checkout</span>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function ChatClient({ conversationId }: { conversationId: string }) {
     const router = useRouter();
@@ -392,10 +471,12 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                                     </div>
                                 )}
 
-                                <div className={`flex flex-col max-w-[70%] ${isSelf ? 'items-end' : 'items-start'}`}>
+                                <div className={`flex flex-col max-w-[85%] sm:max-w-[70%] ${isSelf ? 'items-end' : 'items-start'}`}>
                                     {/* Bubble Container */}
                                     <div className="group relative">
-                                        {msg.content && (
+                                        {msg.type === 'INVOICE_PAYMENT_REQUEST' && msg.metadata ? (
+                                            <PaymentRequestCard metadata={msg.metadata} isSelf={isSelf} />
+                                        ) : msg.content && (
                                             <div className={`px-[14px] py-[10px] text-[15px] leading-relaxed relative ${isSelf ? 'bg-indigo-600 text-white rounded-[18px] rounded-br-[4px] shadow-sm' : 'bg-white dark:bg-[var(--card)] text-gray-800 dark:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] rounded-[18px] rounded-bl-[4px] shadow-sm'}`}>
                                                 {msg.content.split('\n').map((line: string, i: number, arr: any[]) => {
                                                     const urlRegex = /(https?:\/\/[^\s]+)/g;

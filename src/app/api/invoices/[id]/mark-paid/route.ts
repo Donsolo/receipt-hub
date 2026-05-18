@@ -26,9 +26,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
         const updatedInvoice = await prisma.invoice.update({
             where: { id: invoice.id },
-            data: { status: 'PAID' },
+            data: { 
+                status: 'PAID',
+                paymentStatus: 'PAID',
+                paymentConfirmed: true,
+                paymentConfirmedAt: new Date(),
+                amountPaid: invoice.total,
+                remainingBalance: 0,
+                lastPaymentAt: new Date()
+            },
             include: { items: true }
         });
+
+        // Resolve any active installments to avoid conflicts
+        if (invoice.paymentPlanEnabled) {
+            await prisma.invoiceInstallment.updateMany({
+                where: { invoiceId: invoice.id, status: { not: 'PAID' } },
+                data: { status: 'PAID', paidAt: new Date() }
+            });
+        }
 
         return NextResponse.json({ success: true, invoice: updatedInvoice }, { status: 200 });
 

@@ -41,12 +41,28 @@ interface PublicInvoice {
     businessRegistrationNumber?: string | null;
     authorizedSignature?: string | null;
     publicToken?: string | null;
+    ownerIsPro?: boolean;
+    acceptOnlinePayment?: boolean;
+    paymentStatus?: string;
+    amountPaid?: number;
+    remainingBalance?: number;
     viewCount: number;
     lastViewedAt: string | null;
     sentAt: string | null;
     depositAmount?: number;
     paymentMethod?: string | null;
     payments?: any;
+    onlinePayments?: {
+        id: string;
+        amount: number;
+        currency: string;
+        status: string;
+        paymentMethod: string | null;
+        payerName: string | null;
+        payerEmail: string | null;
+        createdAt: string;
+    }[];
+    convertedReceiptId?: string | null;
     items: {
         id: string;
         name: string;
@@ -55,12 +71,21 @@ interface PublicInvoice {
         unitPrice: number;
         total: number;
     }[];
+    paymentPlanEnabled?: boolean;
+    installments?: {
+        id: string;
+        label: string | null;
+        amount: number;
+        dueDate: string | null;
+        status: string;
+    }[];
 }
 
 export default function PublicInvoiceViewer({ token, isAuthenticated = false }: { token: string; isAuthenticated?: boolean }) {
     const router = useRouter();
     const [invoice, setInvoice] = useState<PublicInvoice | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
 
@@ -285,6 +310,199 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
             <div className="flex-1 w-full flex flex-col pb-24 px-4 sm:px-6 print:p-0 print:m-0 print:block">
             
             <InvoiceDocument invoice={invoice} />
+            
+            {/* --- PAYMENT HISTORY (OWNER ONLY) --- */}
+            {isAuthenticated && invoice.onlinePayments && invoice.onlinePayments.length > 0 && (
+                <div className="mt-8 bg-white dark:bg-[#0b1220] rounded-3xl shadow-xl shadow-indigo-900/5 ring-1 ring-black/5 dark:ring-white/10 px-6 py-8 sm:p-10 relative overflow-hidden print:hidden">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Payment Activity</h3>
+                    <div className="space-y-4">
+                        {invoice.onlinePayments.map(payment => (
+                            <div key={payment.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-white/5 ring-1 ring-black/5 dark:ring-white/5">
+                                <div>
+                                    <div className="font-bold text-gray-900 dark:text-white">${payment.amount.toFixed(2)} {payment.currency}</div>
+                                    <div className="text-xs text-gray-500 dark:text-[var(--muted)] mt-1">
+                                        {format(new Date(payment.createdAt), 'MMM d, yyyy h:mm a')} • {payment.paymentMethod || 'Stripe'}
+                                    </div>
+                                    {(payment.payerName || payment.payerEmail) && (
+                                        <div className="text-xs text-gray-500 dark:text-[var(--muted)] mt-1">
+                                            By: {payment.payerName || payment.payerEmail}
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <span className={clsx(
+                                        "px-2.5 py-1 rounded-full text-xs font-bold",
+                                        payment.status === 'SUCCEEDED' ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400" :
+                                        payment.status === 'PENDING' ? "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400" :
+                                        "bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400"
+                                    )}>
+                                        {payment.status}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* --- ONLINE PAYMENT CTA --- */}
+            {invoice.ownerIsPro && invoice.acceptOnlinePayment && invoice.paymentStatus !== 'PAID' && (invoice.remainingBalance || 0) > 0 && (
+                <>
+                    {invoice.paymentPlanEnabled && invoice.installments && invoice.installments.length > 0 ? (
+                        <div className="mt-8 bg-indigo-50 dark:bg-indigo-500/10 rounded-3xl shadow-xl shadow-indigo-600/5 px-6 py-8 sm:p-10 relative overflow-hidden print:hidden border border-indigo-100 dark:border-indigo-500/20">
+                            <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-6 text-indigo-900 dark:text-indigo-300">
+                                Payment Schedule
+                            </h3>
+                            <div className="space-y-4">
+                                {invoice.installments.map((inst, index) => (
+                                    <div key={inst.id} className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl bg-white dark:bg-[#0b1220] ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
+                                        <div className="flex-1 text-center sm:text-left">
+                                            <div className="font-bold text-lg text-gray-900 dark:text-white">
+                                                {inst.label || `Installment ${index + 1}`}
+                                            </div>
+                                            {inst.dueDate && (
+                                                <div className="text-sm text-gray-500 dark:text-[var(--muted)] mt-1">
+                                                    Due: {format(new Date(inst.dueDate), 'MMM d, yyyy')}
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="text-xl font-black tabular-nums tracking-tight text-gray-900 dark:text-white">
+                                            ${inst.amount.toFixed(2)}
+                                        </div>
+                                        
+                                        <div className="w-full sm:w-auto mt-2 sm:mt-0 flex justify-center">
+                                            {inst.status === 'PAID' ? (
+                                                <span className="px-4 py-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 font-bold rounded-xl text-sm w-full sm:w-auto text-center">
+                                                    Paid
+                                                </span>
+                                            ) : inst.status === 'PAYMENT_PENDING' ? (
+                                                <span className="px-4 py-2 bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 font-bold rounded-xl text-sm w-full sm:w-auto text-center">
+                                                    Pending
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    disabled={isCheckoutLoading}
+                                                    onClick={async () => {
+                                                        setIsCheckoutLoading(true);
+                                                        try {
+                                                            const res = await fetch(`/api/public/invoice/${token}/create-checkout-session`, { 
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({ installmentId: inst.id })
+                                                            });
+                                                            const data = await res.json();
+                                                            if (!res.ok || !data.success) {
+                                                                throw new Error(data.error || 'Failed to initialize secure checkout.');
+                                                            }
+                                                            if (data.url) {
+                                                                window.location.href = data.url;
+                                                            }
+                                                        } catch (e: any) {
+                                                            alert(e.message);
+                                                        } finally {
+                                                            setIsCheckoutLoading(false);
+                                                        }
+                                                    }}
+                                                    className={clsx("w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-500/20", isCheckoutLoading && "opacity-70 cursor-not-allowed")}
+                                                >
+                                                    Pay
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="mt-8 bg-indigo-600 dark:bg-indigo-500 rounded-3xl shadow-xl shadow-indigo-600/20 px-6 py-8 sm:p-10 relative overflow-hidden print:hidden text-white flex flex-col sm:flex-row items-center justify-between gap-6 animate-in slide-in-from-bottom-8 fade-in duration-700">
+                            <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+                            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
+                            
+                            <div className="text-center sm:text-left relative z-10">
+                                <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-2">
+                                    {invoice.paymentStatus === 'PARTIAL_PAID' ? 'Complete Your Payment' : 'Secure Online Payment'}
+                                </h3>
+                                <p className="text-indigo-100 font-medium text-sm max-w-md">
+                                    {invoice.paymentStatus === 'PARTIAL_PAID' ? 
+                                        `You have a remaining balance of $${(invoice.remainingBalance || 0).toFixed(2)}. Pay securely via Stripe.` : 
+                                        'Pay securely with any major credit card via Stripe. Your payment will be instantly verified and a receipt will be generated.'}
+                                </p>
+                            </div>
+                            
+                            <div className="w-full sm:w-auto relative z-10 flex flex-col items-center sm:items-end gap-2">
+                                <div className="text-2xl font-black tabular-nums tracking-tight mb-1">
+                                    ${(invoice.remainingBalance || 0).toFixed(2)}
+                                </div>
+                                <button
+                                    disabled={isCheckoutLoading}
+                                    onClick={async () => {
+                                        setIsCheckoutLoading(true);
+                                        try {
+                                            const res = await fetch(`/api/public/invoice/${token}/create-checkout-session`, { method: 'POST' });
+                                            const data = await res.json();
+                                            if (!res.ok || !data.success) {
+                                                throw new Error(data.error || 'Failed to initialize secure checkout.');
+                                            }
+                                            if (data.url) {
+                                                window.location.href = data.url;
+                                            }
+                                        } catch (e: any) {
+                                            alert(e.message);
+                                        } finally {
+                                            setIsCheckoutLoading(false);
+                                        }
+                                    }}
+                                    className={clsx("w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-white text-indigo-600 shadow-lg shadow-black/10 text-base font-black rounded-2xl transition-all hover:-translate-y-1 hover:shadow-xl", isCheckoutLoading && "opacity-70 cursor-not-allowed")}
+                                >
+                                    {isCheckoutLoading ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-indigo-600/30 border-t-indigo-600 rounded-full animate-spin"></div>
+                                            Connecting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                                            Pay {invoice.paymentStatus === 'PARTIAL_PAID' ? 'Balance' : 'Invoice'} Now
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* --- PAID IN FULL CTA --- */}
+            {invoice.paymentStatus === 'PAID' && (
+                 <div className="mt-8 bg-emerald-50 dark:bg-emerald-500/10 rounded-3xl ring-1 ring-emerald-500/20 px-6 py-8 sm:p-10 relative overflow-hidden print:hidden text-emerald-900 dark:text-emerald-50 flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div className="text-center sm:text-left">
+                        <div className="flex items-center justify-center sm:justify-start gap-2 mb-2 text-emerald-600 dark:text-emerald-400">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <h3 className="text-xl sm:text-2xl font-black tracking-tight">Paid in Full</h3>
+                        </div>
+                        <p className="text-emerald-700/80 dark:text-emerald-200/70 font-medium text-sm">
+                            Thank you! This invoice has been fully paid.
+                        </p>
+                    </div>
+                    {invoice.convertedReceiptId && (
+                        <a
+                            href={isAuthenticated ? `/dashboard/receipts/view/${invoice.convertedReceiptId}` : undefined} // If public, maybe no link or generic
+                            onClick={(e) => {
+                                if (!isAuthenticated) {
+                                    e.preventDefault();
+                                    alert('Receipt is generated and stored securely by the issuer.');
+                                }
+                            }}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 text-base font-black rounded-2xl transition-all"
+                        >
+                            View Receipt
+                        </a>
+                    )}
+                 </div>
+            )}
 
             {/* --- SHARE & DISTRIBUTION LAYER (SCREEN ONLY) --- */}
             <div className="mt-8 bg-white dark:bg-[#0b1220] rounded-3xl shadow-xl shadow-indigo-900/5 ring-1 ring-black/5 dark:ring-white/10 px-6 py-8 sm:p-10 relative overflow-hidden print:hidden">

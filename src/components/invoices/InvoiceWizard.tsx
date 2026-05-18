@@ -41,6 +41,7 @@ export interface InvoiceWizardProps {
     businessRegistrationNumber?: string;
     initialData?: {
         id?: string;
+        customerContactId?: string | null;
         clientName: string;
         clientEmail: string;
         clientCompany?: string;
@@ -79,6 +80,38 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
     const [clientAddress, setClientAddress] = useState(initialData?.clientAddress || '');
     const [clientPropertyAddress, setClientPropertyAddress] = useState(initialData?.clientPropertyAddress || '');
     const [propertyDifferent, setPropertyDifferent] = useState(!!initialData?.clientPropertyAddress);
+    const [customerContactId, setCustomerContactId] = useState<string | null>(initialData?.customerContactId || null);
+
+    // Contacts
+    const [contacts, setContacts] = useState<any[]>([]);
+    useEffect(() => {
+        if (isPro) {
+            fetch('/api/contacts')
+                .then(res => res.json())
+                .then(data => {
+                    if (data && Array.isArray(data)) setContacts(data);
+                })
+                .catch(console.error);
+        }
+    }, [isPro]);
+
+    const handleSelectContact = (contactId: string) => {
+        if (!contactId) {
+            setCustomerContactId(null);
+            return;
+        }
+        const contact = contacts.find(c => c.id === contactId);
+        if (contact) {
+            setCustomerContactId(contact.id);
+            setClientName(contact.name || `${contact.firstName || ''} ${contact.lastName || ''}`.trim());
+            setClientEmail(contact.email || '');
+            setClientPhone(contact.phone || '');
+            setClientCompany(contact.company || '');
+            
+            const addressParts = [contact.addressLine1, contact.city, contact.state, contact.postalCode, contact.country].filter(Boolean);
+            setClientAddress(addressParts.join(', '));
+        }
+    };
 
     // Step 2: Details
     const [title, setTitle] = useState(initialData?.title || 'Invoice');
@@ -274,6 +307,7 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
         setIsSaving(true);
         try {
             const payload = {
+                customerContactId,
                 clientName,
                 clientEmail,
                 clientCompany,
@@ -377,6 +411,22 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                             <h2 className="text-xl font-bold text-[var(--text)]">Client Information</h2>
                             <p className="text-sm text-[var(--muted)] mt-1">Who is this invoice for?</p>
                         </div>
+                        
+                        {isPro && contacts.length > 0 && (
+                            <div className="bg-indigo-50 dark:bg-indigo-500/10 p-4 rounded-xl border border-indigo-100 dark:border-indigo-500/20 mb-6">
+                                <label className="block text-xs font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider mb-2">Select Existing Customer (Optional)</label>
+                                <select 
+                                    value={customerContactId || ''}
+                                    onChange={e => handleSelectContact(e.target.value)}
+                                    className="w-full bg-white dark:bg-black/20 border border-indigo-200 dark:border-indigo-500/30 text-gray-900 dark:text-white rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500/50"
+                                >
+                                    <option value="">-- Choose a contact to autofill --</option>
+                                    {contacts.map(c => (
+                                        <option key={c.id} value={c.id}>{c.name || c.email || c.phone}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div className="md:col-span-2">

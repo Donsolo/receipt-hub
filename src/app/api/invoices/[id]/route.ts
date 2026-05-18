@@ -51,9 +51,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         }
 
         const body = await req.json();
-        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, status, attachedPhotos, items, depositAmount, paymentMethod, payments } = body;
+        const { customerContactId, clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, status, attachedPhotos, items, depositAmount, paymentMethod, payments, acceptOnlinePayment } = body;
 
         let dataToUpdate: any = {};
+        
+        if (customerContactId !== undefined) dataToUpdate.customerContactId = customerContactId || null;
 
         if (clientName !== undefined) dataToUpdate.clientName = clientName;
         if (clientEmail !== undefined) dataToUpdate.clientEmail = clientEmail || null;
@@ -88,6 +90,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         if (depositAmount !== undefined) dataToUpdate.depositAmount = Number(depositAmount) || 0;
         if (paymentMethod !== undefined) dataToUpdate.paymentMethod = paymentMethod || null;
         if (payments !== undefined && Array.isArray(payments)) dataToUpdate.payments = payments;
+        
+        if (acceptOnlinePayment !== undefined) {
+            const isPro = (user.plan === "PRO" && user.planStatus !== "inactive") || user.role === "ADMIN" || user.role === "SUPER_ADMIN";
+            if (!isPro && acceptOnlinePayment === true) {
+                return NextResponse.json({ success: false, error: 'Pro plan required to enable online payments.' }, { status: 403 });
+            }
+            dataToUpdate.acceptOnlinePayment = acceptOnlinePayment;
+            if (acceptOnlinePayment && !invoice.paymentEnabledAt) {
+                dataToUpdate.paymentEnabledAt = new Date();
+            }
+        }
         
         if (attachedPhotos !== undefined && Array.isArray(attachedPhotos)) dataToUpdate.attachedPhotos = attachedPhotos;
 

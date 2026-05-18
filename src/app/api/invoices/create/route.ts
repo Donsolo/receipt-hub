@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         if (!user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
 
         const body = await req.json();
-        const { clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, attachedPhotos, items, depositAmount, paymentMethod, payments } = body;
+        const { customerContactId, clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, attachedPhotos, items, depositAmount, paymentMethod, payments } = body;
 
         if (!clientName || !title || !issueDate || !items || !Array.isArray(items) || items.length === 0) {
             return NextResponse.json({ success: false, error: 'Missing required fields or items' }, { status: 400 });
@@ -64,6 +64,7 @@ export async function POST(req: Request) {
         const invoice = await prisma.invoice.create({
             data: {
                 userId: user.userId,
+                customerContactId: customerContactId || null,
                 invoiceNumber: seqData.documentNumber,
                 sequenceNumber: seqData.sequenceNumber,
                 clientName,
