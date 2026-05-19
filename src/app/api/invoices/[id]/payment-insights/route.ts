@@ -28,7 +28,7 @@ export async function GET(
                 lastViewedAt: true,
                 paymentReminderCount: true,
                 lastPaymentReminderAt: true,
-                user: { select: { plan: true, role: true } }
+                user: { select: { plan: true, role: true, planStatus: true } }
             }
         });
 
