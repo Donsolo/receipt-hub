@@ -24,7 +24,7 @@ export default async function NewCampaignPage() {
             tags: true,
             invoices: {
                 include: {
-                    payments: true,
+                    
                     installments: true
                 }
             }

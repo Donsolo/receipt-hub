@@ -24,7 +24,7 @@ export default async function ContactsPage() {
             tags: { include: { tag: true } },
             invoices: {
                 include: {
-                    payments: true,
+                    
                     installments: true
                 }
             }

@@ -54,7 +54,6 @@ export async function POST(request: Request) {
             include: {
                 paymentRequestLogs: true,
                 installments: true,
-                payments: true,
                 user: true
             }
         });
