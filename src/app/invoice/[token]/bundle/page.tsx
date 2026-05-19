@@ -71,7 +71,7 @@ export default async function InvoiceBundlePage({ params }: { params: Promise<{ 
         attachedPhotos: invoice.attachedPhotos,
         depositAmount: invoice.depositAmount ?? undefined,
         paymentMethod: invoice.paymentMethod,
-        payments: invoice.payments,
+        payments: Array.isArray(invoice.payments) ? (invoice.payments as any) : undefined,
         onlinePayments: invoice.onlinePayments,
         paymentPlanEnabled: invoice.paymentPlanEnabled,
         installments: invoice.installments.map(i => ({
