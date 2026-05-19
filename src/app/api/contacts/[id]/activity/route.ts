@@ -83,7 +83,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
                     id: `inv_req_${log.id}`,
                     type: 'INVOICE_REQUEST',
                     title: log.action === 'REMINDER_SENT' ? 'Payment Reminder Sent' : 'Payment Request Sent',
-                    description: `Sent via ${log.channel} to ${log.recipientEmail || log.recipientPhone || 'recipient'}`,
+                    description: `Sent via ${log.channel} to ${log.recipientEmail || 'recipient'}`,
                     timestamp: log.createdAt,
                     icon: 'mail'
                 });
