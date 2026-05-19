@@ -39,7 +39,7 @@ export default async function InvoiceBundlePage({ params }: { params: Promise<{ 
         subtotal: invoice.subtotal,
         discountType: invoice.discountType,
         discountValue: invoice.discountValue ?? undefined,
-        tax: invoice.tax ?? undefined,
+        tax: invoice.tax || 0,
         total: invoice.total,
         issueDate: invoice.issueDate,
         dueDate: invoice.dueDate,
