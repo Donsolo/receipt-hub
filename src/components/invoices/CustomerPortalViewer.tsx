@@ -160,6 +160,15 @@ export default function CustomerPortalViewer({ token, source, requestLogId }: Cu
                         </div>
                         
                         {!isFullyPaid && invoice.ownerIsPro && invoice.acceptOnlinePayment && !invoice.paymentPlanEnabled && (
+                            !invoice.authorizedSignature ? (
+                                <a
+                                    href={`/invoice/${token}`}
+                                    className="w-full md:w-auto px-8 py-4 bg-white text-indigo-600 font-black rounded-2xl shadow-lg hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                    Review & Sign to Pay
+                                </a>
+                            ) : (
                             <button
                                 disabled={isCheckoutLoading}
                                 onClick={() => handleCheckout()}
@@ -177,6 +186,7 @@ export default function CustomerPortalViewer({ token, source, requestLogId }: Cu
                                     </>
                                 )}
                             </button>
+                            )
                         )}
 
                         {isFullyPaid && (
@@ -221,6 +231,13 @@ export default function CustomerPortalViewer({ token, source, requestLogId }: Cu
                                                     <div className="px-4 py-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 font-bold rounded-xl text-sm w-full text-center">Paid</div>
                                                 ) : inst.status === 'PAYMENT_PENDING' ? (
                                                     <div className="px-4 py-2 bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 font-bold rounded-xl text-sm w-full text-center">Pending</div>
+                                                ) : !invoice.authorizedSignature && invoice.ownerIsPro && invoice.acceptOnlinePayment ? (
+                                                    <a
+                                                        href={`/invoice/${token}`}
+                                                        className="w-full px-6 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold rounded-xl transition-colors text-center inline-block"
+                                                    >
+                                                        Sign to Pay
+                                                    </a>
                                                 ) : invoice.ownerIsPro && invoice.acceptOnlinePayment ? (
                                                     <button
                                                         disabled={isCheckoutLoading}

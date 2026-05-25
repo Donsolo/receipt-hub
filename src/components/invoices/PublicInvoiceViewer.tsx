@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
 import InvoiceDocument from './InvoiceDocument';
+import SignaturePad from '../ui/SignaturePad';
 
 interface PublicInvoice {
     id: string;
@@ -87,6 +88,28 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
     const [isLoading, setIsLoading] = useState(true);
     const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isSigning, setIsSigning] = useState(false);
+
+    const handleSign = async (dataUrl: string) => {
+        setIsSigning(true);
+        try {
+            const res = await fetch(`/api/public/invoice/${token}/sign`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ signature: dataUrl })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Failed to save signature.');
+            }
+            // Update local state to reveal payment buttons
+            setInvoice(prev => prev ? { ...prev, authorizedSignature: dataUrl } : null);
+        } catch (err: any) {
+            alert(err.message);
+        } finally {
+            setIsSigning(false);
+        }
+    };
 
 
     useEffect(() => {
@@ -345,10 +368,24 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
                 </div>
             )}
 
-            {/* --- ONLINE PAYMENT CTA --- */}
+            {/* --- ONLINE PAYMENT CTA OR SIGNATURE PAD --- */}
             {invoice.ownerIsPro && invoice.acceptOnlinePayment && invoice.paymentStatus !== 'PAID' && (invoice.remainingBalance || 0) > 0 && (
                 <>
-                    {invoice.paymentPlanEnabled && invoice.installments && invoice.installments.length > 0 ? (
+                    {!invoice.authorizedSignature ? (
+                        <div className="mt-8 bg-white dark:bg-[#0b1220] rounded-3xl ring-1 ring-black/5 dark:ring-white/10 px-6 py-8 sm:p-10 relative overflow-hidden print:hidden border-t-4 border-t-indigo-500 shadow-xl shadow-indigo-900/5">
+                            <div className="text-center sm:text-left mb-6">
+                                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-gray-900 dark:text-white">
+                                    Sign to Enable Payment
+                                </h3>
+                                <p className="text-sm text-gray-500 dark:text-[var(--muted)] mt-1">
+                                    Please provide your authorized signature below to approve this invoice and unlock secure online payment.
+                                </p>
+                            </div>
+                            <div className="max-w-md mx-auto sm:mx-0">
+                                <SignaturePad onSign={handleSign} />
+                            </div>
+                        </div>
+                    ) : invoice.paymentPlanEnabled && invoice.installments && invoice.installments.length > 0 ? (
                         <div className="mt-8 bg-indigo-50 dark:bg-indigo-500/10 rounded-3xl shadow-xl shadow-indigo-600/5 px-6 py-8 sm:p-10 relative overflow-hidden print:hidden border border-indigo-100 dark:border-indigo-500/20">
                             <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-6 text-indigo-900 dark:text-indigo-300">
                                 Payment Schedule
