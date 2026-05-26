@@ -15,6 +15,7 @@ interface HeroSectionProps {
     blurStrength?: number;
     textAlignment?: 'left' | 'center' | 'right';
     height?: string;
+    compact?: boolean;
     children?: React.ReactNode;
 }
 
@@ -26,6 +27,7 @@ export default function HeroSection({
     overlayOpacity,
     blurStrength,
     textAlignment = 'left',
+    compact = false,
     children
 }: HeroSectionProps) {
     // If the parent passes these props, they override the defaults
@@ -50,7 +52,9 @@ export default function HeroSection({
     const useVeroLogic = pageKey === 'vero';
     const heightClass = isLanding
         ? 'min-h-[320px] md:min-h-[440px]'
-        : 'min-h-[200px] md:min-h-[260px]';
+        : compact 
+            ? 'min-h-[140px] md:min-h-[200px]' 
+            : 'min-h-[200px] md:min-h-[260px]';
 
     return (
         <div className={`relative w-full overflow-hidden flex flex-col border-b border-[var(--border)] ${heightClass} isolate`}>

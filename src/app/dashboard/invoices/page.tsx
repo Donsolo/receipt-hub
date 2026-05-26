@@ -7,6 +7,8 @@ import { clsx } from 'clsx';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import InvoiceActions from '@/components/invoices/InvoiceActions';
 import HeroSection from '@/components/ui/HeroSection';
+import CompactStatsGrid from '@/components/invoices/CompactStatsGrid';
+import MobileFilterBar from '@/components/invoices/MobileFilterBar';
 
 export const dynamic = "force-dynamic";
 
@@ -118,7 +120,7 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
 
     return (
         <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)]">
-            <HeroSection pageKey="receipts" />
+            <HeroSection pageKey="receipts" compact={true} />
             
             <div className="flex-1 w-full flex flex-col items-center px-4 sm:px-6 lg:px-8 py-8">
                 <div className="w-full max-w-6xl space-y-6 relative">
@@ -164,40 +166,16 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {/* Metrics Row */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 flex flex-col">
-                                <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1">Total Invoices</span>
-                                <span className="text-2xl font-black text-[var(--text)]">{stats.total}</span>
-                            </div>
-                            <div className="bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 flex flex-col">
-                                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Sent</span>
-                                <span className="text-2xl font-black text-blue-600 dark:text-blue-400">{stats.sent}</span>
-                            </div>
-                            <div className="bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4 flex flex-col">
-                                <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Viewed</span>
-                                <span className="text-2xl font-black text-purple-600 dark:text-purple-400">{stats.viewed}</span>
-                            </div>
-                            <div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex flex-col">
-                                <span className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider mb-1">Overdue</span>
-                                <span className="text-2xl font-black text-red-600 dark:text-red-400">{stats.overdue}</span>
-                            </div>
-                        </div>
+                        {/* Metrics Row (Collapsible) */}
+                        <CompactStatsGrid stats={stats} />
 
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <Link href="/dashboard/invoices" className={clsx("px-4 py-2 rounded-xl text-sm font-bold transition-all", filterParam === 'all' ? "bg-gray-900 text-white dark:bg-white dark:text-black shadow-md" : "bg-[var(--card)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]")}>All</Link>
-                                <Link href="/dashboard/invoices?filter=draft" className={clsx("px-4 py-2 rounded-xl text-sm font-bold transition-all", filterParam === 'draft' ? "bg-gray-900 text-white dark:bg-white dark:text-black shadow-md" : "bg-[var(--card)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]")}>Draft</Link>
-                                <Link href="/dashboard/invoices?filter=sent" className={clsx("px-4 py-2 rounded-xl text-sm font-bold transition-all", filterParam === 'sent' ? "bg-gray-900 text-white dark:bg-white dark:text-black shadow-md" : "bg-[var(--card)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]")}>Sent</Link>
-                                <Link href="/dashboard/invoices?filter=viewed" className={clsx("px-4 py-2 rounded-xl text-sm font-bold transition-all", filterParam === 'viewed' ? "bg-gray-900 text-white dark:bg-white dark:text-black shadow-md" : "bg-[var(--card)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]")}>Viewed</Link>
-                                <Link href="/dashboard/invoices?filter=paid" className={clsx("px-4 py-2 rounded-xl text-sm font-bold transition-all", filterParam === 'paid' ? "bg-gray-900 text-white dark:bg-white dark:text-black shadow-md" : "bg-[var(--card)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]")}>Paid</Link>
-                                <Link href="/dashboard/invoices?filter=overdue" className={clsx("px-4 py-2 rounded-xl text-sm font-bold transition-all", filterParam === 'overdue' ? "bg-gray-900 text-white dark:bg-white dark:text-black shadow-md" : "bg-[var(--card)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]")}>Overdue</Link>
-                            </div>
+                            <MobileFilterBar filterParam={filterParam} />
                             
                             {/* Sort Toggle */}
-                            <div className="flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] rounded-xl p-1">
-                                <Link href={`/dashboard/invoices?filter=${filterParam}&sort=newest`} className={clsx("px-3 py-1.5 text-xs font-bold rounded-lg transition-colors", sortParam === 'newest' ? "bg-gray-100 dark:bg-white/10 text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]")}>Newest</Link>
-                                <Link href={`/dashboard/invoices?filter=${filterParam}&sort=activity`} className={clsx("px-3 py-1.5 text-xs font-bold rounded-lg transition-colors", sortParam === 'activity' ? "bg-gray-100 dark:bg-white/10 text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]")}>Last Activity</Link>
+                            <div className="flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] rounded-xl p-1 shrink-0 mt-2 sm:mt-0">
+                                <Link href={`/dashboard/invoices?filter=${filterParam}&sort=newest`} className={clsx("px-3 py-1.5 text-xs font-bold rounded-lg transition-colors", sortParam === 'newest' ? "bg-gray-100 dark:bg-white/10 text-[var(--text)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--text)]")}>Newest</Link>
+                                <Link href={`/dashboard/invoices?filter=${filterParam}&sort=activity`} className={clsx("px-3 py-1.5 text-xs font-bold rounded-lg transition-colors", sortParam === 'activity' ? "bg-gray-100 dark:bg-white/10 text-[var(--text)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--text)]")}>Last Activity</Link>
                             </div>
                         </div>
                     <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden hidden md:block">
@@ -260,7 +238,16 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                                 <div className="font-bold text-[var(--text)] tabular-nums">${inv.total.toFixed(2)}</div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end">
+                                                <div className="flex justify-end items-center gap-2">
+                                                    {inv.isConverted ? (
+                                                        <Link href={inv.convertedReceiptId ? `/receipt/${inv.convertedReceiptId}` : `/history`} className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-[var(--text)] rounded-lg font-bold text-xs transition-colors">
+                                                            View Receipt
+                                                        </Link>
+                                                    ) : (
+                                                        <Link href={`/dashboard/invoices/edit/${inv.id}`} className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg font-bold text-xs transition-colors">
+                                                            Edit
+                                                        </Link>
+                                                    )}
                                                     <InvoiceActions 
                                                         invoice={{ 
                                                             id: inv.id, 
@@ -296,7 +283,7 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end gap-2">
-                                        <div className="font-black text-blue-600 dark:text-blue-400 text-lg tabular-nums tracking-tight">${inv.total.toFixed(2)}</div>
+                                        <div className="font-black text-[var(--text)] text-lg tabular-nums tracking-tight">${inv.total.toFixed(2)}</div>
                                         <InvoiceActions 
                                             invoice={{ 
                                                 id: inv.id, 
@@ -341,6 +328,17 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                     <div className="text-[11px] font-bold text-[var(--muted)] text-right">
                                         Issued<br/>{formatDistanceToNow(new Date(inv.issueDate), { addSuffix: true })}
                                     </div>
+                                </div>
+                                <div className="pt-3 flex gap-2">
+                                    {inv.isConverted ? (
+                                        <Link href={inv.convertedReceiptId ? `/receipt/${inv.convertedReceiptId}` : `/history`} className="flex-1 text-center py-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-[var(--text)] rounded-xl font-bold text-sm transition-colors">
+                                            View Receipt
+                                        </Link>
+                                    ) : (
+                                        <Link href={`/dashboard/invoices/edit/${inv.id}`} className="flex-1 text-center py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-sm transition-colors shadow-sm shadow-blue-500/20">
+                                            Edit Invoice
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
                         ))}

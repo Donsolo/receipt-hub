@@ -8,6 +8,7 @@ export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     if (pathname?.startsWith('/invoice/')) return null;
+    if (pathname?.startsWith('/dashboard')) return null;
 
     // Hide global footer on landing page since it has its own custom footer
     if (pathname === '/') {

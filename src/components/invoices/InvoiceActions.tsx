@@ -282,19 +282,8 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
                     
                     {/* View and Copy Options */}
                     <div className="py-1">
-                        {invoice.publicToken ? (
-                            <Link href={`/invoice/${invoice.publicToken}`} target="_blank" className="flex items-center px-4 py-2.5 text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5" onClick={closeMenu}>
-                                <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                View Client Portal
-                            </Link>
-                        ) : (
-                            <button onClick={handleCopyLink} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
-                                <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                Generate View Link
-                            </button>
-                        )}
-                        <button onClick={handleCopyLink} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
-                            <svg className="mr-3 h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                        <button onClick={handleCopyLink} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                            <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                             Copy Public Link
                         </button>
                     </div>
@@ -303,25 +292,25 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
                     {!invoice.isConverted && invoice.status !== 'PAID' && (
                         <div className="py-1">
                             {!invoice.isConverted && (
-                                <button onClick={handleOpenShareModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
-                                    <svg className="mr-3 h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                                <button onClick={handleOpenShareModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                    <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                                     Send via Network
                                 </button>
                             )}
                             
                             {isPro && (
                                 <>
-                                    <button onClick={handleOpenPaymentRequestModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
-                                        <svg className="mr-3 h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                                    <button onClick={handleOpenPaymentRequestModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                        <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                                         Request Payment
                                     </button>
-                                    <button onClick={handleOpenEmailModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
-                                        <svg className="mr-3 h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                    <button onClick={handleOpenEmailModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                        <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                         Email Request
                                     </button>
                                     {invoice.status !== 'DRAFT' && (
-                                        <button onClick={handleOpenReminderModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
-                                            <svg className="mr-3 h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <button onClick={handleOpenReminderModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                            <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                             Send Reminder
                                         </button>
                                     )}
@@ -333,43 +322,43 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
                     {/* Management Actions */}
                     <div className="py-1">
                         {!invoice.isConverted && (
-                            <Link href={`/dashboard/invoices/edit/${invoice.id}`} className="flex items-center px-4 py-2.5 text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5" onClick={closeMenu}>
+                            <Link href={`/dashboard/invoices/edit/${invoice.id}`} className="flex items-center px-4 py-2.5 text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors" onClick={closeMenu}>
                                 <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                 Edit Invoice
                             </Link>
                         )}
                         
                         {isPro && !invoice.isConverted && invoice.status !== 'PAID' && (
-                            <button onClick={() => handleAction('toggle-payment')} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
-                                <svg className={clsx("mr-3 h-4 w-4", invoice.acceptOnlinePayment ? "text-emerald-500" : "text-[var(--muted)]")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <button onClick={() => handleAction('toggle-payment')} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                <svg className={clsx("mr-3 h-4 w-4", invoice.acceptOnlinePayment ? "text-[var(--text)]" : "text-[var(--muted)]")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 {invoice.acceptOnlinePayment ? "Disable Online Payments" : "Enable Online Payments"}
                             </button>
                         )}
 
                         {!invoice.isConverted && invoice.status !== 'PAID' && (
-                            <button onClick={() => handleAction('mark-paid')} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
-                                <svg className="mr-3 h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <button onClick={() => handleAction('mark-paid')} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 Mark as Paid
                             </button>
                         )}
 
                         {!invoice.isConverted && invoice.status === 'PAID' && (
-                            <button onClick={() => handleAction('convert')} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
-                                <svg className="mr-3 h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                            <button onClick={() => handleAction('convert')} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
                                 Convert to Receipt
                             </button>
                         )}
 
                         {invoice.isConverted && (
-                            <Link href={invoice.convertedReceiptId ? `/receipt/${invoice.convertedReceiptId}` : `/history`} className="flex items-center px-4 py-2.5 text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5" onClick={closeMenu}>
-                                <svg className="mr-3 h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <Link href={invoice.convertedReceiptId ? `/receipt/${invoice.convertedReceiptId}` : `/history`} className="flex items-center px-4 py-2.5 text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors" onClick={closeMenu}>
+                                <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 View Receipt
                             </Link>
                         )}
                         
                         {invoice.status === 'PAID' && invoice.publicToken && (
-                            <Link href={`/invoice/${invoice.publicToken}/bundle`} target="_blank" className="flex items-center px-4 py-2.5 text-sm font-medium text-emerald-600 hover:bg-gray-50 dark:hover:bg-white/5" onClick={closeMenu}>
-                                <svg className="mr-3 h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            <Link href={`/invoice/${invoice.publicToken}/bundle`} target="_blank" className="flex items-center px-4 py-2.5 text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors" onClick={closeMenu}>
+                                <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                                 Download Bundle
                             </Link>
                         )}
