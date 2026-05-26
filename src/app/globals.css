@@ -120,3 +120,19 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
+
+/* react-simple-pull-to-refresh override to ensure layout doesn't break */
+.ptr {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0% !important;
+  width: 100% !important;
+}
+
+.ptr__children {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  position: relative !important;
+}

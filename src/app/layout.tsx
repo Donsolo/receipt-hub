@@ -72,6 +72,7 @@ import { db } from '@/lib/db';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import GlobalVeroBubble from '@/components/vero/GlobalVeroBubble';
 import NativeFetchInterceptor from '@/components/NativeFetchInterceptor';
+import PullToRefreshWrapper from '@/components/PullToRefreshWrapper';
 
 export default async function RootLayout({
   children,
@@ -153,7 +154,9 @@ export default async function RootLayout({
                 <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} />
                 <div className="flex-1 flex flex-col w-full relative">
                   <main className="flex-grow w-full flex flex-col relative">
-                    {children}
+                    <PullToRefreshWrapper>
+                      {children}
+                    </PullToRefreshWrapper>
                   </main>
                   <InstallPrompt />
                   <Footer />
@@ -185,7 +188,9 @@ export default async function RootLayout({
               <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} />
               <div className="flex-1 flex flex-col w-full relative">
                 <main className="flex-grow w-full flex flex-col relative">
-                  {children}
+                  <PullToRefreshWrapper>
+                    {children}
+                  </PullToRefreshWrapper>
                 </main>
                 <InstallPrompt />
                 <Footer />
