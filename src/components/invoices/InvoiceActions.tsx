@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { clsx } from 'clsx';
@@ -21,7 +21,24 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
     const [isSending, setIsSending] = useState(false);
     const [selectedInstallmentId, setSelectedInstallmentId] = useState('');
 
+    // Dropdown State
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const closeMenu = () => setIsMenuOpen(false);
+
     const handleAction = async (action: 'convert' | 'mark-paid' | 'delete' | 'toggle-payment') => {
+        closeMenu();
         let confirmMsg = '';
         if (action === 'delete') confirmMsg = 'Are you sure you want to permanently delete this invoice?';
         if (action === 'convert') confirmMsg = 'Convert this PAID invoice to a permanent Receipt? This cannot be undone and will lock the invoice.';
@@ -70,6 +87,7 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
     };
 
     const handleCopyLink = async () => {
+        closeMenu();
         setIsLoading(true);
         try {
             const token = await getOrCreateToken();
@@ -88,11 +106,13 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
     };
 
     const handleOpenShareModal = async () => {
+        closeMenu();
         setIsShareModalOpen(true);
         await loadConnections();
     };
 
     const handleOpenPaymentRequestModal = async () => {
+        closeMenu();
         if (!invoice.acceptOnlinePayment) {
             if (!window.confirm('Online payments are currently disabled for this invoice. You must enable secure Stripe payments to send a payment request. Enable now?')) {
                 return;
@@ -220,6 +240,7 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
     };
 
     const handleOpenEmailModal = () => {
+        closeMenu();
         if (!invoice.acceptOnlinePayment) {
             if (!window.confirm('Online payments are disabled. Enable secure Stripe payments to send this request?')) return;
         }
@@ -227,168 +248,141 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
     };
 
     const handleOpenReminderModal = async () => {
+        closeMenu();
         setIsReminderModalOpen(true);
         setSelectedInstallmentId('');
         await loadConnections();
     };
 
     return (
-        <>
-            <div className="flex items-center justify-center gap-2">
-                
-                {/* View Original Invoice */}
-                {invoice.publicToken ? (
-                    <Link href={`/invoice/${invoice.publicToken}`} target="_blank" className="flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-blue-500 bg-gray-100 hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-blue-500/10 px-2.5 py-1 rounded-md transition-colors" title="View Original Invoice">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                        <span className="hidden xl:inline">View</span>
-                    </Link>
+        <div className="relative inline-block text-left" ref={menuRef}>
+            <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                disabled={isLoading}
+                className={clsx(
+                    "flex items-center justify-center p-2 rounded-lg transition-colors border outline-none",
+                    isMenuOpen 
+                        ? "bg-gray-100 border-gray-300 dark:bg-white/10 dark:border-white/20 text-gray-900 dark:text-white"
+                        : "bg-[var(--card)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5",
+                    isLoading && "opacity-50 cursor-not-allowed"
+                )}
+                title="Options"
+            >
+                {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-[var(--muted)] border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                    <button onClick={handleCopyLink} disabled={isLoading} className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-blue-500")} title="Generate Link to View">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    </button>
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                    </svg>
                 )}
+            </button>
 
-                {/* Send via Verihub Network */}
-                {!invoice.isConverted && (
-                    <button 
-                        disabled={isLoading}
-                        onClick={handleOpenShareModal} 
-                        className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-indigo-500")} 
-                        title="Send to Client Network"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-                    </button>
-                )}
+            {isMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl bg-[var(--card)] shadow-2xl ring-1 ring-black/5 dark:ring-white/10 focus:outline-none z-50 overflow-hidden divide-y divide-[var(--border)]">
+                    
+                    {/* View and Copy Options */}
+                    <div className="py-1">
+                        {invoice.publicToken ? (
+                            <Link href={`/invoice/${invoice.publicToken}`} target="_blank" className="flex items-center px-4 py-2.5 text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5" onClick={closeMenu}>
+                                <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                View Client Portal
+                            </Link>
+                        ) : (
+                            <button onClick={handleCopyLink} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
+                                <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                Generate View Link
+                            </button>
+                        )}
+                        <button onClick={handleCopyLink} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
+                            <svg className="mr-3 h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                            Copy Public Link
+                        </button>
+                    </div>
 
-                {/* Send Payment Request (Pro only, unpaid) */}
-                {isPro && !invoice.isConverted && invoice.status !== 'PAID' && (
-                    <button 
-                        disabled={isLoading}
-                        onClick={handleOpenPaymentRequestModal} 
-                        className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-amber-500")} 
-                        title="Request Payment"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                    </button>
-                )}
+                    {/* Send & Request Options */}
+                    {!invoice.isConverted && invoice.status !== 'PAID' && (
+                        <div className="py-1">
+                            {!invoice.isConverted && (
+                                <button onClick={handleOpenShareModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
+                                    <svg className="mr-3 h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                                    Send via Network
+                                </button>
+                            )}
+                            
+                            {isPro && (
+                                <>
+                                    <button onClick={handleOpenPaymentRequestModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
+                                        <svg className="mr-3 h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                                        Request Payment
+                                    </button>
+                                    <button onClick={handleOpenEmailModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
+                                        <svg className="mr-3 h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                        Email Request
+                                    </button>
+                                    {invoice.status !== 'DRAFT' && (
+                                        <button onClick={handleOpenReminderModal} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
+                                            <svg className="mr-3 h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            Send Reminder
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
 
-                {/* Copy Link */}
-                <button 
-                    disabled={isLoading}
-                    onClick={handleCopyLink} 
-                    className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-blue-500")} 
-                    title="Copy Public Client Link"
-                >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                </button>
-                
-                {/* Email Payment Request (Pro only, unpaid) */}
-                {isPro && !invoice.isConverted && invoice.status !== 'PAID' && (
-                    <button 
-                        disabled={isLoading}
-                        onClick={handleOpenEmailModal} 
-                        className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-indigo-500")} 
-                        title="Email Payment Request"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    </button>
-                )}
+                    {/* Management Actions */}
+                    <div className="py-1">
+                        {!invoice.isConverted && (
+                            <Link href={`/dashboard/invoices/edit/${invoice.id}`} className="flex items-center px-4 py-2.5 text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5" onClick={closeMenu}>
+                                <svg className="mr-3 h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                Edit Invoice
+                            </Link>
+                        )}
+                        
+                        {isPro && !invoice.isConverted && invoice.status !== 'PAID' && (
+                            <button onClick={() => handleAction('toggle-payment')} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
+                                <svg className={clsx("mr-3 h-4 w-4", invoice.acceptOnlinePayment ? "text-emerald-500" : "text-[var(--muted)]")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                {invoice.acceptOnlinePayment ? "Disable Online Payments" : "Enable Online Payments"}
+                            </button>
+                        )}
 
-                {/* Send Reminder (Pro only, unpaid) */}
-                {isPro && !invoice.isConverted && invoice.status !== 'PAID' && invoice.status !== 'DRAFT' && (
-                    <button 
-                        disabled={isLoading}
-                        onClick={handleOpenReminderModal} 
-                        className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-orange-500")} 
-                        title="Send Reminder"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </button>
-                )}
+                        {!invoice.isConverted && invoice.status !== 'PAID' && (
+                            <button onClick={() => handleAction('mark-paid')} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
+                                <svg className="mr-3 h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                Mark as Paid
+                            </button>
+                        )}
 
-                {/* Accept Online Payments Toggle (Pro only, not converted, not paid) */}
-                {isPro && !invoice.isConverted && invoice.status !== 'PAID' && (
-                    <button 
-                        disabled={isLoading}
-                        onClick={() => handleAction('toggle-payment')} 
-                        className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : invoice.acceptOnlinePayment ? "text-emerald-500 hover:text-emerald-400" : "text-[var(--muted)] hover:text-emerald-500")} 
-                        title={invoice.acceptOnlinePayment ? "Online Payments Enabled - Click to Disable" : "Enable Online Payments"}
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                    </button>
-                )}
+                        {!invoice.isConverted && invoice.status === 'PAID' && (
+                            <button onClick={() => handleAction('convert')} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5">
+                                <svg className="mr-3 h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                                Convert to Receipt
+                            </button>
+                        )}
 
-                {/* Edit (Locked if Converted) */}
-                {!invoice.isConverted ? (
-                    <Link href={`/dashboard/invoices/edit/${invoice.id}`} className={clsx("transition-colors p-1", isLoading ? "pointer-events-none opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-indigo-500")} title="Edit">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                    </Link>
-                ) : null}
+                        {invoice.isConverted && (
+                            <Link href={invoice.convertedReceiptId ? `/receipt/${invoice.convertedReceiptId}` : `/history`} className="flex items-center px-4 py-2.5 text-sm font-medium text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5" onClick={closeMenu}>
+                                <svg className="mr-3 h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                View Receipt
+                            </Link>
+                        )}
+                        
+                        {invoice.status === 'PAID' && invoice.publicToken && (
+                            <Link href={`/invoice/${invoice.publicToken}/bundle`} target="_blank" className="flex items-center px-4 py-2.5 text-sm font-medium text-emerald-600 hover:bg-gray-50 dark:hover:bg-white/5" onClick={closeMenu}>
+                                <svg className="mr-3 h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                Download Bundle
+                            </Link>
+                        )}
 
-                {/* Mark Paid (Locked if Converted or already Paid) */}
-                {!invoice.isConverted && invoice.status !== 'PAID' && (
-                    <button 
-                        disabled={isLoading}
-                        onClick={() => handleAction('mark-paid')} 
-                        className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-emerald-500")} 
-                        title="Mark Paid"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </button>
-                )}
-
-                {/* Convert to Receipt (Only if PAID and Not Converted) */}
-                {!invoice.isConverted && invoice.status === 'PAID' && (
-                    <button 
-                        disabled={isLoading}
-                        onClick={() => handleAction('convert')} 
-                        className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-blue-500")} 
-                        title="Convert to Receipt"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                    </button>
-                )}
-
-                {/* View Converted Receipt (If already Converted) */}
-                {invoice.isConverted && (
-                    <Link href={invoice.convertedReceiptId ? `/receipt/${invoice.convertedReceiptId}` : `/history`} className="text-blue-500 hover:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-2 py-0.5 rounded transition-colors text-xs font-bold whitespace-nowrap" title="View in Receipt Hub">
-                        View Receipt
-                    </Link>
-                )}
-
-                {/* Convert Disabled State (If not Paid and not Converted) */}
-                {!invoice.isConverted && invoice.status !== 'PAID' && (
-                    <button disabled className="text-[var(--muted)]/30 cursor-not-allowed p-1 hidden sm:block" title="Invoice must be PAID to convert">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                    </button>
-                )}
-
-                {/* Delete */}
-                {!invoice.isConverted && invoice.status !== 'PAID' && (
-                    <button 
-                        disabled={isLoading}
-                        onClick={() => handleAction('delete')} 
-                        className={clsx("transition-colors p-1", isLoading ? "cursor-not-allowed opacity-50 text-[var(--muted)]" : "text-[var(--muted)] hover:text-red-500")} 
-                        title="Delete"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
-                )}
-
-                {/* Download Paid Bundle */}
-                {invoice.status === 'PAID' && invoice.publicToken && (
-                    <Link 
-                        href={`/invoice/${invoice.publicToken}/bundle`} 
-                        target="_blank"
-                        className="text-emerald-600 hover:text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20 px-2 py-0.5 rounded transition-colors text-xs font-bold whitespace-nowrap ml-2 flex items-center gap-1" 
-                        title="Download Paid Bundle"
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        <span className="hidden sm:inline">Bundle</span>
-                    </Link>
-                )}
-
-            </div>
+                        {!invoice.isConverted && invoice.status !== 'PAID' && (
+                            <button onClick={() => handleAction('delete')} className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                                <svg className="mr-3 h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                Delete
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Network Share Modal */}
             {isShareModalOpen && (
@@ -651,6 +645,6 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 }

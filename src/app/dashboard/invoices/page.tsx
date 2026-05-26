@@ -1,4 +1,4 @@
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
 import Link from 'next/link';
@@ -24,14 +24,50 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
     }
 
     const isPro = (authUser.plan === "PRO" && authUser.planStatus !== "inactive") || authUser.role === "ADMIN" || authUser.role === "SUPER_ADMIN";
+    
     if (!isPro) {
+        const headersList = await headers();
+        const userAgent = headersList.get('user-agent') || '';
+        const isMobileApp = /Capacitor|wv/i.test(userAgent);
+
         return (
-            <div className="min-h-screen bg-[var(--bg)] p-8 flex flex-col items-center justify-center">
-                <h1 className="text-2xl font-bold text-[var(--text)] mb-4">Pro Feature</h1>
-                <p className="text-[var(--muted)] mb-6">Invoicing is restricted to Pro members.</p>
-                <Link href="/upgrade" className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors">
-                    Upgrade to Pro
-                </Link>
+            <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)] relative">
+                <HeroSection pageKey="receipts" />
+                
+                {/* Modal Overlay Background */}
+                <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
+                
+                {/* Modal Dialog */}
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-[var(--card)] w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-gray-100 dark:border-[var(--border)]">
+                        <div className="p-8 text-center flex flex-col items-center">
+                            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6 shadow-inner ring-4 ring-blue-50 dark:ring-blue-900/20">
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" /></svg>
+                            </div>
+                            <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Pro Feature</h2>
+                            <p className="text-gray-500 dark:text-[var(--muted)] mb-8 text-sm">
+                                Professional invoicing and secure payment requests are exclusive to Pro members.
+                            </p>
+                            
+                            {isMobileApp ? (
+                                <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl p-5 w-full">
+                                    <p className="text-sm text-blue-800 dark:text-blue-300 font-medium">
+                                        To upgrade your account and unlock these features, please visit <strong className="font-bold underline decoration-blue-500/50">verihub.app</strong> in your web browser.
+                                    </p>
+                                </div>
+                            ) : (
+                                <Link href="/upgrade" className="w-full px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 text-lg">
+                                    Upgrade to Pro
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                </Link>
+                            )}
+                            
+                            <Link href="/dashboard" className="mt-6 text-sm font-bold text-gray-400 hover:text-gray-600 dark:text-[var(--muted)] dark:hover:text-white transition-colors">
+                                Return to Dashboard
+                            </Link>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -164,7 +200,7 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                 <Link href={`/dashboard/invoices?filter=${filterParam}&sort=activity`} className={clsx("px-3 py-1.5 text-xs font-bold rounded-lg transition-colors", sortParam === 'activity' ? "bg-gray-100 dark:bg-white/10 text-[var(--text)]" : "text-[var(--muted)] hover:text-[var(--text)]")}>Last Activity</Link>
                             </div>
                         </div>
-                    <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
+                    <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden hidden md:block">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse min-w-[800px]">
                                 <thead>
@@ -174,7 +210,7 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                         <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Issue Date</th>
                                         <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider text-right">Views</th>
                                         <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider text-right">Total</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider text-center">Actions</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[var(--border)]">
@@ -223,26 +259,91 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                             <td className="px-6 py-4 text-right whitespace-nowrap">
                                                 <div className="font-bold text-[var(--text)] tabular-nums">${inv.total.toFixed(2)}</div>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <InvoiceActions 
-                                                    invoice={{ 
-                                                        id: inv.id, 
-                                                        status: inv.status, 
-                                                        isConverted: inv.isConverted, 
-                                                        publicToken: inv.publicToken, 
-                                                        convertedReceiptId: inv.convertedReceiptId,
-                                                        acceptOnlinePayment: inv.acceptOnlinePayment,
-                                                        paymentStatus: inv.paymentStatus,
-                                                        remainingBalance: inv.remainingBalance
-                                                    }} 
-                                                    isPro={isPro} 
-                                                />
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex justify-end">
+                                                    <InvoiceActions 
+                                                        invoice={{ 
+                                                            id: inv.id, 
+                                                            status: inv.status, 
+                                                            isConverted: inv.isConverted, 
+                                                            publicToken: inv.publicToken, 
+                                                            convertedReceiptId: inv.convertedReceiptId,
+                                                            acceptOnlinePayment: inv.acceptOnlinePayment,
+                                                            paymentStatus: inv.paymentStatus,
+                                                            remainingBalance: inv.remainingBalance
+                                                        }} 
+                                                        isPro={isPro} 
+                                                    />
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+
+                    {/* Mobile Cards (Hidden on Desktop) */}
+                    <div className="grid grid-cols-1 gap-4 md:hidden">
+                        {invoices.map((inv) => (
+                            <div key={inv.id} className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col gap-4 relative">
+                                <div className="flex justify-between items-start gap-4">
+                                    <div className="flex flex-col">
+                                        <div className="font-bold text-[var(--text)] text-lg leading-tight">{inv.title}</div>
+                                        <div className="text-sm text-[var(--muted)] mt-1 font-medium">
+                                            {inv.invoiceNumber && <span className="font-mono text-[var(--muted)]/80 mr-1.5">#{inv.invoiceNumber}</span>}
+                                            {inv.clientName}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-2">
+                                        <div className="font-black text-blue-600 dark:text-blue-400 text-lg tabular-nums tracking-tight">${inv.total.toFixed(2)}</div>
+                                        <InvoiceActions 
+                                            invoice={{ 
+                                                id: inv.id, 
+                                                status: inv.status, 
+                                                isConverted: inv.isConverted, 
+                                                publicToken: inv.publicToken, 
+                                                convertedReceiptId: inv.convertedReceiptId,
+                                                acceptOnlinePayment: inv.acceptOnlinePayment,
+                                                paymentStatus: inv.paymentStatus,
+                                                remainingBalance: inv.remainingBalance
+                                            }} 
+                                            isPro={isPro} 
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-end pt-4 border-t border-[var(--border)]">
+                                    <div className="flex flex-col gap-2">
+                                        {/* Status Badge */}
+                                        <div className="flex items-center gap-2">
+                                            {inv.status === 'PAID' && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">PAID</span>}
+                                            {inv.status === 'DRAFT' && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[var(--muted)]/10 text-[var(--muted)] border border-[var(--border)]">DRAFT</span>}
+                                            {inv.status === 'SENT' && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">SENT</span>}
+                                            {inv.status === 'VIEWED' && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">VIEWED</span>}
+                                            {inv.status === 'CANCELLED' && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">CANCELLED</span>}
+                                            
+                                            {inv.viewCount > 0 && (
+                                                <span className="text-xs text-[var(--muted)] font-medium flex items-center gap-1">
+                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                    {inv.viewCount} {inv.viewCount === 1 ? 'view' : 'views'}
+                                                </span>
+                                            )}
+                                        </div>
+                                        
+                                        {/* Smart Status Hints */}
+                                        {inv.status === 'SENT' && inv.viewCount === 0 && inv.sentAt && (Date.now() - new Date(inv.sentAt).getTime() > 24 * 60 * 60 * 1000) && (
+                                            <div className="text-[10px] text-red-500/80 font-medium flex items-center gap-1">
+                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                Not yet viewed
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="text-[11px] font-bold text-[var(--muted)] text-right">
+                                        Issued<br/>{formatDistanceToNow(new Date(inv.issueDate), { addSuffix: true })}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                     </div>
                 )}
