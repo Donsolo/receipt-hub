@@ -278,7 +278,7 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
             </button>
 
             {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl bg-[var(--card)] shadow-2xl ring-1 ring-black/5 dark:ring-white/10 focus:outline-none z-50 overflow-hidden divide-y divide-[var(--border)]">
+                <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl bg-[var(--card)] shadow-2xl ring-1 ring-black/5 dark:ring-white/10 focus:outline-none z-[70] max-h-[60vh] overflow-y-auto custom-scrollbar divide-y divide-[var(--border)]">
                     
                     {/* View and Copy Options */}
                     <div className="py-1">
