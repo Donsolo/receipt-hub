@@ -55,9 +55,10 @@ export interface InvoiceDocumentProps {
             total: number;
         }[];
     };
+    onSignatureClick?: () => void;
 }
 
-export default function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
+export default function InvoiceDocument({ invoice, onSignatureClick }: InvoiceDocumentProps) {
     const isPaid = invoice.status === 'PAID';
     const isDraft = invoice.status === 'DRAFT';
     const isOverdue = !isPaid && invoice.dueDate && new Date(invoice.dueDate) < new Date(new Date().setHours(0,0,0,0));
@@ -404,6 +405,16 @@ export default function InvoiceDocument({ invoice }: InvoiceDocumentProps) {
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={invoice.authorizedSignature} alt="Authorized Signature" className="h-16 object-contain mix-blend-multiply dark:mix-blend-normal dark:invert print:mix-blend-normal print:invert-0" />
                             </div>
+                        ) : onSignatureClick ? (
+                            <button 
+                                onClick={onSignatureClick}
+                                className="w-full h-16 mb-2 border-b-2 border-dashed border-indigo-400 dark:border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center justify-center rounded-t-lg group cursor-pointer print:hidden"
+                            >
+                                <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:scale-105 transition-transform flex items-center gap-2">
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                    Click here to sign
+                                </span>
+                            </button>
                         ) : (
                             <div className="w-full border-b border-slate-300 dark:border-slate-600 print:border-slate-400 h-16 mb-2"></div>
                         )}

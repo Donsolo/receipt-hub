@@ -89,6 +89,7 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
     const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isSigning, setIsSigning] = useState(false);
+    const [showSignatureModal, setShowSignatureModal] = useState(false);
 
     const handleSign = async (dataUrl: string) => {
         setIsSigning(true);
@@ -104,6 +105,7 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
             }
             // Update local state to reveal payment buttons
             setInvoice(prev => prev ? { ...prev, authorizedSignature: dataUrl } : null);
+            setShowSignatureModal(false);
         } catch (err: any) {
             alert(err.message);
         } finally {
@@ -332,7 +334,10 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
 
             <div className="flex-1 w-full flex flex-col pb-24 px-4 sm:px-6 print:p-0 print:m-0 print:block">
             
-            <InvoiceDocument invoice={invoice} />
+            <InvoiceDocument 
+                invoice={invoice} 
+                onSignatureClick={!invoice.authorizedSignature ? () => setShowSignatureModal(true) : undefined} 
+            />
             
             {/* --- PAYMENT HISTORY (OWNER ONLY) --- */}
             {isAuthenticated && invoice.onlinePayments && invoice.onlinePayments.length > 0 && (
@@ -372,17 +377,23 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
             {invoice.ownerIsPro && invoice.acceptOnlinePayment && invoice.paymentStatus !== 'PAID' && (invoice.remainingBalance || 0) > 0 && (
                 <>
                     {!invoice.authorizedSignature ? (
-                        <div className="mt-8 bg-white dark:bg-[#0b1220] rounded-3xl ring-1 ring-black/5 dark:ring-white/10 px-6 py-8 sm:p-10 relative overflow-hidden print:hidden border-t-4 border-t-indigo-500 shadow-xl shadow-indigo-900/5">
-                            <div className="text-center sm:text-left mb-6">
-                                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-gray-900 dark:text-white">
-                                    Sign to Enable Payment
+                        <div className="mt-8 bg-indigo-600 dark:bg-indigo-500 rounded-3xl shadow-xl shadow-indigo-600/20 px-6 py-8 sm:p-10 relative overflow-hidden print:hidden text-white flex flex-col sm:flex-row items-center justify-between gap-6 animate-in slide-in-from-bottom-8 fade-in duration-700">
+                            <div className="text-center sm:text-left relative z-10">
+                                <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-2">
+                                    Signature Required
                                 </h3>
-                                <p className="text-sm text-gray-500 dark:text-[var(--muted)] mt-1">
-                                    Please provide your authorized signature below to approve this invoice and unlock secure online payment.
+                                <p className="text-indigo-100 font-medium text-sm max-w-md">
+                                    Please provide your authorized signature on the document to approve this invoice and unlock secure online payment.
                                 </p>
                             </div>
-                            <div className="max-w-md mx-auto sm:mx-0">
-                                <SignaturePad onSign={handleSign} />
+                            <div className="w-full sm:w-auto relative z-10 flex flex-col items-center sm:items-end gap-2">
+                                <button
+                                    onClick={() => setShowSignatureModal(true)}
+                                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-white text-indigo-600 shadow-lg shadow-black/10 text-base font-black rounded-2xl transition-all hover:-translate-y-1 hover:shadow-xl"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                    Sign Invoice Now
+                                </button>
                             </div>
                         </div>
                     ) : invoice.paymentPlanEnabled && invoice.installments && invoice.installments.length > 0 ? (
@@ -622,6 +633,23 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
                     </a>
                 </div>
             </div>
+
+            {/* Signature Modal */}
+            {showSignatureModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white dark:bg-[#0b1220] rounded-3xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 p-6 sm:p-8 w-full max-w-lg relative animate-in zoom-in-95">
+                        <button 
+                            onClick={() => setShowSignatureModal(false)}
+                            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 transition-colors"
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                        <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Sign Document</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Draw your signature below to authorize this invoice.</p>
+                        <SignaturePad onSign={handleSign} />
+                    </div>
+                </div>
+            )}
 
             {/* Verihub CTA (Watermark Footer) */}
             <div className="mt-16 flex flex-col items-center justify-center text-center pb-8 transition-all duration-500 print:hidden">
