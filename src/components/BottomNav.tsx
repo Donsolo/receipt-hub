@@ -75,6 +75,16 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
             )
         }] : []),
         {
+            href: '/dashboard/vero',
+            label: isPro ? 'Vero+' : 'Vero',
+            isSpecial: true,
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+            )
+        },
+        {
             href: '/dashboard/billing',
             label: 'Billing',
             badge: unpaidCount > 0 ? unpaidCount : undefined,
@@ -92,90 +102,77 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
             )
-        },
-        {
-            href: '/dashboard/profile',
-            label: 'Profile',
-            icon: (
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-            )
         }
     ];
-
-    const handleVeroAction = (isVoice: boolean) => {
-        setShowVeroOverlay(true);
-        setStartVoice(isVoice);
-    };
-
-    const isVeroActive = pathname === '/dashboard/vero';
 
     return (
         <>
             {/* Spacer to prevent content from hiding behind the fixed bottom nav on mobile */}
-            <div className="h-32 md:hidden w-full flex-shrink-0" />
+            <div className="h-24 md:hidden w-full flex-shrink-0" />
 
             <div className={clsx(
                 "md:hidden fixed bottom-4 left-4 right-4 z-50 pb-safe pointer-events-none transition-transform duration-300",
                 isKeyboardOpen ? "translate-y-[150%] opacity-0" : "translate-y-0 opacity-100"
             )}>
-                
-                {/* Centered Floating Action Button (Vero Dock) */}
-                <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 pointer-events-auto z-50 flex flex-col items-center">
-                    <button
-                        onClick={(e) => {
-                            if (isLongPress.current) {
-                                e.preventDefault();
-                                return;
-                            }
-                            handleVeroAction(false);
-                        }}
-                        onTouchStart={() => {
-                            isLongPress.current = false;
-                            pressTimer.current = setTimeout(() => {
-                                isLongPress.current = true;
-                                handleVeroAction(true);
-                            }, 600);
-                        }}
-                        onTouchEnd={() => {
-                            if (pressTimer.current) clearTimeout(pressTimer.current);
-                        }}
-                        onMouseDown={() => {
-                            isLongPress.current = false;
-                            pressTimer.current = setTimeout(() => {
-                                isLongPress.current = true;
-                                handleVeroAction(true);
-                            }, 600);
-                        }}
-                        onMouseUp={() => {
-                            if (pressTimer.current) clearTimeout(pressTimer.current);
-                        }}
-                        onMouseLeave={() => {
-                            if (pressTimer.current) clearTimeout(pressTimer.current);
-                        }}
-                        className="group relative outline-none"
-                    >
-                        {/* Pulse Ring */}
-                        <div className="absolute inset-0 rounded-full bg-indigo-500/30 animate-ping opacity-75 group-hover:opacity-100 transition-opacity"></div>
-                        
-                        {/* Core Button Area */}
-                        <div className={clsx(
-                            "relative w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 border-[3px] border-[var(--bg)]",
-                            isVeroActive 
-                                ? "bg-indigo-600 text-white shadow-indigo-500/50 scale-105" 
-                                : "bg-gradient-to-tr from-indigo-600 to-violet-500 text-white shadow-indigo-500/40 hover:scale-105 active:scale-95"
-                        )}>
-                            <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                            </svg>
-                        </div>
-                    </button>
-                </div>
-
-                <div className="bg-[var(--header-bg)]/90 backdrop-blur-xl border border-[var(--border)]/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-2xl flex items-center justify-around h-16 px-2 pointer-events-auto mt-2">
+                <div className="bg-[var(--header-bg)]/90 backdrop-blur-xl border border-[var(--border)]/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-2xl flex items-center justify-around h-16 px-2 pointer-events-auto">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                        
+                        if (item.isSpecial) {
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={(e) => {
+                                        if (isLongPress.current) {
+                                            e.preventDefault();
+                                            return;
+                                        }
+                                        if (pathname === '/dashboard/vero') {
+                                            e.preventDefault();
+                                            setShowVeroOverlay(true);
+                                            setStartVoice(false);
+                                        }
+                                    }}
+                                    onTouchStart={() => {
+                                        isLongPress.current = false;
+                                        pressTimer.current = setTimeout(() => {
+                                            isLongPress.current = true;
+                                            setShowVeroOverlay(true);
+                                            setStartVoice(true);
+                                        }, 600);
+                                    }}
+                                    onTouchEnd={() => {
+                                        if (pressTimer.current) clearTimeout(pressTimer.current);
+                                    }}
+                                    onMouseDown={() => {
+                                        isLongPress.current = false;
+                                        pressTimer.current = setTimeout(() => {
+                                            isLongPress.current = true;
+                                            setShowVeroOverlay(true);
+                                            setStartVoice(true);
+                                        }, 600);
+                                    }}
+                                    onMouseUp={() => {
+                                        if (pressTimer.current) clearTimeout(pressTimer.current);
+                                    }}
+                                    onMouseLeave={() => {
+                                        if (pressTimer.current) clearTimeout(pressTimer.current);
+                                    }}
+                                    className="flex flex-col items-center justify-center w-full h-full relative -mt-6 z-10"
+                                >
+                                    <div className={clsx(
+                                        "w-12 h-12 rounded-full flex items-center justify-center shadow-xl transition-all duration-300",
+                                        isActive 
+                                            ? "bg-indigo-600 text-white shadow-indigo-500/40 ring-4 ring-[var(--bg)] scale-105" 
+                                            : "bg-[var(--card)] text-indigo-500 border border-[var(--border)] shadow-black/5 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 ring-4 ring-[var(--bg)] hover:scale-105"
+                                    )}>
+                                        {item.icon}
+                                    </div>
+                                    <span className={clsx("text-[10px] font-bold mt-1.5 transition-colors", isActive ? "text-indigo-500" : "text-[var(--header-icon)] hover:text-[var(--header-icon-hover)]")}>{item.label}</span>
+                                </Link>
+                            );
+                        }
 
                         return (
                             <Link
