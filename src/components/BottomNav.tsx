@@ -11,8 +11,20 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
     const [showVeroOverlay, setShowVeroOverlay] = useState(false);
     const [startVoice, setStartVoice] = useState(false);
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+    const [unpaidCount, setUnpaidCount] = useState(0);
     const pressTimer = useRef<NodeJS.Timeout | null>(null);
     const isLongPress = useRef(false);
+
+    useEffect(() => {
+        fetch('/api/billing/summary')
+            .then(res => res.json())
+            .then(data => {
+                if (data?.success && data?.data?.incoming?.unpaidCount) {
+                    setUnpaidCount(data.data.incoming.unpaidCount);
+                }
+            })
+            .catch(() => {});
+    }, [pathname]);
 
     useEffect(() => {
         // Detect keyboard opening via Capacitor events or window resize fallback
@@ -78,6 +90,16 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
             icon: (
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            )
+        },
+        {
+            href: '/dashboard/billing',
+            label: 'Billing',
+            badge: unpaidCount > 0 ? unpaidCount : undefined,
+            icon: (
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
             )
         },
@@ -170,8 +192,13 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                                     isActive ? "text-indigo-500" : "text-[var(--header-icon)] hover:text-[var(--header-icon-hover)]"
                                 )}
                             >
-                                <div className={clsx("transition-transform duration-300", isActive ? "scale-110 -translate-y-0.5" : "")}>
+                                <div className={clsx("transition-transform duration-300 relative", isActive ? "scale-110 -translate-y-0.5" : "")}>
                                     {item.icon}
+                                    {item.badge && (
+                                        <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-[var(--header-bg)]">
+                                            {item.badge}
+                                        </span>
+                                    )}
                                 </div>
                                 <span className={clsx("text-[10px] transition-all duration-300", isActive ? "font-semibold" : "font-medium")}>
                                     {item.label}

@@ -6,6 +6,7 @@ import { getReceipts } from '@/lib/actions';
 import HeroSection from '@/components/ui/HeroSection';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import DashboardUpgradeButton from '@/components/ui/DashboardUpgradeButton';
+import BillingDashboardWidget from '@/components/billing/BillingDashboardWidget';
 
 export const dynamic = "force-dynamic";
 
@@ -120,6 +121,9 @@ export default async function Dashboard() {
                             </div>
                         </PageHeaderCard>
                     </div>
+
+                    {/* Billing Center Widget */}
+                    <BillingDashboardWidget />
 
                     {/* Quick Stats Strip */}
                     <div className={`bg-[var(--bg)] border ${isPro ? 'border-yellow-500/20 shadow-sm shadow-yellow-500/5' : 'border-[var(--border)]'} rounded-xl flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-white/5 overflow-hidden mb-6 transition-all`}>
