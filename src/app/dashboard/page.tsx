@@ -31,13 +31,22 @@ export default async function Dashboard() {
 
     // Fetch invoices if Pro user
     let userInvoices: any[] = [];
+    let lensStats = { approved: 0, pending: 0 };
     if (isPro) {
         try {
             userInvoices = await db.invoice.findMany({
                 where: { userId: authUser.userId }
             });
+
+            // Fast fetch for Lens mini-stats
+            const lensShares = await db.veroLensShare.findMany({
+                where: { session: { userId: authUser.userId } },
+                select: { status: true }
+            });
+            lensStats.approved = lensShares.filter(s => s.status === 'APPROVED').length;
+            lensStats.pending = lensShares.filter(s => s.status === 'ACTIVE').length;
         } catch (e) {
-            console.error('Failed to fetch invoices in Dashboard. Schema might be pending migration:', e);
+            console.error('Failed to fetch Pro stats in Dashboard:', e);
             userInvoices = []; // Fallback gracefully
         }
     }
@@ -184,6 +193,41 @@ export default async function Dashboard() {
                                                     <span className="text-[var(--muted)] font-normal">/</span>
                                                     <span className="text-amber-500">{userInvoices.filter(i => i.status !== 'PAID').length}</span>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+                        )}
+
+                        {/* Vero Lens Analytics (PRO ONLY) */}
+                        {isPro && (
+                            <Link href="/dashboard/vero/lens/analytics" className="block group h-full">
+                                <div className="bg-[var(--bg)] border border-[var(--border)] rounded-xl px-5 py-6 hover:bg-[var(--card-hover)] hover:-translate-y-1 hover:shadow-lg shadow-md transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                    <div className="flex justify-between items-start mb-4 relative z-10">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-12 w-12 shrink-0 bg-violet-500/10 rounded-xl flex items-center justify-center text-violet-500 group-hover:bg-violet-500/20 shadow-inner border border-violet-500/10 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Lens Analytics</h2>
+                                                <p className="text-[11px] text-[var(--muted)] font-medium uppercase tracking-wider mt-0.5">Quote Performance</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex-1 flex flex-col justify-end relative z-10 pt-2 border-t border-[var(--border)] mt-2">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <span className="block text-[10px] uppercase font-bold text-[var(--muted)] mb-1">Approved</span>
+                                                <span className="text-xl font-bold text-emerald-500">{lensStats.approved}</span>
+                                            </div>
+                                            <div>
+                                                <span className="block text-[10px] uppercase font-bold text-[var(--muted)] mb-1">Pending</span>
+                                                <span className="text-xl font-bold text-amber-500">{lensStats.pending}</span>
                                             </div>
                                         </div>
                                     </div>

@@ -49,6 +49,20 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
     }
 }
 
+import { cookies } from 'next/headers';
+
+export async function getCurrentUser() {
+    const cookieStore = await Promise.resolve(cookies());
+    const token = cookieStore.get('auth_token')?.value;
+    if (!token) return null;
+    const user = await verifyToken(token);
+    if (!user) return null;
+    return {
+        id: user.userId,
+        ...user
+    };
+}
+
 import { getSystemSettings } from '@/lib/settings';
 
 export async function ensureActivated(user: JWTPayload) {
