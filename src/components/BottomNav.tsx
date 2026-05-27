@@ -10,8 +10,35 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
     const pathname = usePathname();
     const [showVeroOverlay, setShowVeroOverlay] = useState(false);
     const [startVoice, setStartVoice] = useState(false);
+    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const pressTimer = useRef<NodeJS.Timeout | null>(null);
     const isLongPress = useRef(false);
+
+    useEffect(() => {
+        // Detect keyboard opening via Capacitor events or window resize fallback
+        const initialHeight = window.innerHeight;
+        
+        const handleResize = () => {
+            if (initialHeight - window.innerHeight > 150) {
+                setIsKeyboardOpen(true);
+            } else {
+                setIsKeyboardOpen(false);
+            }
+        };
+
+        const handleKeyboardShow = () => setIsKeyboardOpen(true);
+        const handleKeyboardHide = () => setIsKeyboardOpen(false);
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('keyboardWillShow', handleKeyboardShow);
+        window.addEventListener('keyboardWillHide', handleKeyboardHide);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('keyboardWillShow', handleKeyboardShow);
+            window.removeEventListener('keyboardWillHide', handleKeyboardHide);
+        };
+    }, []);
 
     // Do not show on invoice public view pages
     if (pathname?.startsWith('/invoice/')) return null;
@@ -70,7 +97,10 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
             {/* Spacer to prevent content from hiding behind the fixed bottom nav on mobile */}
             <div className="h-24 md:hidden w-full flex-shrink-0" />
 
-            <div className="md:hidden fixed bottom-4 left-4 right-4 z-50 pb-safe pointer-events-none">
+            <div className={clsx(
+                "md:hidden fixed bottom-4 left-4 right-4 z-50 pb-safe pointer-events-none transition-transform duration-300",
+                isKeyboardOpen ? "translate-y-[150%] opacity-0" : "translate-y-0 opacity-100"
+            )}>
                 <div className="bg-[var(--header-bg)]/90 backdrop-blur-xl border border-[var(--border)]/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-2xl flex items-center justify-around h-16 px-2 pointer-events-auto">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
