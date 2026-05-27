@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { stripe } from '@/lib/stripe';
+import { getInvoiceStripeInstance } from '@/lib/stripe';
 import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: Request, { params }: { params: Promise<{ token: string }> }) {
@@ -96,8 +96,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://verihub.app';
         const businessName = invoice.user?.businessName || invoice.user?.name || 'Verihub User';
 
+        const { stripeInstance, mode } = getInvoiceStripeInstance();
+        console.log(`[Stripe Invoice Checkout] Using mode: ${mode}`);
+
         // Create Stripe Checkout Session
-        const session = await stripe.checkout.sessions.create({
+        const session = await stripeInstance.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'payment',
             line_items: [
