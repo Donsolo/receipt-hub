@@ -58,7 +58,7 @@ export default function InstallPrompt() {
     if (!showPrompt) return null;
 
     return (
-        <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-5 duration-500">
+        <div className="fixed bottom-24 left-4 right-4 z-50 animate-in slide-in-from-bottom-5 duration-500">
             <div className="bg-[var(--card)]/90 backdrop-blur-md border border-[var(--border)] shadow-xl rounded-2xl p-4 flex items-center justify-between max-w-md mx-auto">
                 <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0 shadow-sm rounded-xl overflow-hidden">

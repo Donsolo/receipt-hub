@@ -111,10 +111,10 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
             <div className="h-24 md:hidden w-full flex-shrink-0" />
 
             <div className={clsx(
-                "md:hidden fixed bottom-4 left-4 right-4 z-50 pb-safe pointer-events-none transition-transform duration-300",
+                "md:hidden fixed bottom-0 left-0 w-full z-50 pb-safe transition-transform duration-300",
                 isKeyboardOpen ? "translate-y-[150%] opacity-0" : "translate-y-0 opacity-100"
             )}>
-                <div className="bg-[var(--header-bg)]/90 backdrop-blur-xl border border-[var(--border)]/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-2xl flex items-center justify-around h-16 px-2 pointer-events-auto">
+                <div className="bg-[var(--header-bg)] border-t border-[var(--border)] shadow-[0_-8px_30px_rgb(0,0,0,0.05)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.2)] flex items-center justify-around h-[68px] px-2">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                         
@@ -164,8 +164,8 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                                     <div className={clsx(
                                         "w-12 h-12 rounded-full flex items-center justify-center shadow-xl transition-all duration-300",
                                         isActive 
-                                            ? "bg-indigo-600 text-white shadow-indigo-500/40 ring-4 ring-[var(--bg)] scale-105" 
-                                            : "bg-[var(--card)] text-indigo-500 border border-[var(--border)] shadow-black/5 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 ring-4 ring-[var(--bg)] hover:scale-105"
+                                            ? "bg-indigo-600 text-white shadow-indigo-500/40 ring-4 ring-[var(--header-bg)] scale-105" 
+                                            : "bg-[var(--card)] text-indigo-500 border border-[var(--border)] shadow-black/5 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 ring-4 ring-[var(--header-bg)] hover:scale-105"
                                     )}>
                                         {item.icon}
                                     </div>
