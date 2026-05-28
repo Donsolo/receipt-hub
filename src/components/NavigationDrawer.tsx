@@ -218,6 +218,43 @@ export default function NavigationDrawer({
                         />
                     </div>
 
+                    {/* Admin CP Context Navigation */}
+                    {pathname?.startsWith('/admin') && (role === 'ADMIN' || role === 'SUPER_ADMIN') && (
+                        <div className="space-y-2.5 mb-8">
+                            <div className="px-1 mb-2 text-[10px] font-bold text-[var(--drawer-text-secondary)] uppercase tracking-widest">Admin Menu</div>
+                            <NavCard 
+                                href="/admin/users"
+                                title="User Management"
+                                subtitle="Manage user accounts"
+                                icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
+                            />
+                            <NavCard 
+                                href="/admin/hero-manager"
+                                title="Global Heros"
+                                subtitle="Manage hero sections"
+                                icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
+                            />
+                            <NavCard 
+                                href="/admin/announcements"
+                                title="Announcements & Popups"
+                                subtitle="System notifications"
+                                icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>}
+                            />
+                            <NavCard 
+                                href="/admin/global-message"
+                                title="Global Messaging"
+                                subtitle="Send platform messages"
+                                icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>}
+                            />
+                            <NavCard 
+                                href="/admin/app-releases"
+                                title="App Releases"
+                                subtitle="Manage version updates"
+                                icon={<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>}
+                            />
+                        </div>
+                    )}
+
                     {/* Secondary Navigation */}
                     <div className="space-y-2.5 mb-8">
                         <div className="px-1 mb-2 text-[10px] font-bold text-[var(--drawer-text-secondary)] uppercase tracking-widest">Settings & Utilities</div>
