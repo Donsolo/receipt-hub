@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: 'Verihub',
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
   }
 };
 
@@ -147,7 +147,7 @@ export default async function RootLayout({
                   
                   var meta = document.createElement('meta');
                   meta.name = 'theme-color';
-                  meta.content = isDark ? '#0B1220' : '#F9FAFB';
+                  meta.content = '#0B1220';
                   document.head.appendChild(meta);
                 } catch (e) {}
               })();

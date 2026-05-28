@@ -38,7 +38,7 @@ export function ThemeProvider({
                 metaThemeColor.setAttribute('name', 'theme-color');
                 document.head.appendChild(metaThemeColor);
             }
-            metaThemeColor.setAttribute('content', isDark ? '#0B1220' : '#F9FAFB');
+            metaThemeColor.setAttribute('content', '#0B1220');
         };
 
         // Apply immediately
