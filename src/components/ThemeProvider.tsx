@@ -22,12 +22,23 @@ export function ThemeProvider({
 
     useEffect(() => {
         const applyTheme = (currentTheme: Theme) => {
+            let isDark = false;
             if (currentTheme === 'system') {
-                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.setAttribute('data-theme', systemPrefersDark ? 'dark' : 'light');
+                isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             } else {
-                document.documentElement.setAttribute('data-theme', currentTheme);
+                isDark = currentTheme === 'dark';
             }
+            
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            
+            // Dynamically update theme-color meta tag for status bar text color logic
+            let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+            if (!metaThemeColor) {
+                metaThemeColor = document.createElement('meta');
+                metaThemeColor.setAttribute('name', 'theme-color');
+                document.head.appendChild(metaThemeColor);
+            }
+            metaThemeColor.setAttribute('content', isDark ? '#0B1220' : '#F9FAFB');
         };
 
         // Apply immediately

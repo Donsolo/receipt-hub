@@ -68,10 +68,6 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F9FAFB' },
-    { media: '(prefers-color-scheme: dark)', color: '#0B1220' },
-  ],
 };
 
 import { verifyToken } from '@/lib/auth';
@@ -123,10 +119,16 @@ export default async function RootLayout({
               (function() {
                 try {
                   var initialTheme = '${initialTheme}';
+                  var isDark = initialTheme === 'dark';
                   if (initialTheme === 'system') {
-                    var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                    isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   }
+                  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                  
+                  var meta = document.createElement('meta');
+                  meta.name = 'theme-color';
+                  meta.content = isDark ? '#0B1220' : '#F9FAFB';
+                  document.head.appendChild(meta);
                 } catch (e) {}
               })();
             `,
