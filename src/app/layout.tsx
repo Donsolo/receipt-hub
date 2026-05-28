@@ -61,10 +61,17 @@ export const metadata: Metadata = {
   }
 };
 
-export const viewport = {
+import { Viewport } from 'next';
+
+export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0B1220',
+  maximumScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F9FAFB' },
+    { media: '(prefers-color-scheme: dark)', color: '#0B1220' },
+  ],
 };
 
 import { verifyToken } from '@/lib/auth';
