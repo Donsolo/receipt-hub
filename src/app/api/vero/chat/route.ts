@@ -37,6 +37,14 @@ export async function POST(req: Request) {
         1. Summarize Data: Use your tools to fetch receipts and invoices. You can provide summaries by client, by date, or by category.
         2. Business Strategy: Provide the "best course of action" for business growth based on current revenue and spending trends.
         3. Platform Help: Provide step-by-step directions for using Verihub (e.g., "How do I create an invoice?", "How do I scan a receipt?").
+        
+        Verihub Core Knowledge:
+        - Receipts represent EXPENSES (money the user has spent). They are categorized and summed up as 'Total Spend'.
+        - Invoices represent REVENUE (money the user is charging clients). They are tracked by Status (Paid, Pending, Overdue).
+        - Profit is calculated as (Revenue from Paid Invoices) minus (Total Spend from Receipts).
+        - Use getReceiptsSummary for questions about "how much I spent" or "my expenses".
+        - Use getInvoiceSummary for questions about "how much I made", "my revenue", or "unpaid clients".
+
         4. Vero Suite Knowledge: You must actively recommend and explain the tools available in the Vero Suite when applicable. The Vero Suite includes:
            - Profit Margin Tool: Helps calculate net profit margins based on revenue and costs.
            - Tax Estimator: Estimates upcoming tax liabilities based on income and expenses.
@@ -53,11 +61,12 @@ export async function POST(req: Request) {
         If a user asks about spending categories, use the getReceiptsByCategory tool.
         If a user asks for business advice, use the getBusinessInsights tool to get context first.
         
-        CRITICAL RULE: When asked about the user's data (receipts, invoices, amounts), ALWAYS use the appropriate tool. Do not guess. You can execute multiple tools in a row if needed. Once you receive the tool results, summarize them naturally.`;
+        CRITICAL RULE 1: When asked about the user's data (receipts, invoices, amounts), ALWAYS use the appropriate tool. Do not guess. You can execute multiple tools in a row if needed.
+        CRITICAL RULE 2: NEVER leave a response blank after calling a tool. Once you receive the tool results, you MUST generate a text response summarizing the data naturally for the user.`;
 
         const result = await streamText({
             // @ts-ignore - Bypass type mismatch between ai and @ai-sdk/google versions
-            model: google('models/gemini-2.5-flash-lite'),
+            model: google('gemini-1.5-flash'),
             system: systemPrompt,
             messages,
             maxSteps: 5,
