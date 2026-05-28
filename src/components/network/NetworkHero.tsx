@@ -22,7 +22,7 @@ export default function NetworkHero({
     const router = useRouter();
 
     return (
-        <div className="relative w-full max-w-5xl mx-auto mt-6 sm:mt-10 mb-8 px-4 sm:px-6" style={{ overflow: 'hidden', contain: 'layout' }}>
+        <div className="relative w-full max-w-5xl mx-auto mt-0 sm:mt-10 mb-8 px-4 sm:px-6" style={{ overflow: 'hidden', contain: 'layout' }}>
             {/* Animated CSS Gradient Background for the Hero Surface */}
             <div className="absolute inset-0 z-0 bg-gradient-to-br from-indigo-900/20 via-[#0B1220] to-purple-900/10 rounded-[32px] blur-3xl opacity-80 animate-pulse pointer-events-none" />
 

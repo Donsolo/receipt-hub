@@ -90,7 +90,7 @@ function NotificationBell() {
             <div
                 style={{ contain: 'layout style', willChange: 'transform' }}
                 className={clsx(
-                    "fixed top-0 left-full z-[101] h-full w-[80vw] sm:w-[360px] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out",
+                    "fixed top-0 left-full z-[101] h-full w-[80vw] sm:w-[360px] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out pt-[env(safe-area-inset-top)]",
                     isOpen ? "-translate-x-full" : "translate-x-0"
                 )}
             >
@@ -319,7 +319,7 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
                 <div
                     style={{ contain: 'layout style', willChange: 'transform' }}
                     className={clsx(
-                        "md:hidden fixed top-0 left-full z-[101] h-full w-[80vw] sm:w-[360px] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out",
+                        "md:hidden fixed top-0 left-full z-[101] h-full w-[80vw] sm:w-[360px] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out pt-[env(safe-area-inset-top)]",
                         isMenuOpen ? "-translate-x-full" : "translate-x-0"
                     )}
                 >
