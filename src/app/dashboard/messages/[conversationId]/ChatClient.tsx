@@ -110,6 +110,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
     const [messageInput, setMessageInput] = useState('');
     const [isTyping, setIsTyping] = useState(false); // Simulated
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -121,6 +122,32 @@ export default function ChatClient({ conversationId }: { conversationId: string 
                 if (data.id) setAuthUserId(data.id);
             })
             .catch(() => { });
+    }, []);
+
+    // Detect keyboard opening via Capacitor events or window resize fallback
+    useEffect(() => {
+        const initialHeight = window.innerHeight;
+        
+        const handleResize = () => {
+            if (initialHeight - window.innerHeight > 150) {
+                setIsKeyboardOpen(true);
+            } else {
+                setIsKeyboardOpen(false);
+            }
+        };
+
+        const handleKeyboardShow = () => setIsKeyboardOpen(true);
+        const handleKeyboardHide = () => setIsKeyboardOpen(false);
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('keyboardWillShow', handleKeyboardShow);
+        window.addEventListener('keyboardWillHide', handleKeyboardHide);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('keyboardWillShow', handleKeyboardShow);
+            window.removeEventListener('keyboardWillHide', handleKeyboardHide);
+        };
     }, []);
 
     // Load Conversation Metadata (via the list API)
@@ -536,7 +563,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
             </div>
 
             {/* RICH DESKTOP INPUT AREA */}
-            <div className="p-4 sm:p-5 pb-6 bg-white dark:bg-[var(--card)] border-t border-gray-200 dark:border-[var(--border)] shrink-0 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.1)] z-20">
+            <div className={`p-4 sm:p-5 ${isKeyboardOpen ? 'pb-4' : 'pb-24 sm:pb-6'} bg-white dark:bg-[var(--card)] border-t border-gray-200 dark:border-[var(--border)] shrink-0 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.1)] z-20 transition-all duration-300`}>
                 <div className="max-w-4xl mx-auto relative">
                     <form
                         onSubmit={handleSendMessage}
