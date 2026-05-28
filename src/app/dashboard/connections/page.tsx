@@ -10,6 +10,7 @@ type UserResult = {
     id: string;
     name: string | null;
     businessName: string | null;
+    businessLogoPath?: string | null;
     email?: string | null; // Only present in email search
 };
 
@@ -19,6 +20,7 @@ type IncomingRequest = {
         id: string;
         name: string | null;
         businessName: string | null;
+        businessLogoPath?: string | null;
         email?: string | null;
     };
 };
@@ -31,6 +33,7 @@ type Connection = {
         id: string;
         name: string | null;
         businessName: string | null;
+        businessLogoPath?: string | null;
         email?: string | null;
     };
 };

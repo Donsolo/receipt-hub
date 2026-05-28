@@ -9,6 +9,7 @@ export interface ConnectionData {
         id: string;
         name: string | null;
         businessName: string | null;
+        businessLogoPath?: string | null;
         email?: string | null;
     };
 }
