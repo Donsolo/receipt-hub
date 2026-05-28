@@ -111,7 +111,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" suppressHydrationWarning data-theme={initialTheme === "system" ? "dark" : initialTheme}>
+    <html lang="en" suppressHydrationWarning data-theme={initialTheme === "system" ? "dark" : initialTheme} className="overflow-x-hidden w-full m-0 p-0">
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -136,7 +136,7 @@ export default async function RootLayout({
         />
       </head>
       <ThemeProvider initialTheme={initialTheme}>
-        <body className={`${inter.className} antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out`}>
+        <body className={`${inter.className} antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out overflow-x-hidden w-full m-0 p-0`}>
           <NativeFetchInterceptor />
           {isAuthenticated ? (
             <NotificationProvider>
