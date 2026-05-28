@@ -51,13 +51,16 @@ export async function POST(req: Request) {
 
         If a user asks about a specific client (e.g. "summary of Maria"), use the searchInvoices tool.
         If a user asks about spending categories, use the getReceiptsByCategory tool.
-        If a user asks for business advice, use the getBusinessInsights tool to get context first.`;
+        If a user asks for business advice, use the getBusinessInsights tool to get context first.
+        
+        CRITICAL RULE: When asked about the user's data (receipts, invoices, amounts), ALWAYS use the appropriate tool. Do not guess. You can execute multiple tools in a row if needed. Once you receive the tool results, summarize them naturally.`;
 
         const result = await streamText({
             // @ts-ignore - Bypass type mismatch between ai and @ai-sdk/google versions
             model: google('models/gemini-2.5-flash-lite'),
             system: systemPrompt,
             messages,
+            maxSteps: 5,
             tools: {
                 getInvoiceSummary: tool({
                     description: 'Get a comprehensive summary of the user\'s invoices, including totals, revenue, unpaid balances, top clients, and overdue details.',
