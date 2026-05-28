@@ -353,7 +353,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-64px)] md:h-[calc(100vh-0px)] bg-[#F7F8FA] dark:bg-[var(--bg)] font-sans">
+        <div className="fixed top-[64px] bottom-0 left-0 right-0 z-10 flex flex-col bg-[#F7F8FA] dark:bg-[var(--bg)] font-sans overflow-hidden">
             {/* STICKY HEADER */}
             <header className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-[var(--card)]/80 backdrop-blur-md border-b border-gray-200 dark:border-[var(--border)] shrink-0">
                 <div className="flex items-center gap-4">
