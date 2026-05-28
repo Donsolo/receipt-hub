@@ -10,6 +10,16 @@ body {
   padding-right: env(safe-area-inset-right);
   width: 100%;
   max-width: 100%;
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbars globally to prevent invisible right gutter */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  background: transparent !important;
 }
 
 :root {
