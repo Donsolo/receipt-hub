@@ -22,7 +22,7 @@ export default function NetworkHero({
     const router = useRouter();
 
     return (
-        <div className="relative w-full max-w-5xl mx-auto mt-6 sm:mt-10 mb-8 px-4 sm:px-6">
+        <div className="relative w-full max-w-5xl mx-auto mt-6 sm:mt-10 mb-8 px-4 sm:px-6" style={{ overflow: 'hidden', contain: 'layout' }}>
             {/* Animated CSS Gradient Background for the Hero Surface */}
             <div className="absolute inset-0 z-0 bg-gradient-to-br from-indigo-900/20 via-[#0B1220] to-purple-900/10 rounded-[32px] blur-3xl opacity-80 animate-pulse pointer-events-none" />
 
@@ -30,7 +30,7 @@ export default function NetworkHero({
             <div className="relative z-10 bg-[var(--card)]/60 backdrop-blur-3xl border border-[var(--border)] rounded-[32px] shadow-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center gap-6 md:gap-10 overflow-hidden">
                 
                 {/* Subtle Inner Mesh Gradient */}
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.08),transparent_50%)] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.08),transparent_50%)] -translate-y-1/2 translate-x-1/4 pointer-events-none overflow-hidden" />
 
                 {/* Left: Identity */}
                 <div className="flex items-center gap-5 w-full md:w-auto flex-1">

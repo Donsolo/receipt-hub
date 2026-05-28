@@ -88,9 +88,10 @@ function NotificationBell() {
 
             {/* Sliding Drawer */}
             <div
+                style={{ contain: 'layout style', willChange: 'transform' }}
                 className={clsx(
-                    "fixed top-0 right-0 z-[101] h-full w-[45vw] sm:w-[360px] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out",
-                    isOpen ? "translate-x-0" : "translate-x-full"
+                    "fixed top-0 left-full z-[101] h-full w-[80vw] sm:w-[360px] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out",
+                    isOpen ? "-translate-x-full" : "translate-x-0"
                 )}
             >
                 {/* Drawer Header */}
@@ -316,9 +317,10 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
             {/* Mobile Menu Drawer */}
             {isAuthenticated && (
                 <div
+                    style={{ contain: 'layout style', willChange: 'transform' }}
                     className={clsx(
-                        "md:hidden fixed top-0 right-0 z-[101] h-full w-[45vw] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out",
-                        isMenuOpen ? "translate-x-0" : "translate-x-full"
+                        "md:hidden fixed top-0 left-full z-[101] h-full w-[80vw] sm:w-[360px] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out",
+                        isMenuOpen ? "-translate-x-full" : "translate-x-0"
                     )}
                 >
                     <div className="flex items-center justify-between px-3 py-4 border-b border-[var(--border)] h-[60px]">
