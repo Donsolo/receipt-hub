@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { DM_Sans, DM_Mono } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import BottomNav from '@/components/BottomNav';
@@ -10,7 +10,8 @@ import NotificationToasts from '@/components/notifications/NotificationToasts';
 
 import { cookies } from 'next/headers';
 
-const inter = Inter({ subsets: ['latin'] });
+const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-dm-sans' });
+const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'], variable: '--font-dm-mono' });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://verihub.app'),
@@ -138,7 +139,7 @@ export default async function RootLayout({
         />
       </head>
       <ThemeProvider initialTheme={initialTheme}>
-        <body className={`${inter.className} antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out overflow-x-hidden w-full m-0 p-0`}>
+        <body className={`${dmSans.variable} ${dmMono.variable} font-sans antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out overflow-x-hidden w-full m-0 p-0`}>
           <NativeFetchInterceptor />
           {isAuthenticated ? (
             <NotificationProvider>

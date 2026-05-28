@@ -1,4 +1,5 @@
 import { useRouter } from 'next/navigation';
+import { IconSearch, IconMessageCircle, IconBuildingCommunity, IconCheck } from '@tabler/icons-react';
 
 interface NetworkHeroProps {
     businessName: string | null;
@@ -7,7 +8,10 @@ interface NetworkHeroProps {
     avatarLetter: string;
     totalConnections: number;
     pendingRequests: number;
+    suggestedCount: number;
     onFindBusinesses: () => void;
+    onPendingClick: () => void;
+    onSuggestedClick: () => void;
 }
 
 export default function NetworkHero({
@@ -17,88 +21,106 @@ export default function NetworkHero({
     avatarLetter,
     totalConnections,
     pendingRequests,
-    onFindBusinesses
+    suggestedCount,
+    onFindBusinesses,
+    onPendingClick,
+    onSuggestedClick
 }: NetworkHeroProps) {
     const router = useRouter();
 
     return (
-        <div className="relative w-full max-w-5xl mx-auto mt-0 sm:mt-10 mb-8 px-4 sm:px-6" style={{ overflow: 'hidden', contain: 'layout' }}>
-            {/* Animated CSS Gradient Background for the Hero Surface */}
-            <div className="absolute inset-0 z-0 bg-gradient-to-br from-indigo-900/20 via-[#0B1220] to-purple-900/10 rounded-[32px] blur-3xl opacity-80 animate-pulse pointer-events-none" />
-
-            {/* Main Floating Surface */}
-            <div className="relative z-10 bg-[var(--card)]/60 backdrop-blur-3xl border border-[var(--border)] rounded-[32px] shadow-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center gap-6 md:gap-10 overflow-hidden">
-                
-                {/* Subtle Inner Mesh Gradient */}
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.08),transparent_50%)] -translate-y-1/2 translate-x-1/4 pointer-events-none overflow-hidden" />
-
-                {/* Left: Identity */}
-                <div className="flex items-center gap-5 w-full md:w-auto flex-1">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-300 flex items-center justify-center font-bold text-3xl sm:text-4xl shadow-inner shrink-0 relative">
+        <div className="relative pt-12 pb-24 px-5 bg-[#0B0F1A] text-white overflow-hidden">
+            {/* Ambient Glows */}
+            <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-[100px] pointer-events-none" style={{ backgroundColor: 'rgba(99,102,241,0.22)' }}></div>
+            <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full blur-[80px] pointer-events-none" style={{ backgroundColor: 'rgba(20,184,166,0.15)' }}></div>
+            
+            {/* Line Grid Overlay */}
+            <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                    backgroundImage: `
+                        linear-gradient(rgba(99,102,241,0.10) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(99,102,241,0.10) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '32px 32px',
+                    animation: 'grid-drift 8s linear infinite'
+                }}
+            ></div>
+            
+            <div className="relative z-10 max-w-5xl mx-auto">
+                {/* Identity Block */}
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="w-[54px] h-[54px] rounded-[14px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden">
                         {businessLogoPath ? (
-                            <img src={businessLogoPath} alt="Business Logo" className="w-full h-full object-cover rounded-full" />
+                            <img src={businessLogoPath} alt="Business Logo" className="w-full h-full object-cover" />
                         ) : (
-                            avatarLetter
+                            <IconBuildingCommunity size={28} className="text-white opacity-90" />
                         )}
-                        {/* Optional Online Glow */}
-                        {!businessLogoPath && <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[var(--card)] shadow-[0_0_8px_rgba(16,185,129,0.8)] z-10" />}
                     </div>
+                    
                     <div className="flex flex-col">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text)] drop-shadow-sm tracking-tight">
-                            {businessName || ownerName || "Your Network"}
-                        </h1>
-                        <p className="text-sm sm:text-base text-[var(--muted)] mt-0.5 font-medium">
-                            {businessName ? ownerName : "Business Network"}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                            <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                                Verified
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-xl font-bold tracking-tight text-white drop-shadow-sm">
+                                {businessName || ownerName || "Your Network"}
+                            </h1>
+                            <div className="flex items-center gap-1 bg-[#10B981]/15 border border-[#10B981]/30 px-2 py-0.5 rounded-full">
+                                <IconCheck size={12} className="text-[#34D399]" stroke={3} />
+                                <span className="text-[10px] font-bold text-[#34D399] uppercase tracking-wider">Verified</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[13px] text-gray-400 font-medium">
+                                {businessName ? ownerName : "Business Network"}
                             </span>
-                            <span className="text-[11px] font-medium text-[var(--muted)]">
-                                • Member since 2026
+                            <span className="w-1 h-1 rounded-full bg-gray-600"></span>
+                            <span className="text-[12px] font-medium text-gray-500">
+                                Member since 2026
                             </span>
                         </div>
                     </div>
                 </div>
 
-                {/* Right: Stats & Actions */}
-                <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                    <div className="flex gap-4 w-full sm:w-auto">
-                        <div className="flex flex-col justify-center">
-                            <span className="text-2xl font-bold text-[var(--text)] tracking-tight">{totalConnections}</span>
-                            <span className="text-[11px] text-[var(--muted)] font-medium mt-0.5">Active</span>
-                        </div>
-                        <div className="w-px h-10 bg-[var(--border)] self-center" />
-                        <div className="flex flex-col justify-center relative">
-                            {pendingRequests > 0 && (
-                                <span className="absolute -top-1 -right-4 flex h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                            )}
-                            <span className="text-2xl font-bold text-[var(--text)] tracking-tight">{pendingRequests}</span>
-                            <span className="text-[11px] text-[var(--muted)] font-medium mt-0.5">Pending</span>
+                {/* Stats Pills */}
+                <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+                    <div className="flex-shrink-0 flex items-center space-x-2 bg-white/5 border border-white/10 rounded-[12px] px-3.5 py-2 backdrop-blur-md">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Active</span>
+                            <span className="text-sm font-bold font-mono">{totalConnections}</span>
                         </div>
                     </div>
+                    <button onClick={onPendingClick} className="flex-shrink-0 flex items-center space-x-2 bg-white/5 hover:bg-white/10 transition-colors border border-white/10 rounded-[12px] px-3.5 py-2 backdrop-blur-md text-left active:scale-95">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Pending</span>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-sm font-bold font-mono">{pendingRequests}</span>
+                                {pendingRequests > 0 && <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />}
+                            </div>
+                        </div>
+                    </button>
+                    <button onClick={onSuggestedClick} className="flex-shrink-0 flex items-center space-x-2 bg-white/5 hover:bg-white/10 transition-colors border border-white/10 rounded-[12px] px-3.5 py-2 backdrop-blur-md text-left active:scale-95">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Suggested</span>
+                            <span className="text-sm font-bold font-mono">{suggestedCount}</span>
+                        </div>
+                    </button>
+                </div>
 
-                    <div className="flex gap-3 w-full sm:w-auto mt-4 md:mt-0 md:ml-4">
-                        <button
-                            onClick={onFindBusinesses}
-                            className="flex-1 sm:flex-none bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-sm font-semibold px-6 py-3 rounded-xl transition-all shadow-sm border border-indigo-500/20 active:scale-95 flex items-center justify-center gap-2"
-                        >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            Discover
-                        </button>
-                        <button
-                            onClick={() => router.push('/dashboard/messages')}
-                            className="flex-1 sm:flex-none bg-white/5 hover:bg-white/10 text-[var(--text)] text-sm font-semibold px-6 py-3 rounded-xl transition-all border border-white/5 active:scale-95 flex items-center justify-center gap-2"
-                        >
-                            <svg className="w-4 h-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                            </svg>
-                            Messages
-                        </button>
-                    </div>
+                {/* Actions Grid */}
+                <div className="grid grid-cols-2 gap-3 mt-5">
+                    <button
+                        onClick={onFindBusinesses}
+                        className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[13px] font-bold px-4 py-3 rounded-xl transition-all active:scale-95"
+                    >
+                        <IconSearch size={16} />
+                        Discover
+                    </button>
+                    <button
+                        onClick={() => router.push('/dashboard/messages')}
+                        className="w-full flex items-center justify-center gap-2 bg-[#5B5FEF] hover:bg-[#4F54E5] text-white text-[13px] font-bold px-4 py-3 rounded-xl transition-all shadow-[0_4px_12px_rgba(91,95,239,0.3)] active:scale-95"
+                    >
+                        <IconMessageCircle size={16} />
+                        Messages
+                    </button>
                 </div>
             </div>
         </div>

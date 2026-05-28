@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
 import { useState, useRef, useEffect } from 'react';
 import VeroAssistant from './vero/VeroAssistant';
+import { IconReceipt, IconFileText, IconSparkles, IconCreditCard, IconUsers } from '@tabler/icons-react';
 
 export default function BottomNav({ isPro }: { isPro?: boolean }) {
     const pathname = usePathname();
@@ -59,49 +60,29 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
         {
             href: '/history',
             label: 'Receipts',
-            icon: (
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-            )
+            icon: <IconReceipt size={24} stroke={1.5} />
         },
         ...(isPro ? [{
             href: '/dashboard/invoices',
             label: 'Invoices',
-            icon: (
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-            )
+            icon: <IconFileText size={24} stroke={1.5} />
         }] : []),
         {
             href: '/dashboard/vero',
             label: isPro ? 'Vero+' : 'Vero',
             isSpecial: true,
-            icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-            )
+            icon: <IconSparkles size={24} stroke={1.5} />
         },
         {
             href: '/dashboard/billing',
             label: 'Billing',
             badge: unpaidCount > 0 ? unpaidCount : undefined,
-            icon: (
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-            )
+            icon: <IconCreditCard size={24} stroke={1.5} />
         },
         {
             href: '/dashboard/connections',
             label: 'Network',
-            icon: (
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-            )
+            icon: <IconUsers size={24} stroke={1.5} />
         }
     ];
 
@@ -161,19 +142,12 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                                     onMouseLeave={() => {
                                         if (pressTimer.current) clearTimeout(pressTimer.current);
                                     }}
-                                    className="flex flex-col items-center justify-center w-full h-full relative -mt-6 z-10"
+                                    className="flex flex-col items-center justify-center relative -mt-[18px] z-10"
                                 >
-                                    <div className={clsx(
-                                        "w-[56px] h-[56px] rounded-full flex items-center justify-center transition-all duration-300 relative",
-                                        isActive 
-                                            ? "bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 ring-[6px] ring-[var(--bg)] scale-110" 
-                                            : "bg-[var(--bg)] text-indigo-400 border border-[var(--border)] shadow-md hover:bg-indigo-500/10 hover:text-indigo-300 ring-[6px] ring-[var(--bg)] hover:scale-105"
-                                    )}>
-                                        {/* Subtle internal glow when active */}
-                                        {isActive && <div className="absolute inset-0 rounded-full bg-white/20 blur-[2px]" />}
-                                        <div className="relative z-10">{item.icon}</div>
+                                    <div className="w-[48px] h-[48px] rounded-[16px] bg-[#5B5FEF] text-white flex items-center justify-center shadow-[0_4px_16px_rgba(91,95,239,0.4)] flex-shrink-0 cursor-pointer">
+                                        {item.icon}
                                     </div>
-                                    <span className={clsx("text-[10px] font-bold mt-2 transition-colors", isActive ? "text-indigo-400" : "text-[var(--muted)]")}>{item.label}</span>
+                                    <span className={clsx("text-[10px] font-bold mt-1 transition-colors", isActive ? "text-[#5B5FEF]" : "text-[var(--muted)]")}>{item.label}</span>
                                 </Link>
                             );
                         }
@@ -184,13 +158,9 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                                 href={item.href}
                                 className={clsx(
                                     "flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-300 relative group",
-                                    isActive ? "text-indigo-400" : "text-[var(--muted)] hover:text-[var(--text)]"
+                                    isActive ? "text-[#5B5FEF]" : "text-[var(--muted)] hover:text-[#5B5FEF]"
                                 )}
                             >
-                                {/* Background Highlight for Active State */}
-                                {isActive && (
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[15px] w-12 h-8 bg-indigo-500/10 dark:bg-white/5 rounded-full pointer-events-none" />
-                                )}
                                 <div className={clsx("transition-transform duration-300 relative z-10", isActive ? "scale-110 -translate-y-1" : "group-hover:scale-105")}>
                                     {item.icon}
                                     {item.badge && (

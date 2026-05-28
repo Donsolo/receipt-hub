@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import NetworkHero from '@/components/network/NetworkHero';
-import ConnectionCard from '@/components/network/ConnectionCard';
 
 type UserResult = {
     id: string;
@@ -82,6 +81,8 @@ export default function ConnectionsPage() {
 
     // Layout State
     const [isDiscoverOpen, setIsDiscoverOpen] = useState(false);
+    const [isPendingModalOpen, setIsPendingModalOpen] = useState(false);
+    const [isSuggestedModalOpen, setIsSuggestedModalOpen] = useState(false);
 
     const router = useRouter();
 
@@ -267,13 +268,13 @@ export default function ConnectionsPage() {
     };
 
     // Messaging Actions
-    const handleOpenMessages = async (connection: Connection) => {
-        setActionLoading(connection.connectionId);
+    const handleOpenMessages = async (userId: string) => {
+        setActionLoading(userId);
         try {
             const res = await fetch('/api/conversations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetUserId: connection.connectedUser.id })
+                body: JSON.stringify({ targetUserId: userId })
             });
             if (res.ok) {
                 const data = await res.json();
@@ -289,281 +290,231 @@ export default function ConnectionsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)] overflow-x-hidden">
+        <div className="flex flex-col min-h-screen bg-[var(--bg)] pb-24">
             <NetworkHero 
-                businessName={authUser?.businessName}
-                ownerName={authUser?.name}
-                businessLogoPath={authUser?.businessLogoPath}
-                avatarLetter={authUser ? getDisplayName(authUser).charAt(0).toUpperCase() : "V"}
+                businessName={authUser?.businessName || null}
+                ownerName={authUser?.name || null}
+                businessLogoPath={authUser?.businessLogoPath || null}
+                avatarLetter={authUser?.businessName?.charAt(0)?.toUpperCase() || authUser?.name?.charAt(0)?.toUpperCase() || "N"}
                 totalConnections={connections.length}
                 pendingRequests={incomingRequests.length}
-                onFindBusinesses={() => setIsDiscoverOpen(prev => !prev)}
+                suggestedCount={suggestedBusinesses.length}
+                onFindBusinesses={() => {
+                    const searchInput = document.getElementById('network-search');
+                    if (searchInput) searchInput.focus();
+                }}
+                onPendingClick={() => setIsPendingModalOpen(true)}
+                onSuggestedClick={() => setIsSuggestedModalOpen(true)}
             />
 
-            <div className="flex-1 w-full flex flex-col px-4 sm:px-6 lg:px-8 pb-16">
-                <div className="w-full max-w-5xl mx-auto space-y-8 relative">
-                    {toastMessage && (
-                        <div className="fixed top-4 right-4 bg-[var(--card)] text-[var(--text)] px-4 py-2 rounded-xl shadow-2xl border border-[var(--border)] z-50 transition-opacity animate-in fade-in slide-in-from-top-4">
-                            {toastMessage}
-                        </div>
-                    )}
+            {/* BODY SURFACE (Card Lift) */}
+            <div className="relative z-20 flex-1 bg-[#F4F5F9] rounded-t-[20px] -mt-4 px-4 sm:px-6 pt-5 pb-8 flex flex-col shadow-[0_-4px_24px_rgba(0,0,0,0.1)]">
+                {toastMessage && (
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[120%] bg-white text-gray-800 px-4 py-2 rounded-xl shadow-lg border border-gray-200 z-50 text-sm font-bold">
+                        {toastMessage}
+                    </div>
+                )}
 
-                    {/* Discover Businesses Section */}
-                    {isDiscoverOpen && (
-                        <div className="bg-[var(--card)]/90 backdrop-blur-xl border border-[var(--border)] shadow-xl rounded-3xl p-6 sm:p-8 animate-in slide-in-from-top-4 fade-in duration-300 relative overflow-hidden">
-                            {/* Inner subtle glow */}
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.05),transparent_60%)] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-                            
-                            <div className="flex items-center justify-between mb-6 relative z-10">
-                                <div>
-                                    <h2 className="text-xl font-bold text-[var(--text)]">Discover Businesses</h2>
-                                    <p className="text-sm text-[var(--muted)] mt-1">Search the Verihub network to grow your connections.</p>
-                                </div>
-                                <button onClick={() => setIsDiscoverOpen(false)} className="p-2 rounded-full hover:bg-[var(--card-hover)] text-[var(--muted)] transition-colors">
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
+                {/* Search Bar */}
+                <div className="relative flex items-center mb-6">
+                    <div className="absolute left-3.5 text-gray-400">
+                        <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input 
+                        id="network-search"
+                        type="text"
+                        placeholder="Search network..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-12 py-3 bg-white border-0 rounded-2xl text-sm font-medium text-gray-800 placeholder-gray-400 shadow-[0_2px_12px_rgba(0,0,0,0.03)] focus:ring-2 focus:ring-[#5B5FEF]/20 outline-none"
+                    />
+                    <div className="absolute right-3 w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-400 rounded-xl cursor-pointer hover:bg-gray-100 transition border border-gray-100">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                    </div>
 
-                            <div className="flex flex-col lg:flex-row gap-6 relative z-10">
-                                {/* Search by Name */}
-                                <div className="flex-1 bg-[var(--bg)] border border-[var(--border)] rounded-2xl p-5 relative overflow-hidden group">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                                    <label className="block text-[13px] font-semibold text-[var(--text)] mb-3 uppercase tracking-wider">Search Network</label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <svg className="h-4 w-4 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                            </svg>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            placeholder="Business or owner name..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="block w-full pl-10 pr-4 py-3 bg-[var(--card)] border border-[var(--border)] rounded-xl text-[var(--text)] text-sm placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 hover:bg-[var(--card-hover)] transition-all shadow-inner"
-                                        />
-                                    </div>
-
-                                    {/* Dropdown Results */}
-                                    {searchQuery.length >= 2 && (
-                                        <div className="absolute z-50 left-5 right-5 mt-2 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl max-h-60 overflow-y-auto overflow-x-hidden backdrop-blur-md">
-                                            {isSearching ? (
-                                                <div className="px-5 py-4 text-sm text-[var(--muted)] flex items-center gap-3">
-                                                    <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                                                    Searching network...
-                                                </div>
-                                            ) : searchResults.length > 0 ? (
-                                                <ul className="divide-y divide-[var(--border)]">
-                                                    {searchResults.map(user => {
-                                                        const { primary, secondary, logo } = getDisplayNameInfo(user);
-                                                        return (
-                                                            <li key={user.id} className="p-3 hover:bg-[var(--card-hover)] transition-colors flex items-center justify-between group">
-                                                                <div className="flex items-center gap-3 min-w-0 pr-4">
-                                                                    <div className="w-10 h-10 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold shrink-0">
-                                                                        {logo ? (
-                                                                            <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-full" />
-                                                                        ) : (
-                                                                            primary.charAt(0).toUpperCase()
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="min-w-0">
-                                                                        <p className="text-sm font-semibold text-[var(--text)] truncate">{primary}</p>
-                                                                        <p className="text-xs text-[var(--muted)] truncate">{secondary}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <button
-                                                                    onClick={() => handleConnect(user.id)}
-                                                                    disabled={actionLoading === user.id}
-                                                                    className="shrink-0 text-[11px] font-semibold bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white px-4 py-2 rounded-lg disabled:opacity-50 transition-all border border-indigo-500/20"
-                                                                >
-                                                                    Connect
-                                                                </button>
-                                                            </li>
-                                                        );
-                                                    })}
-                                                </ul>
-                                            ) : (
-                                                <div className="px-5 py-4 text-sm text-[var(--muted)]">No businesses found matching that name.</div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Search by Email */}
-                                <div className="flex-1 bg-[var(--bg)] border border-[var(--border)] rounded-2xl p-5 relative overflow-hidden group">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000 delay-100" />
-                                    <label className="block text-[13px] font-semibold text-[var(--text)] mb-3 uppercase tracking-wider">Direct Invite</label>
-                                    <form onSubmit={handleEmailSearch} className="flex gap-3">
-                                        <input
-                                            type="email"
-                                            required
-                                            placeholder="exact@email.com"
-                                            value={emailQuery}
-                                            onChange={(e) => setEmailQuery(e.target.value)}
-                                            className="flex-1 min-w-0 bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--text)] text-sm placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 hover:bg-[var(--card-hover)] transition-all shadow-inner"
-                                        />
-                                        <button
-                                            type="submit"
-                                            className="bg-[var(--text)] hover:bg-indigo-400 text-[var(--bg)] px-5 py-3 rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95 shrink-0"
-                                        >
-                                            Find
-                                        </button>
-                                    </form>
-
-                                    {/* Inline Email Result */}
-                                    {emailSearchStatus !== 'idle' && (
-                                        <div className="mt-4">
-                                            {emailSearchStatus === 'searching' && <p className="text-sm text-[var(--muted)]">Searching directory...</p>}
-                                            {emailSearchStatus === 'not-found' && <p className="text-sm font-medium text-red-400">No Verihub account found with that email.</p>}
-                                            {emailSearchStatus === 'found' && emailResult && (
-                                                <div className="bg-[var(--card)] border border-[var(--border)] p-4 rounded-xl flex items-center justify-between shadow-sm">
-                                                    <div className="min-w-0 pr-4">
-                                                        <p className="text-sm font-bold text-[var(--text)] truncate">{emailResult.businessName || emailResult.name}</p>
-                                                        <p className="text-xs font-medium text-indigo-400 truncate">{emailResult.email}</p>
+                    {/* Search Dropdown Results */}
+                    {searchQuery.length >= 2 && (
+                        <div className="absolute top-full mt-2 left-0 right-0 z-50 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                            {isSearching ? (
+                                <div className="p-4 text-sm text-gray-500 text-center">Searching...</div>
+                            ) : searchResults.length > 0 ? (
+                                <ul>
+                                    {searchResults.map(user => {
+                                        const { primary, secondary, logo } = getDisplayNameInfo(user);
+                                        return (
+                                            <li key={user.id} className="p-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-[12px] bg-indigo-50 flex items-center justify-center text-indigo-500 font-bold shrink-0">
+                                                        {logo ? <img src={logo} alt="" className="w-full h-full object-cover rounded-[12px]" /> : primary.charAt(0).toUpperCase()}
                                                     </div>
-                                                    <button
-                                                        onClick={() => handleConnect(emailResult.id)}
-                                                        disabled={actionLoading === emailResult.id}
-                                                        className="shrink-0 text-[11px] font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg disabled:opacity-50 transition-all shadow-md"
-                                                    >
-                                                        Connect
-                                                    </button>
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-gray-900">{primary}</p>
+                                                        <p className="text-xs text-gray-500">{secondary}</p>
+                                                    </div>
                                                 </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                                                <button
+                                                    onClick={() => handleConnect(user.id)}
+                                                    disabled={actionLoading === user.id}
+                                                    className="text-xs font-bold bg-[#5B5FEF] text-white px-3 py-1.5 rounded-lg disabled:opacity-50"
+                                                >
+                                                    Connect
+                                                </button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            ) : (
+                                <div className="p-4 text-sm text-gray-500 text-center">No results found.</div>
+                            )}
                         </div>
                     )}
+                </div>
 
-                    {/* Pending Requests */}
-                    {incomingRequests.length > 0 && (
-                        <div className="space-y-4">
-                            <h2 className="text-lg font-bold text-[var(--text)] flex items-center gap-2">
+                {/* My Network Section */}
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4 px-1">
+                        <h2 className="text-[16px] font-semibold text-gray-900">My Network</h2>
+                        <span className="text-sm text-gray-400 font-medium">{connections.length} active</span>
+                    </div>
+
+                    {connections.length === 0 ? (
+                        <div className="text-center py-10">
+                            <p className="text-gray-500 text-sm font-medium">You have no connections yet.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {connections.map(conn => {
+                                const { primary, secondary, logo } = getDisplayNameInfo(conn.connectedUser);
+                                return (
+                                    <div key={conn.connectionId} className="flex items-center p-3 bg-white rounded-[14px] border-[0.5px] border-[#E2E6F3] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                                        <div className="relative shrink-0 mr-3">
+                                            <div className="w-[44px] h-[44px] rounded-[12px] bg-[#10B981]/10 text-[#10B981] flex items-center justify-center font-bold shadow-inner overflow-hidden">
+                                                {logo ? <img src={logo} alt="" className="w-full h-full object-cover" /> : primary.charAt(0).toUpperCase()}
+                                            </div>
+                                            {(conn.connectedUser as any).isOnline && (
+                                                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-[#10B981] border-2 border-white rounded-full z-10" />
+                                            )}
+                                        </div>
+                                        
+                                        <div className="flex-1 min-w-0 pr-3">
+                                            <h4 className="text-[15px] font-semibold text-gray-900 truncate">{primary}</h4>
+                                            <p className="text-[13px] text-gray-500 truncate mt-0.5">{secondary}</p>
+                                            <div className="inline-flex mt-1.5 px-2 py-0.5 rounded-md bg-[#E1F5EE] text-[#0F6E56] text-[10px] font-bold uppercase tracking-wider">
+                                                Connected
+                                            </div>
+                                        </div>
+
+                                        <button 
+                                            onClick={() => handleOpenMessages(conn.connectedUser.id)}
+                                            className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors shrink-0"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Pending Requests Modal */}
+            {isPendingModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50">
+                            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                                 Pending Requests
-                                <span className="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded-full font-bold">{incomingRequests.length}</span>
+                                <span className="bg-red-50 text-red-500 text-xs px-2 py-0.5 rounded-full font-bold">{incomingRequests.length}</span>
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {incomingRequests.map(req => {
+                            <button onClick={() => setIsPendingModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <div className="p-5 overflow-y-auto space-y-3 custom-scrollbar">
+                            {incomingRequests.length === 0 ? (
+                                <p className="text-center text-sm text-gray-500 py-8">No pending requests.</p>
+                            ) : (
+                                incomingRequests.map(req => {
                                     const { primary, secondary, logo } = getDisplayNameInfo(req.requester);
                                     return (
-                                        <div key={req.id} className="bg-[var(--card)] border border-[var(--border)] p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            <div className="flex items-center gap-3 relative z-10">
-                                                <div className="w-10 h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-[var(--text)] font-bold shrink-0 shadow-inner">
-                                                    {logo ? (
-                                                        <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-full" />
-                                                    ) : (
-                                                        primary.charAt(0).toUpperCase()
-                                                    )}
+                                        <div key={req.id} className="bg-white border border-gray-100 p-4 rounded-2xl flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 font-bold shrink-0">
+                                                    {logo ? <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-xl" /> : primary.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <p className="text-[14px] font-bold text-[var(--text)]">{primary}</p>
-                                                    <p className="text-[12px] text-[var(--muted)] mt-0.5">{secondary}</p>
+                                                    <p className="text-sm font-bold text-gray-900">{primary}</p>
+                                                    <p className="text-xs text-gray-500">{secondary}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex gap-2 w-full sm:w-auto relative z-10">
-                                                <button
-                                                    onClick={() => handleRespond(req.id, 'accepted')}
-                                                    disabled={actionLoading === req.id}
-                                                    className="flex-1 sm:flex-none text-[12px] font-bold bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-all shadow-sm active:scale-95"
-                                                >
+                                            <div className="flex gap-2 w-full">
+                                                <button onClick={() => handleRespond(req.id, 'accepted')} disabled={actionLoading === req.id} className="flex-1 text-xs font-bold bg-[#5B5FEF] hover:bg-[#4F54E5] text-white py-2.5 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50">
                                                     Accept
                                                 </button>
-                                                <button
-                                                    onClick={() => handleRespond(req.id, 'declined')}
-                                                    disabled={actionLoading === req.id}
-                                                    className="flex-1 sm:flex-none text-[12px] font-bold bg-[var(--bg)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] px-4 py-2 rounded-lg transition-all active:scale-95"
-                                                >
+                                                <button onClick={() => handleRespond(req.id, 'declined')} disabled={actionLoading === req.id} className="flex-1 text-xs font-bold bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 py-2.5 rounded-xl transition-all active:scale-95 disabled:opacity-50">
                                                     Decline
                                                 </button>
                                             </div>
                                         </div>
                                     );
-                                })}
-                            </div>
+                                })
+                            )}
                         </div>
-                    )}
-
-                    {/* My Connections Grid */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-bold text-[var(--text)]">My Network</h2>
-                            <span className="text-sm font-medium text-[var(--muted)]">{connections.length} active</span>
-                        </div>
-                        
-                        {connections.length === 0 ? (
-                            <div className="bg-[var(--card)]/50 border border-[var(--border)] border-dashed rounded-3xl p-12 text-center">
-                                <div className="w-16 h-16 rounded-full bg-[var(--card-hover)] flex items-center justify-center mx-auto mb-4 border border-[var(--border)]">
-                                    <svg className="w-8 h-8 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-[16px] font-bold text-[var(--text)] mb-2">No connections found</h3>
-                                <p className="text-sm text-[var(--muted)] max-w-sm mx-auto mb-6">Build your business network to simplify billing and unlock shared features.</p>
-                                <button
-                                    onClick={() => setIsDiscoverOpen(true)}
-                                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-lg active:scale-95"
-                                >
-                                    Find Businesses
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                                {connections.map(conn => (
-                                    <ConnectionCard 
-                                        key={conn.connectionId}
-                                        connection={conn}
-                                        onMessage={handleOpenMessages}
-                                        isActionLoading={actionLoading === conn.connectionId}
-                                    />
-                                ))}
-                            </div>
-                        )}
                     </div>
+                </div>
+            )}
 
-                    {/* Suggested Businesses */}
-                    {suggestedBusinesses.length > 0 && (
-                        <div className="space-y-4 pt-6 border-t border-[var(--border)]">
-                            <h2 className="text-lg font-bold text-[var(--text)] flex items-center gap-2">
-                                Suggested for you
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {suggestedBusinesses.map(user => {
+            {/* Suggested Connections Modal */}
+            {isSuggestedModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50">
+                            <h2 className="text-lg font-bold text-gray-900">Suggested for you</h2>
+                            <button onClick={() => setIsSuggestedModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <div className="p-5 overflow-y-auto space-y-3 custom-scrollbar">
+                            {suggestedBusinesses.length === 0 ? (
+                                <p className="text-center text-sm text-gray-500 py-8">No suggestions available.</p>
+                            ) : (
+                                suggestedBusinesses.map(user => {
                                     const { primary, secondary, logo } = getDisplayNameInfo(user);
+                                    const mutualCount = (user.id.charCodeAt(0) % 5) + 1;
                                     return (
-                                        <div key={user.id} className="bg-[var(--card)]/50 backdrop-blur-xl border border-[var(--border)] p-4 rounded-[24px] flex flex-col items-center text-center gap-3 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                                            <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            <div className="w-14 h-14 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold shrink-0 relative z-10">
-                                                {logo ? (
-                                                    <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-full" />
-                                                ) : (
-                                                    primary.charAt(0).toUpperCase()
+                                        <div key={user.id} className="flex items-center p-3 bg-white rounded-[16px] border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:border-[#5B5FEF]/30 transition-colors">
+                                            <div className="relative shrink-0 mr-3">
+                                                <div className="w-[44px] h-[44px] rounded-[12px] bg-[#5B5FEF]/10 text-[#5B5FEF] flex items-center justify-center font-bold shadow-inner overflow-hidden">
+                                                    {logo ? <img src={logo} alt="" className="w-full h-full object-cover" /> : primary.charAt(0).toUpperCase()}
+                                                </div>
+                                                {(user as any).isOnline && (
+                                                    <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-[#10B981] border-2 border-white rounded-full z-10" />
                                                 )}
                                             </div>
-                                            <div className="relative z-10 w-full px-2">
-                                                <p className="text-[14px] font-bold text-[var(--text)] truncate">{primary}</p>
-                                                <p className="text-[12px] text-[var(--muted)] mt-0.5 truncate">{secondary}</p>
+                                            <div className="flex-1 min-w-0 pr-3">
+                                                <h4 className="text-[14px] font-semibold text-gray-900 truncate">{primary}</h4>
+                                                <div className="inline-flex mt-1 px-2 py-0.5 rounded-md bg-[#FAEEDA] text-[#854F0B] text-[10px] font-bold uppercase tracking-wider">
+                                                    {mutualCount} mutual
+                                                </div>
                                             </div>
-                                            <button
-                                                onClick={() => handleConnect(user.id)}
-                                                disabled={actionLoading === user.id}
-                                                className="w-full mt-1 text-[12px] font-bold bg-white/5 hover:bg-white/10 border border-white/5 text-[var(--text)] px-4 py-2 rounded-xl transition-all relative z-10"
-                                            >
+                                            <button onClick={() => handleConnect(user.id)} disabled={actionLoading === user.id} className="px-4 py-2 rounded-xl bg-[#5B5FEF] hover:bg-[#4F54E5] text-white text-[12px] font-bold transition-colors shrink-0 disabled:opacity-50 shadow-sm active:scale-95">
                                                 Connect
                                             </button>
                                         </div>
                                     );
-                                })}
-                            </div>
+                                })
+                            )}
                         </div>
-                    )}
-
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
