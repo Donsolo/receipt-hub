@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
 import { useNotifications } from '@/context/NotificationContext';
+import NavigationDrawer from './NavigationDrawer';
 
 function formatTimeAgo(dateString: string) {
     const date = new Date(dateString);
@@ -172,7 +173,23 @@ function NotificationBell() {
     );
 }
 
-export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticated: boolean; role?: string; isPro?: boolean }) {
+export default function Navbar({ 
+    isAuthenticated, 
+    role, 
+    isPro,
+    userName = "",
+    businessName = "",
+    businessLogoPath = null,
+    activeInvoicesCount = 0
+}: { 
+    isAuthenticated: boolean; 
+    role?: string; 
+    isPro?: boolean;
+    userName?: string;
+    businessName?: string;
+    businessLogoPath?: string | null;
+    activeInvoicesCount?: number;
+}) {
     const pathname = usePathname();
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -224,7 +241,22 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
         <header className="sticky top-0 w-full flex-shrink-0 bg-[var(--header-bg)] border-b border-[var(--header-border)] z-50 pt-[env(safe-area-inset-top)]">
             <div className="max-w-7xl mx-auto px-[20px]">
                 <div className="flex justify-between h-[60px]">
-                    <div className="flex">
+                    <div className="flex items-center">
+                        {/* Mobile Menu Button - Left Aligned */}
+                        <div className="flex items-center md:hidden mr-3">
+                            {isAuthenticated && (
+                                <button
+                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    className="inline-flex items-center justify-center p-2 rounded-md text-[var(--header-icon)] hover:text-[var(--header-icon-hover)] hover:bg-[var(--header-icon-hover-bg)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-colors -ml-2"
+                                >
+                                    <span className="sr-only">Open main menu</span>
+                                    <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
+
                         <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex-shrink-0 flex items-center group transition-transform duration-200 hover:opacity-90">
                             <img
                                 src="/assets/verihub-logo-icon.png"
@@ -278,132 +310,24 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
 
                         {/* Universal Notification Bell */}
                         {isAuthenticated && <NotificationBell />}
-
-                        {/* Mobile Menu Button */}
-                        <div className="flex items-center md:hidden pl-1 sm:pl-2">
-                            {isAuthenticated && (
-                                <button
-                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                    className="inline-flex items-center justify-center p-2 rounded-md text-[var(--header-icon)] hover:text-[var(--header-icon-hover)] hover:bg-[var(--header-icon-hover-bg)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-colors"
-                                >
-                                    <span className="sr-only">Open main menu</span>
-                                    {!isMenuOpen ? (
-                                        <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                                        </svg>
-                                    ) : (
-                                        <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    )}
-                                </button>
-                            )}
-                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Mobile Menu Backdrop */}
+            {/* Navigation Drawer Component */}
             {isAuthenticated && (
-                <div
-                    className={clsx(
-                        "md:hidden fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm transition-opacity duration-300",
-                        isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-                    )}
-                    onClick={() => setIsMenuOpen(false)}
+                <NavigationDrawer 
+                    isOpen={isMenuOpen}
+                    setIsOpen={setIsMenuOpen}
+                    userName={userName}
+                    businessName={businessName}
+                    businessLogoPath={businessLogoPath}
+                    isPro={!!isPro}
+                    role={role}
+                    activeInvoicesCount={activeInvoicesCount}
+                    handleLogout={handleLogout}
+                    pathname={pathname}
                 />
-            )}
-
-            {/* Mobile Menu Drawer */}
-            {isAuthenticated && (
-                <div
-                    style={{ contain: 'layout style', willChange: 'transform' }}
-                    className={clsx(
-                        "md:hidden fixed top-0 left-full z-[101] h-full w-[80vw] sm:w-[360px] bg-[var(--bg)] shadow-2xl border-l border-[var(--border)] flex flex-col transform transition-transform duration-300 ease-in-out pt-[env(safe-area-inset-top)]",
-                        isMenuOpen ? "-translate-x-full" : "translate-x-0"
-                    )}
-                >
-                    <div className="flex items-center justify-between px-3 py-4 border-b border-[var(--border)] h-[60px]">
-                        <h2 className="text-sm font-semibold text-[var(--text)] truncate">Menu</h2>
-                        <button
-                            onClick={() => setIsMenuOpen(false)}
-                            className="p-1 rounded-md text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] transition-colors"
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto px-2 pt-2 pb-3 space-y-1">
-                        {/* Context-aware Navigation (Only show if in Admin CP) */}
-                        {pathname?.startsWith('/admin') && mobileContextLinks.length > 0 && (
-                            <div className="pb-2 mb-2 border-b border-[var(--border)]">
-                                <div className="px-3 py-1 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Admin Menu</div>
-                                {mobileContextLinks.map((link) => (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        onClick={() => setIsMenuOpen(false)}
-                                        className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
-                                    >
-                                        {link.label}
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Global App Navigation */}
-                        <div className="pb-2">
-                            <div className="px-3 py-1 text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Global Menu</div>
-                            <Link
-                                href="/dashboard"
-                                onClick={() => setIsMenuOpen(false)}
-                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
-                            >
-                                Dashboard
-                            </Link>
-                            <Link
-                                href="/dashboard/billing"
-                                onClick={() => setIsMenuOpen(false)}
-                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
-                            >
-                                Billing Center
-                            </Link>
-                            <Link
-                                href="/dashboard/messages"
-                                onClick={() => setIsMenuOpen(false)}
-                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
-                            >
-                                Messages
-                            </Link>
-                            <Link
-                                href="/dashboard/profile"
-                                onClick={() => setIsMenuOpen(false)}
-                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
-                            >
-                                Profile
-                            </Link>
-                            {role === 'ADMIN' || role === 'SUPER_ADMIN' ? (
-                                <Link
-                                    href="/admin"
-                                    onClick={() => setIsMenuOpen(false)}
-                                    className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-indigo-600/20 text-indigo-400 break-words"
-                                >
-                                    Admin CP
-                                </Link>
-                            ) : null}
-                            <button
-                                onClick={() => {
-                                    setIsMenuOpen(false);
-                                    handleLogout();
-                                }}
-                                className="text-left w-full text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words mt-2 border-t border-[var(--border)] pt-3"
-                            >
-                                Sign Out
-                            </button>
-                        </div>
-                    </div>
-                </div>
             )}
         </header>
     );

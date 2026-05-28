@@ -90,6 +90,10 @@ export default async function RootLayout({
   let isAuthenticated = false;
   let userRole: string | undefined;
   let isPro = false;
+  let userName = "";
+  let businessName = "";
+  let businessLogoPath: string | null = null;
+  let activeInvoicesCount = 0;
 
   let initialTheme: "dark" | "light" | "system" = "dark";
 
@@ -100,15 +104,28 @@ export default async function RootLayout({
       userRole = payload.role as string;
       isPro = (payload.plan === "PRO" && payload.planStatus !== "inactive") || payload.role === "ADMIN" || payload.role === "SUPER_ADMIN";
 
-      // Extract theme from DB
+      // Extract theme and metadata from DB
       const dbUser = await db.user.findUnique({
         where: { id: payload.userId as string },
-        select: { theme: true }
+        select: { theme: true, name: true, businessName: true, businessLogoPath: true }
       });
-      if (dbUser?.theme === "light") {
-        initialTheme = "light";
-      } else if (dbUser?.theme === "system") {
-        initialTheme = "system";
+      if (dbUser) {
+        userName = dbUser.name || "";
+        businessName = dbUser.businessName || "";
+        businessLogoPath = dbUser.businessLogoPath;
+        if (dbUser.theme === "light") {
+          initialTheme = "light";
+        } else if (dbUser.theme === "system") {
+          initialTheme = "system";
+        }
+      }
+
+      if (isPro) {
+        const invoices = await db.invoice.findMany({
+          where: { userId: payload.userId as string, status: { not: 'PAID' } },
+          select: { id: true }
+        });
+        activeInvoicesCount = invoices.length;
       }
     }
   }
@@ -163,7 +180,7 @@ export default async function RootLayout({
                   }}
                 />
                 <NotificationToasts />
-                <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} />
+                <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} userName={userName} businessName={businessName} businessLogoPath={businessLogoPath} activeInvoicesCount={activeInvoicesCount} />
                 <div className="flex-1 flex flex-col w-full relative">
                   <main className="flex-grow w-full flex flex-col relative">
                     <PullToRefreshWrapper>
@@ -197,7 +214,7 @@ export default async function RootLayout({
                   }),
                 }}
               />
-              <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} />
+              <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} userName={userName} businessName={businessName} businessLogoPath={businessLogoPath} activeInvoicesCount={activeInvoicesCount} />
               <div className="flex-1 flex flex-col w-full relative">
                 <main className="flex-grow w-full flex flex-col relative">
                   <PullToRefreshWrapper>

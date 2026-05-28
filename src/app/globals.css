@@ -57,8 +57,32 @@ body {
   --header-border: var(--border);
   --header-text: var(--text);
   --header-icon: var(--muted);
-  --header-icon-hover: var(--text);
   --header-icon-hover-bg: var(--card-hover);
+
+  /* Drawer Tokens (Dark) */
+  --drawer-bg: rgba(11, 15, 26, 0.95);
+  --drawer-border: rgba(255, 255, 255, 0.1);
+  --drawer-text-primary: #FFFFFF;
+  --drawer-text-secondary: #9CA3AF;
+  --drawer-badge-pro-bg: rgba(234, 179, 8, 0.2);
+  --drawer-badge-pro-text: #EAB308;
+  --drawer-badge-std-bg: rgba(255, 255, 255, 0.1);
+  --drawer-badge-std-text: #D1D5DB;
+  --drawer-card-bg: rgba(255, 255, 255, 0.05);
+  --drawer-card-hover: rgba(255, 255, 255, 0.1);
+  --drawer-card-border: transparent;
+  --drawer-card-border-hover: rgba(255, 255, 255, 0.1);
+  --drawer-icon-bg: rgba(255, 255, 255, 0.05);
+  --drawer-icon-text: #9CA3AF;
+  --drawer-icon-bg-active: rgba(99, 102, 241, 0.3);
+  --drawer-icon-text-active: #A5B4FC;
+  --drawer-footer-bg: rgba(255, 255, 255, 0.02);
+  --drawer-footer-border: rgba(255, 255, 255, 0.1);
+  --drawer-vero-gradient-from: rgba(99, 102, 241, 0.1);
+  --drawer-vero-gradient-to: rgba(168, 85, 247, 0.1);
+  --drawer-vero-border: rgba(99, 102, 241, 0.2);
+  --drawer-shadow: 10px 0 40px rgba(0, 0, 0, 0.5);
+  --drawer-backdrop: rgba(0, 0, 0, 0.6);
 }
 
 [data-theme="light"] {
@@ -78,6 +102,31 @@ body {
   --header-icon: #9CA3AF;
   --header-icon-hover: #F9FAFB;
   --header-icon-hover-bg: #182338;
+
+  /* Drawer Tokens (Light) */
+  --drawer-bg: rgba(255, 255, 255, 0.95);
+  --drawer-border: #E5E7EB;
+  --drawer-text-primary: #111827;
+  --drawer-text-secondary: #6B7280;
+  --drawer-badge-pro-bg: rgba(234, 179, 8, 0.15);
+  --drawer-badge-pro-text: #CA8A04;
+  --drawer-badge-std-bg: #F3F4F6;
+  --drawer-badge-std-text: #4B5563;
+  --drawer-card-bg: #F7F9FC;
+  --drawer-card-hover: #EEF2FF;
+  --drawer-card-border: #E5E7EB;
+  --drawer-card-border-hover: #C7D2FE;
+  --drawer-icon-bg: #FFFFFF;
+  --drawer-icon-text: #6B7280;
+  --drawer-icon-bg-active: rgba(79, 70, 229, 0.15);
+  --drawer-icon-text-active: #4F46E5;
+  --drawer-footer-bg: #F9FAFB;
+  --drawer-footer-border: #E5E7EB;
+  --drawer-vero-gradient-from: rgba(99, 102, 241, 0.05);
+  --drawer-vero-gradient-to: rgba(168, 85, 247, 0.05);
+  --drawer-vero-border: rgba(99, 102, 241, 0.15);
+  --drawer-shadow: 10px 0 40px rgba(0, 0, 0, 0.08);
+  --drawer-backdrop: rgba(0, 0, 0, 0.2);
 }
 
 @media print {
