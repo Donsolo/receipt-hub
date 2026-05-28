@@ -368,6 +368,13 @@ export default function Navbar({ isAuthenticated, role, isPro }: { isAuthenticat
                                 Billing Center
                             </Link>
                             <Link
+                                href="/dashboard/messages"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"
+                            >
+                                Messages
+                            </Link>
+                            <Link
                                 href="/dashboard/profile"
                                 onClick={() => setIsMenuOpen(false)}
                                 className="text-[var(--text)] hover:text-[var(--text)] block px-3 py-2.5 rounded-md text-sm sm:text-base font-medium hover:bg-[var(--card)] break-words"

@@ -24,10 +24,10 @@ export async function GET(request: Request) {
             },
             include: {
                 requester: {
-                    select: { id: true, name: true, businessName: true, email: true }
+                    select: { id: true, name: true, businessName: true, businessLogoPath: true, email: true }
                 },
                 receiver: {
-                    select: { id: true, name: true, businessName: true, email: true }
+                    select: { id: true, name: true, businessName: true, businessLogoPath: true, email: true }
                 }
             },
             orderBy: {
@@ -47,6 +47,7 @@ export async function GET(request: Request) {
                     id: peer.id,
                     name: peer.name,
                     businessName: peer.businessName,
+                    businessLogoPath: peer.businessLogoPath,
                     email: peer.email
                 }
             };

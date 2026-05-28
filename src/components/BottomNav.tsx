@@ -111,10 +111,12 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
             <div className="h-24 md:hidden w-full flex-shrink-0" />
 
             <div className={clsx(
-                "md:hidden fixed bottom-4 left-4 right-4 z-50 pb-safe pointer-events-none transition-transform duration-300",
+                "md:hidden fixed bottom-5 left-5 right-5 z-50 pb-safe pointer-events-none transition-transform duration-300",
                 isKeyboardOpen ? "translate-y-[150%] opacity-0" : "translate-y-0 opacity-100"
             )}>
-                <div className="bg-[var(--header-bg)]/90 backdrop-blur-xl border border-[var(--border)]/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-2xl flex items-center justify-around h-16 px-2 pointer-events-auto">
+                {/* Outer Glow */}
+                <div className="absolute inset-0 bg-indigo-500/5 blur-2xl rounded-full" />
+                <div className="relative bg-[var(--card)]/70 dark:bg-[#0B1220]/60 backdrop-blur-3xl border border-[var(--border)] shadow-2xl shadow-black/50 rounded-[32px] flex items-center justify-around h-[72px] px-2 pointer-events-auto overflow-visible">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                         
@@ -162,14 +164,16 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                                     className="flex flex-col items-center justify-center w-full h-full relative -mt-6 z-10"
                                 >
                                     <div className={clsx(
-                                        "w-12 h-12 rounded-full flex items-center justify-center shadow-xl transition-all duration-300",
+                                        "w-[56px] h-[56px] rounded-full flex items-center justify-center transition-all duration-300 relative",
                                         isActive 
-                                            ? "bg-indigo-600 text-white shadow-indigo-500/40 ring-4 ring-[var(--header-bg)] scale-105" 
-                                            : "bg-[var(--card)] text-indigo-500 border border-[var(--border)] shadow-black/5 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 ring-4 ring-[var(--header-bg)] hover:scale-105"
+                                            ? "bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 ring-[6px] ring-[var(--bg)] scale-110" 
+                                            : "bg-[var(--bg)] text-indigo-400 border border-[var(--border)] shadow-md hover:bg-indigo-500/10 hover:text-indigo-300 ring-[6px] ring-[var(--bg)] hover:scale-105"
                                     )}>
-                                        {item.icon}
+                                        {/* Subtle internal glow when active */}
+                                        {isActive && <div className="absolute inset-0 rounded-full bg-white/20 blur-[2px]" />}
+                                        <div className="relative z-10">{item.icon}</div>
                                     </div>
-                                    <span className={clsx("text-[10px] font-bold mt-1.5 transition-colors", isActive ? "text-indigo-500" : "text-[var(--header-icon)] hover:text-[var(--header-icon-hover)]")}>{item.label}</span>
+                                    <span className={clsx("text-[10px] font-bold mt-2 transition-colors", isActive ? "text-indigo-400" : "text-[var(--muted)]")}>{item.label}</span>
                                 </Link>
                             );
                         }
@@ -179,19 +183,23 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
                                 key={item.href}
                                 href={item.href}
                                 className={clsx(
-                                    "flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 relative",
-                                    isActive ? "text-indigo-500" : "text-[var(--header-icon)] hover:text-[var(--header-icon-hover)]"
+                                    "flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-300 relative group",
+                                    isActive ? "text-indigo-400" : "text-[var(--muted)] hover:text-[var(--text)]"
                                 )}
                             >
-                                <div className={clsx("transition-transform duration-300 relative", isActive ? "scale-110 -translate-y-0.5" : "")}>
+                                {/* Background Highlight for Active State */}
+                                {isActive && (
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[15px] w-12 h-8 bg-indigo-500/10 dark:bg-white/5 rounded-full pointer-events-none" />
+                                )}
+                                <div className={clsx("transition-transform duration-300 relative z-10", isActive ? "scale-110 -translate-y-1" : "group-hover:scale-105")}>
                                     {item.icon}
                                     {item.badge && (
-                                        <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-[var(--header-bg)]">
+                                        <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-[var(--card)] shadow-md">
                                             {item.badge}
                                         </span>
                                     )}
                                 </div>
-                                <span className={clsx("text-[10px] transition-all duration-300", isActive ? "font-semibold" : "font-medium")}>
+                                <span className={clsx("text-[10px] transition-all duration-300 z-10", isActive ? "font-bold" : "font-medium")}>
                                     {item.label}
                                 </span>
                             </Link>

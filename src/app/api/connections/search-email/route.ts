@@ -40,6 +40,7 @@ export async function GET(request: Request) {
                 id: true,
                 name: true,
                 businessName: true,
+                businessLogoPath: true,
                 email: true, // Email is returned here as per requirements since it's an exact email search
             }
         });

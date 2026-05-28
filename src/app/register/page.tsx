@@ -138,6 +138,16 @@ function RegisterForm() {
                                         )}
                                     </button>
                                 </div>
+                                <div>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-3 text-[var(--text)] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                                        placeholder="Business Name (Required)"
+                                        value={businessName}
+                                        onChange={(e) => setBusinessName(e.target.value)}
+                                    />
+                                </div>
                             </div>
 
                             {/* Optional Fields Container */}
@@ -151,15 +161,6 @@ function RegisterForm() {
                                             placeholder="Full Name (Optional)"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <input
-                                            type="text"
-                                            className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-3 text-[var(--text)] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-                                            placeholder="Business Name (Optional)"
-                                            value={businessName}
-                                            onChange={(e) => setBusinessName(e.target.value)}
                                         />
                                     </div>
                                 </div>

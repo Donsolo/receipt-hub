@@ -9,8 +9,8 @@ export async function POST(request: Request) {
         const body = await request.json();
         let { email, password, name, businessName } = body;
 
-        if (!email || !password) {
-            return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
+        if (!email || !password || !businessName) {
+            return NextResponse.json({ error: 'Email, password, and business name are required' }, { status: 400 });
         }
 
         email = email.toLowerCase();

@@ -330,9 +330,9 @@ export default function ChatClient({ conversationId }: { conversationId: string 
             {/* STICKY HEADER */}
             <header className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-[var(--card)]/80 backdrop-blur-md border-b border-gray-200 dark:border-[var(--border)] shrink-0">
                 <div className="flex items-center gap-4">
-                    <Link href="/dashboard/messages" className="p-2 -ml-2 text-gray-500 hover:text-gray-700 dark:text-[var(--muted)] dark:hover:text-[var(--text)] transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-[var(--card-hover)] lg:hidden">
+                    <button onClick={() => router.back()} className="p-2 -ml-2 text-gray-500 hover:text-gray-700 dark:text-[var(--muted)] dark:hover:text-[var(--text)] transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-[var(--card-hover)] lg:hidden">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                    </Link>
+                    </button>
 
                     {isLoading || !otherParticipant ? (
                         <div className="flex items-center gap-3 animate-pulse">
