@@ -5,35 +5,83 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications, ActionPerformed, PushNotificationSchema, Token } from '@capacitor/push-notifications';
 import { useRouter } from 'next/navigation';
 
+function urlB64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
 export function usePushNotifications() {
     const [token, setToken] = useState<string | null>(null);
     const router = useRouter();
 
-    const registerPushToken = async (hardwareToken: string) => {
+    const registerPushToken = async (hardwareToken: string, platformType: string) => {
         try {
             await fetch('/api/user/push-tokens', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     token: hardwareToken,
-                    platform: Capacitor.getPlatform(),
+                    platform: platformType,
                 }),
             });
-            console.log('Successfully registered Push Token with Verihub backend.');
+            console.log(`Successfully registered Push Token (${platformType}) with Verihub backend.`);
         } catch (error) {
-            console.error('Failed to sync native push token to backend:', error);
+            console.error('Failed to sync push token to backend:', error);
         }
     };
 
     const requestPermissions = useCallback(async () => {
-        if (!Capacitor.isNativePlatform()) return false;
+        if (Capacitor.isNativePlatform()) {
+            const { receive } = await PushNotifications.requestPermissions();
+            if (receive === 'granted') {
+                await PushNotifications.register();
+                return true;
+            }
+            return false;
+        } else {
+            // WEB PUSH LOGIC (PWA)
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                console.warn('Web Push not supported in this browser.');
+                return false;
+            }
+            
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') return false;
 
-        const { receive } = await PushNotifications.requestPermissions();
-        if (receive === 'granted') {
-            await PushNotifications.register();
-            return true;
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                await navigator.serviceWorker.ready;
+                
+                const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+                if (!vapidPublicKey) {
+                    console.error('VAPID public key not found.');
+                    return false;
+                }
+
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlB64ToUint8Array(vapidPublicKey)
+                });
+                
+                const tokenStr = JSON.stringify(subscription);
+                setToken(tokenStr);
+                await registerPushToken(tokenStr, 'web');
+                return true;
+            } catch (error) {
+                console.error('Failed to subscribe to Web Push:', error);
+                return false;
+            }
         }
-        return false;
     }, []);
 
     useEffect(() => {
@@ -56,7 +104,7 @@ export function usePushNotifications() {
             PushNotifications.addListener('registration', (token: Token) => {
                 if (isMounted) {
                     setToken(token.value);
-                    registerPushToken(token.value);
+                    registerPushToken(token.value, Capacitor.getPlatform());
                 }
             });
 
@@ -67,7 +115,6 @@ export function usePushNotifications() {
             // When a notification is received in the foreground
             PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
                 console.log('Push notification received: ', notification);
-                // Optionally dispatch localized toast or UI update here
             });
 
             // When a user taps on a notification from the OS drawer

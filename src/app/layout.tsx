@@ -161,7 +161,7 @@ export default async function RootLayout({
           <NativeFetchInterceptor />
           {isAuthenticated ? (
             <NotificationProvider>
-              <div className="flex flex-col min-h-screen relative" style={{ width: '100dvw', maxWidth: '100dvw', overflowX: 'clip' }}>
+              <div className="flex flex-col min-h-screen relative" style={{ width: '100dvw', maxWidth: '100dvw' }}>
                 <script
                   type="application/ld+json"
                   dangerouslySetInnerHTML={{
@@ -197,7 +197,7 @@ export default async function RootLayout({
               </div>
             </NotificationProvider>
           ) : (
-            <div className="flex flex-col min-h-screen relative" style={{ width: '100dvw', maxWidth: '100dvw', overflowX: 'clip' }}>
+            <div className="flex flex-col min-h-screen relative" style={{ width: '100dvw', maxWidth: '100dvw' }}>
               <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
