@@ -4,11 +4,8 @@ import { db } from '@/lib/db';
 import Link from 'next/link';
 import { format, formatDistanceToNow } from 'date-fns';
 import { clsx } from 'clsx';
-import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import InvoiceActions from '@/components/invoices/InvoiceActions';
-import HeroSection from '@/components/ui/HeroSection';
-import CompactStatsGrid from '@/components/invoices/CompactStatsGrid';
-import MobileFilterBar from '@/components/invoices/MobileFilterBar';
+import { IconFileInvoice, IconClock, IconDotsVertical } from '@tabler/icons-react';
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +31,10 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
 
         return (
             <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)] relative">
-                <HeroSection pageKey="receipts" />
+                {/* Minimal hero block for Unauthorized State */}
+                <div className="relative bg-[#0B0F1A] w-full px-4 pt-8 pb-32">
+                     <div className="absolute inset-0 z-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(99,102,241,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.10) 1px, transparent 1px)', backgroundSize: '32px 32px', animation: 'grid-drift 8s linear infinite' }} />
+                </div>
                 
                 {/* Modal Overlay Background */}
                 <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
@@ -75,7 +75,7 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
     }
 
     let invoices: any[] = [];
-    let stats = { total: 0, sent: 0, viewed: 0, overdue: 0 };
+    let stats = { total: 0, sent: 0, viewed: 0, overdue: 0, totalAmount: 0, sentAmount: 0, viewedAmount: 0, overdueAmount: 0 };
     let fetchError: string | null = null;
     try {
         const allInvoices = await db.invoice.findMany({
@@ -89,9 +89,10 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
             
             // Increment Stats
             stats.total++;
-            if (inv.status === 'SENT') stats.sent++;
-            if (inv.status === 'VIEWED') stats.viewed++;
-            if (inv.status !== 'PAID' && inv.dueDate && inv.dueDate < now) stats.overdue++;
+            stats.totalAmount += inv.total;
+            if (inv.status === 'SENT') { stats.sent++; stats.sentAmount += inv.total; }
+            if (inv.status === 'VIEWED') { stats.viewed++; stats.viewedAmount += inv.total; }
+            if (inv.status !== 'PAID' && inv.dueDate && inv.dueDate < now) { stats.overdue++; stats.overdueAmount += inv.total; }
 
             return {
                 ...inv,
@@ -118,136 +119,199 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
         fetchError = e?.message || String(e) || 'Unknown Database Error';
     }
 
-    return (
-        <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)]">
-            <HeroSection pageKey="receipts" compact={true} />
-            
-            <div className="flex-1 w-full flex flex-col items-center px-4 sm:px-6 lg:px-8 py-8">
-                <div className="w-full max-w-6xl space-y-6 relative">
-                
-                <PageHeaderCard
-                    title="Invoices"
-                    description="Create, manage, and track your business billing."
-                >
-                    <Link href="/dashboard/invoices/create" className="inline-flex items-center justify-center px-4 py-2 mt-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-sm transition-all shadow-md shadow-blue-500/20 gap-2">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                        New Invoice
-                    </Link>
-                </PageHeaderCard>
+    const currentTotalSum = invoices.reduce((sum, inv) => sum + inv.total, 0);
+    const currentCount = invoices.length;
 
-                {fetchError ? (
-                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 flex flex-col items-start shadow-sm">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center text-red-500 shrink-0">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                            </div>
-                            <h2 className="text-xl font-bold text-red-500">Database Synchronization Error</h2>
+    return (
+        <div className="min-h-screen bg-[#F4F5F9] dark:bg-[var(--bg)] flex flex-col font-sans text-[var(--text)] overflow-hidden">
+            
+            {/* HERO SECTION */}
+            <div className="relative bg-[#0B0F1A] w-full px-4 sm:px-6 pt-12 pb-12 overflow-hidden shrink-0">
+                {/* Grid Overlay */}
+                <div 
+                    className="absolute inset-0 z-0 pointer-events-none"
+                    style={{
+                        backgroundImage: 'linear-gradient(rgba(99,102,241,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.10) 1px, transparent 1px)',
+                        backgroundSize: '32px 32px',
+                        animation: 'grid-drift 8s linear infinite'
+                    }}
+                />
+                
+                {/* Glows */}
+                <div className="absolute top-0 left-0 w-96 h-96 bg-[#6366F1] rounded-full blur-[100px] opacity-24 z-0 pointer-events-none" />
+                <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#FB923C] rounded-full blur-[80px] opacity-12 z-0 pointer-events-none" />
+
+                <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col pt-[env(safe-area-inset-top)]">
+                    <div className="flex justify-between items-start mb-6">
+                        <div>
+                            <h1 className="text-3xl font-black text-white tracking-tight">Invoices</h1>
+                            <p className="text-sm font-medium text-indigo-200/70 mt-1">Create, manage & track billing</p>
                         </div>
-                        <p className="text-[var(--text)] text-sm mb-4">
-                            The server failed to securely retrieve your invoice data. This is typically caused by a pending Prisma schema migration on the deployment environment.
-                        </p>
-                        <div className="w-full bg-black/40 dark:bg-black/80 rounded-xl p-4 overflow-auto border border-red-500/20">
-                            <pre className="text-xs text-red-300 font-mono whitespace-pre-wrap">{fetchError}</pre>
-                        </div>
-                    </div>
-                ) : stats.total === 0 ? (
-                    <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-12 flex flex-col items-center justify-center text-center shadow-sm">
-                        <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mb-6 border border-blue-500/20">
-                            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        </div>
-                        <h2 className="text-xl font-bold text-[var(--text)] mb-2">Create your first invoice</h2>
-                        <p className="text-[var(--muted)] text-sm max-w-sm mb-8">
-                            Generate professional, audit-ready invoices and automatically convert them into trackable receipts when paid.
-                        </p>
-                        <Link href="/dashboard/invoices/create" className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                            Get Started
+                        <Link href="/dashboard/invoices/create" className="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-500/20 whitespace-nowrap">
+                            New Invoice
                         </Link>
                     </div>
-                ) : (
-                    <div className="space-y-6">
-                        {/* Metrics Row (Collapsible) */}
-                        <CompactStatsGrid stats={stats} />
 
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <MobileFilterBar filterParam={filterParam} />
-                            
-                            {/* Sort Toggle */}
-                            <div className="flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] rounded-xl p-1 shrink-0 mt-2 sm:mt-0">
-                                <Link href={`/dashboard/invoices?filter=${filterParam}&sort=newest`} className={clsx("px-3 py-1.5 text-xs font-bold rounded-lg transition-colors", sortParam === 'newest' ? "bg-gray-100 dark:bg-white/10 text-[var(--text)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--text)]")}>Newest</Link>
-                                <Link href={`/dashboard/invoices?filter=${filterParam}&sort=activity`} className={clsx("px-3 py-1.5 text-xs font-bold rounded-lg transition-colors", sortParam === 'activity' ? "bg-gray-100 dark:bg-white/10 text-[var(--text)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--text)]")}>Last Activity</Link>
-                            </div>
+                    {/* Stat Pills */}
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 backdrop-blur-md flex flex-col">
+                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-0.5">Total</span>
+                            <span className="font-mono text-[#E8ECFF] font-semibold">${stats.totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         </div>
-                    <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden hidden md:block">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse min-w-[800px]">
-                                <thead>
-                                    <tr className="border-b border-[var(--border)] bg-black/5 dark:bg-white/5">
-                                        <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Title & Client</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Issue Date</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider text-right">Views</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider text-right">Total</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-[var(--muted)] uppercase tracking-wider text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-[var(--border)]">
-                                    {invoices.map((inv) => (
-                                        <tr key={inv.id} className="hover:bg-[var(--card-hover)] transition-colors group">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex flex-col items-start">
-                                                    {inv.status === 'PAID' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">PAID</span>}
-                                                    {inv.status === 'DRAFT' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--muted)]/10 text-[var(--muted)] border border-[var(--border)]">DRAFT</span>}
-                                                    {inv.status === 'SENT' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20">SENT</span>}
-                                                    {inv.status === 'VIEWED' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-500 border border-purple-500/20">VIEWED</span>}
-                                                    {inv.status === 'CANCELLED' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500 border border-red-500/20">CANCELLED</span>}
-                                                    
-                                                    {/* Smart Status Hints */}
-                                                    {inv.status === 'SENT' && inv.viewCount === 0 && inv.sentAt && (Date.now() - new Date(inv.sentAt).getTime() > 24 * 60 * 60 * 1000) && (
-                                                        <div className="text-[10px] text-red-500/80 font-medium mt-1.5 flex items-center gap-1">
-                                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                                            Not yet viewed
-                                                        </div>
-                                                    )}
-                                                    {inv.status === 'VIEWED' && (
-                                                        <div className="text-[10px] text-purple-600/80 dark:text-purple-400/80 font-medium mt-1.5">
-                                                            Client has viewed this invoice
-                                                        </div>
-                                                    )}
+                        <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 backdrop-blur-md flex flex-col">
+                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-0.5">Sent</span>
+                            <span className="font-mono text-[#34D399] font-semibold">${stats.sentAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 backdrop-blur-md flex flex-col">
+                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-0.5">Viewed</span>
+                            <span className="font-mono text-[#FBBF24] font-semibold">${stats.viewedAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 backdrop-blur-md flex flex-col">
+                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-0.5">Overdue</span>
+                            <span className="font-mono text-[#F87171] font-semibold">${stats.overdueAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* BODY SURFACE */}
+            <div className="relative z-10 flex-1 w-full bg-[#F4F5F9] dark:bg-[var(--bg)] rounded-t-[20px] -mt-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] flex flex-col pb-24">
+                
+                {/* Filter Chips */}
+                <div className="w-full overflow-x-auto whitespace-nowrap hide-scrollbar px-4 sm:px-6 pt-6 pb-3">
+                    <div className="flex items-center gap-2 max-w-2xl mx-auto">
+                        {['All', 'Draft', 'Sent', 'Viewed', 'Paid', 'Overdue'].map(f => {
+                            const val = f.toLowerCase();
+                            const isActive = filterParam === val;
+                            return (
+                                <Link 
+                                    key={f}
+                                    href={`/dashboard/invoices?filter=${val}&sort=${sortParam}`}
+                                    className={clsx(
+                                        "px-4 py-2 rounded-full text-sm font-bold transition-all border",
+                                        isActive 
+                                            ? "bg-[#1E2248] border-[#1E2248] text-white shadow-md dark:bg-indigo-500 dark:border-indigo-500"
+                                            : "bg-white dark:bg-[var(--card)] border-[#E2E6F3] dark:border-[var(--border)] text-[#6B7280] dark:text-[var(--muted)] hover:bg-gray-50 dark:hover:bg-[var(--card-hover)]"
+                                    )}
+                                >
+                                    {f}
+                                </Link>
+                            )
+                        })}
+                    </div>
+                </div>
+
+                {/* Sort Row */}
+                <div className="w-full px-4 sm:px-6 pb-4">
+                    <div className="flex items-center gap-2 max-w-2xl mx-auto">
+                        <Link 
+                            href={`/dashboard/invoices?filter=${filterParam}&sort=newest`} 
+                            className={clsx(
+                                "px-3 py-1.5 text-xs font-bold rounded-lg transition-colors border", 
+                                sortParam === 'newest' 
+                                    ? "bg-[#F0F1FA] text-[#3B3F6E] border-[#C4C8E8] dark:bg-indigo-900/30 dark:text-indigo-200 dark:border-indigo-500/30" 
+                                    : "bg-transparent border-transparent text-[#6B7280] dark:text-[var(--muted)] hover:bg-gray-100 dark:hover:bg-[var(--card)]"
+                            )}
+                        >
+                            Newest
+                        </Link>
+                        <Link 
+                            href={`/dashboard/invoices?filter=${filterParam}&sort=activity`} 
+                            className={clsx(
+                                "px-3 py-1.5 text-xs font-bold rounded-lg transition-colors border", 
+                                sortParam === 'activity' 
+                                    ? "bg-[#F0F1FA] text-[#3B3F6E] border-[#C4C8E8] dark:bg-indigo-900/30 dark:text-indigo-200 dark:border-indigo-500/30" 
+                                    : "bg-transparent border-transparent text-[#6B7280] dark:text-[var(--muted)] hover:bg-gray-100 dark:hover:bg-[var(--card)]"
+                            )}
+                        >
+                            Last Activity
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Section Header */}
+                <div className="w-full px-4 sm:px-6 pb-4">
+                    <div className="flex justify-between items-end max-w-2xl mx-auto border-b border-[#E2E6F3] dark:border-[var(--border)] pb-2">
+                        <h2 className="text-base font-bold text-[#111827] dark:text-white">All Invoices</h2>
+                        <div className="text-xs font-medium text-[#6B7280] dark:text-[var(--muted)]">
+                            {currentCount} {currentCount === 1 ? 'invoice' : 'invoices'} &middot; ${currentTotalSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Invoice Cards */}
+                <div className="w-full px-4 sm:px-6 flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="max-w-2xl mx-auto flex flex-col gap-4 pb-12">
+                        {fetchError ? (
+                            <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-500/20 rounded-2xl p-6 text-center">
+                                <p className="text-red-500 text-sm font-bold">{fetchError}</p>
+                            </div>
+                        ) : invoices.length === 0 ? (
+                            <div className="bg-white dark:bg-[var(--card)] border border-[#E2E6F3] dark:border-[var(--border)] rounded-[14px] p-8 text-center flex flex-col items-center">
+                                <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center text-indigo-500 mb-4">
+                                    <IconFileInvoice className="w-6 h-6" />
+                                </div>
+                                <h3 className="font-bold text-[#111827] dark:text-white mb-1">No invoices found</h3>
+                                <p className="text-sm text-[#6B7280] dark:text-[var(--muted)] mb-6">Try adjusting your filters or create a new invoice.</p>
+                                <Link href="/dashboard/invoices/create" className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20 text-sm">
+                                    Create First Invoice
+                                </Link>
+                            </div>
+                        ) : (
+                            invoices.map((inv) => {
+                                // Status Colors mapping
+                                let iconBg = "bg-[#F1EFE8] dark:bg-gray-800";
+                                let iconColor = "text-[#5F5E5A] dark:text-gray-400";
+                                let pillBg = "bg-[#F1EFE8] dark:bg-gray-800";
+                                let pillColor = "text-[#5F5E5A] dark:text-gray-400";
+                                
+                                if (inv.status === 'SENT') {
+                                    iconBg = "bg-[#E6F1FB] dark:bg-blue-900/30";
+                                    iconColor = "text-[#185FA5] dark:text-blue-400";
+                                    pillBg = "bg-[#E6F1FB] dark:bg-blue-900/30";
+                                    pillColor = "text-[#185FA5] dark:text-blue-400";
+                                } else if (inv.status === 'PAID') {
+                                    iconBg = "bg-[#E1F5EE] dark:bg-emerald-900/30";
+                                    iconColor = "text-[#0F6E56] dark:text-emerald-400";
+                                    pillBg = "bg-[#E1F5EE] dark:bg-emerald-900/30";
+                                    pillColor = "text-[#0F6E56] dark:text-emerald-400";
+                                } else if (inv.status === 'VIEWED') {
+                                    iconBg = "bg-[#EEEDFE] dark:bg-purple-900/30";
+                                    iconColor = "text-[#534AB7] dark:text-purple-400";
+                                    pillBg = "bg-[#EEEDFE] dark:bg-purple-900/30";
+                                    pillColor = "text-[#534AB7] dark:text-purple-400";
+                                } else if (inv.status === 'CANCELLED' || (inv.status !== 'PAID' && inv.dueDate && inv.dueDate < new Date())) {
+                                    // Treat overdue as red
+                                    iconBg = "bg-[#FCEBEB] dark:bg-red-900/30";
+                                    iconColor = "text-[#A32D2D] dark:text-red-400";
+                                    pillBg = "bg-[#FCEBEB] dark:bg-red-900/30";
+                                    pillColor = "text-[#A32D2D] dark:text-red-400";
+                                }
+
+                                const isOverdue = inv.status !== 'PAID' && inv.dueDate && inv.dueDate < new Date();
+                                const displayStatus = isOverdue ? 'OVERDUE' : inv.status;
+
+                                return (
+                                    <div key={inv.id} className="bg-white dark:bg-[var(--card)] rounded-[14px] border border-[#E2E6F3] dark:border-[var(--border)] p-4 flex flex-col shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="flex justify-between items-start gap-3">
+                                            <div className="flex items-start gap-3 overflow-hidden">
+                                                <div className={clsx("w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0", iconBg, iconColor)}>
+                                                    <IconFileInvoice className="w-5 h-5" stroke={2} />
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="font-semibold text-[var(--text)]">{inv.title}</div>
-                                                <div className="text-xs text-[var(--muted)] mt-0.5">
-                                                    {inv.invoiceNumber && <span className="font-mono text-[var(--muted)]/80 mr-1.5">#{inv.invoiceNumber}</span>}
-                                                    {inv.clientName}
+                                                <div className="flex flex-col pt-0.5 overflow-hidden">
+                                                    <span className="font-semibold text-[#111827] dark:text-white text-sm leading-tight truncate w-full">
+                                                        {inv.title || 'Untitled Invoice'}
+                                                    </span>
+                                                    <span className="font-mono text-[11px] text-[#6B7280] dark:text-[var(--muted)] mt-1 truncate w-full">
+                                                        {inv.invoiceNumber ? `#${inv.invoiceNumber} • ` : ''}{inv.clientName || 'No Client'}
+                                                    </span>
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-[var(--muted)] whitespace-nowrap">
-                                                {formatDistanceToNow(new Date(inv.issueDate), { addSuffix: true })}
-                                            </td>
-                                            <td className="px-6 py-4 text-right whitespace-nowrap">
-                                                <div className="flex flex-col items-end">
-                                                    <span className="font-bold text-[var(--text)]">{inv.viewCount || 0}</span>
-                                                    {inv.lastViewedAt && (
-                                                        <span className="text-[10px] text-[var(--muted)]">Last: {formatDistanceToNow(new Date(inv.lastViewedAt), { addSuffix: true })}</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-right whitespace-nowrap">
-                                                <div className="font-bold text-[var(--text)] tabular-nums">${inv.total.toFixed(2)}</div>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end items-center gap-2">
-                                                    {inv.isConverted ? (
-                                                        <Link href={inv.convertedReceiptId ? `/receipt/${inv.convertedReceiptId}` : `/history`} className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-[var(--text)] rounded-lg font-bold text-xs transition-colors">
-                                                            View Receipt
-                                                        </Link>
-                                                    ) : (
-                                                        <Link href={`/dashboard/invoices/edit/${inv.id}`} className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg font-bold text-xs transition-colors">
-                                                            Edit
-                                                        </Link>
-                                                    )}
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1 shrink-0">
+                                                <span className="font-mono text-base font-semibold text-[#111827] dark:text-white">
+                                                    ${inv.total.toFixed(2)}
+                                                </span>
+                                                <div className="relative">
                                                     <InvoiceActions 
                                                         invoice={{ 
                                                             id: inv.id, 
@@ -259,92 +323,49 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                                             paymentStatus: inv.paymentStatus,
                                                             remainingBalance: inv.remainingBalance
                                                         }} 
-                                                        isPro={isPro} 
+                                                        isPro={isPro}
+                                                        trigger={
+                                                            <button className="w-7 h-7 rounded-[7px] bg-[#F4F5F9] dark:bg-gray-800 hover:bg-[#E2E6F3] dark:hover:bg-gray-700 flex items-center justify-center transition-colors text-[#6B7280] dark:text-[var(--muted)] mt-0.5">
+                                                                <IconDotsVertical className="w-4 h-4" />
+                                                            </button>
+                                                        }
                                                     />
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    {/* Mobile Cards (Hidden on Desktop) */}
-                    <div className="grid grid-cols-1 gap-4 md:hidden">
-                        {invoices.map((inv) => (
-                            <div key={inv.id} className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col gap-4 relative">
-                                <div className="flex justify-between items-start gap-4">
-                                    <div className="flex flex-col">
-                                        <div className="font-bold text-[var(--text)] text-lg leading-tight">{inv.title}</div>
-                                        <div className="text-sm text-[var(--muted)] mt-1 font-medium">
-                                            {inv.invoiceNumber && <span className="font-mono text-[var(--muted)]/80 mr-1.5">#{inv.invoiceNumber}</span>}
-                                            {inv.clientName}
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col items-end gap-2">
-                                        <div className="font-black text-[var(--text)] text-lg tabular-nums tracking-tight">${inv.total.toFixed(2)}</div>
-                                        <InvoiceActions 
-                                            invoice={{ 
-                                                id: inv.id, 
-                                                status: inv.status, 
-                                                isConverted: inv.isConverted, 
-                                                publicToken: inv.publicToken, 
-                                                convertedReceiptId: inv.convertedReceiptId,
-                                                acceptOnlinePayment: inv.acceptOnlinePayment,
-                                                paymentStatus: inv.paymentStatus,
-                                                remainingBalance: inv.remainingBalance
-                                            }} 
-                                            isPro={isPro} 
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-end pt-4 border-t border-[var(--border)]">
-                                    <div className="flex flex-col gap-2">
-                                        {/* Status Badge */}
-                                        <div className="flex items-center gap-2">
-                                            {inv.status === 'PAID' && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">PAID</span>}
-                                            {inv.status === 'DRAFT' && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[var(--muted)]/10 text-[var(--muted)] border border-[var(--border)]">DRAFT</span>}
-                                            {inv.status === 'SENT' && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">SENT</span>}
-                                            {inv.status === 'VIEWED' && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">VIEWED</span>}
-                                            {inv.status === 'CANCELLED' && <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">CANCELLED</span>}
-                                            
-                                            {inv.viewCount > 0 && (
-                                                <span className="text-xs text-[var(--muted)] font-medium flex items-center gap-1">
-                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                                    {inv.viewCount} {inv.viewCount === 1 ? 'view' : 'views'}
-                                                </span>
-                                            )}
-                                        </div>
-                                        
-                                        {/* Smart Status Hints */}
-                                        {inv.status === 'SENT' && inv.viewCount === 0 && inv.sentAt && (Date.now() - new Date(inv.sentAt).getTime() > 24 * 60 * 60 * 1000) && (
-                                            <div className="text-[10px] text-red-500/80 font-medium flex items-center gap-1">
-                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                                Not yet viewed
                                             </div>
-                                        )}
+                                        </div>
+
+                                        <div className="mt-4 pt-4 border-t border-[#F0F1FA] dark:border-[var(--border)] flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <span className={clsx("px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase", pillBg, pillColor)}>
+                                                    {displayStatus}
+                                                </span>
+                                                <div className="flex items-center gap-1 text-[11px] font-medium text-[#9CA3AF] dark:text-[var(--muted)]">
+                                                    <IconClock className="w-3 h-3" stroke={2} />
+                                                    {formatDistanceToNow(new Date(inv.lastActivityAt), { addSuffix: true })}
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                {inv.status === 'PAID' ? (
+                                                    <Link href={inv.convertedReceiptId ? `/receipt/${inv.convertedReceiptId}` : `/history`} className="px-4 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg text-xs font-bold transition-colors">
+                                                        View
+                                                    </Link>
+                                                ) : isOverdue ? (
+                                                    <Link href={`/dashboard/invoices/edit/${inv.id}`} className="px-4 py-1.5 bg-[#A32D2D] hover:bg-red-800 text-white rounded-lg text-xs font-bold transition-colors shadow-sm shadow-red-900/20">
+                                                        Remind
+                                                    </Link>
+                                                ) : (
+                                                    <Link href={`/dashboard/invoices/edit/${inv.id}`} className="px-4 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg text-xs font-bold transition-colors">
+                                                        Edit
+                                                    </Link>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="text-[11px] font-bold text-[var(--muted)] text-right">
-                                        Issued<br/>{formatDistanceToNow(new Date(inv.issueDate), { addSuffix: true })}
-                                    </div>
-                                </div>
-                                <div className="pt-3 flex gap-2">
-                                    {inv.isConverted ? (
-                                        <Link href={inv.convertedReceiptId ? `/receipt/${inv.convertedReceiptId}` : `/history`} className="flex-1 text-center py-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-[var(--text)] rounded-xl font-bold text-sm transition-colors">
-                                            View Receipt
-                                        </Link>
-                                    ) : (
-                                        <Link href={`/dashboard/invoices/edit/${inv.id}`} className="flex-1 text-center py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-sm transition-colors shadow-sm shadow-blue-500/20">
-                                            Edit Invoice
-                                        </Link>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                                );
+                            })
+                        )}
                     </div>
-                    </div>
-                )}
                 </div>
             </div>
         </div>

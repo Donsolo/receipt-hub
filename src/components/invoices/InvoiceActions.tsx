@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { clsx } from 'clsx';
 
-export default function InvoiceActions({ invoice, isPro }: { invoice: { id: string; status: string; isConverted: boolean; publicToken?: string | null; convertedReceiptId?: string | null; acceptOnlinePayment?: boolean; paymentStatus?: string; remainingBalance?: number | null; paymentPlanEnabled?: boolean; installments?: any[]; }, isPro?: boolean }) {
+export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: { id: string; status: string; isConverted: boolean; publicToken?: string | null; convertedReceiptId?: string | null; acceptOnlinePayment?: boolean; paymentStatus?: string; remainingBalance?: number | null; paymentPlanEnabled?: boolean; installments?: any[]; }, isPro?: boolean, trigger?: React.ReactNode }) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     
@@ -256,26 +256,32 @@ export default function InvoiceActions({ invoice, isPro }: { invoice: { id: stri
 
     return (
         <div className="relative inline-block text-left" ref={menuRef}>
-            <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                disabled={isLoading}
-                className={clsx(
-                    "flex items-center justify-center p-2 rounded-lg transition-colors border outline-none",
-                    isMenuOpen 
-                        ? "bg-gray-100 border-gray-300 dark:bg-white/10 dark:border-white/20 text-gray-900 dark:text-white"
-                        : "bg-[var(--card)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5",
-                    isLoading && "opacity-50 cursor-not-allowed"
-                )}
-                title="Options"
-            >
-                {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-[var(--muted)] border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                    </svg>
-                )}
-            </button>
+            {trigger ? (
+                <div onClick={() => setIsMenuOpen(!isMenuOpen)} className={clsx("inline-block", isLoading && "opacity-50 cursor-not-allowed")}>
+                    {trigger}
+                </div>
+            ) : (
+                <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    disabled={isLoading}
+                    className={clsx(
+                        "flex items-center justify-center p-2 rounded-lg transition-colors border outline-none",
+                        isMenuOpen 
+                            ? "bg-gray-100 border-gray-300 dark:bg-white/10 dark:border-white/20 text-gray-900 dark:text-white"
+                            : "bg-[var(--card)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:bg-gray-50 dark:hover:bg-white/5",
+                        isLoading && "opacity-50 cursor-not-allowed"
+                    )}
+                    title="Options"
+                >
+                    {isLoading ? (
+                        <div className="w-5 h-5 border-2 border-[var(--muted)] border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                        </svg>
+                    )}
+                </button>
+            )}
 
             {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl bg-[var(--card)] shadow-2xl ring-1 ring-black/5 dark:ring-white/10 focus:outline-none z-[70] max-h-[60vh] overflow-y-auto custom-scrollbar divide-y divide-[var(--border)]">
