@@ -70,37 +70,41 @@ export default function BroadcastDisplay() {
 
     const styles = {
         INFO: {
-            bg: 'bg-blue-600/10',
-            border: 'border-blue-500/20',
-            text: 'text-blue-400',
-            icon: <InformationCircleIcon className="h-5 w-5 text-blue-400" />,
-            button: 'hover:bg-blue-500/10'
+            bg: 'bg-blue-600 shadow-lg shadow-blue-900/20',
+            border: 'border-blue-500',
+            text: 'text-white',
+            textBody: 'text-blue-50',
+            icon: <InformationCircleIcon className="h-5 w-5 text-blue-100" />,
+            button: 'hover:bg-blue-500 text-blue-100 hover:text-white'
         },
         UPDATE: {
-            bg: 'bg-purple-600/10',
-            border: 'border-purple-500/20',
-            text: 'text-purple-400',
-            icon: <SparklesIcon className="h-5 w-5 text-purple-400" />,
-            button: 'hover:bg-purple-500/10'
+            bg: 'bg-purple-600 shadow-lg shadow-purple-900/20',
+            border: 'border-purple-500',
+            text: 'text-white',
+            textBody: 'text-purple-50',
+            icon: <SparklesIcon className="h-5 w-5 text-purple-100" />,
+            button: 'hover:bg-purple-500 text-purple-100 hover:text-white'
         },
         WARNING: {
-            bg: 'bg-amber-600/10',
-            border: 'border-amber-500/20',
-            text: 'text-amber-400',
-            icon: <ExclamationTriangleIcon className="h-5 w-5 text-amber-400" />,
-            button: 'hover:bg-amber-500/10'
+            bg: 'bg-amber-600 shadow-lg shadow-amber-900/20',
+            border: 'border-amber-500',
+            text: 'text-white',
+            textBody: 'text-amber-50',
+            icon: <ExclamationTriangleIcon className="h-5 w-5 text-amber-100" />,
+            button: 'hover:bg-amber-500 text-amber-100 hover:text-white'
         },
         SUCCESS: {
-            bg: 'bg-emerald-600/10',
-            border: 'border-emerald-500/20',
-            text: 'text-emerald-400',
-            icon: <CheckCircleIcon className="h-5 w-5 text-emerald-400" />,
-            button: 'hover:bg-emerald-500/10'
+            bg: 'bg-emerald-600 shadow-lg shadow-emerald-900/20',
+            border: 'border-emerald-500',
+            text: 'text-white',
+            textBody: 'text-emerald-50',
+            icon: <CheckCircleIcon className="h-5 w-5 text-emerald-100" />,
+            button: 'hover:bg-emerald-500 text-emerald-100 hover:text-white'
         }
     }[currentBroadcast.type];
 
     return (
-        <div className={`w-full border-b ${styles.border} ${styles.bg} backdrop-blur-md animate-in slide-in-from-top duration-500 sticky top-0 z-[60]`}>
+        <div className={`w-full border-b ${styles.border} ${styles.bg} animate-in slide-in-from-top duration-500 absolute top-0 inset-x-0 z-[60]`}>
             <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1">
@@ -111,11 +115,11 @@ export default function BroadcastDisplay() {
                             <h4 className={`text-sm font-bold ${styles.text} uppercase tracking-wider`}>
                                 {currentBroadcast.title}
                             </h4>
-                            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                            <p className={`text-sm ${styles.textBody} leading-relaxed`}>
                                 {currentBroadcast.message}
                             </p>
                             {broadcasts.length > 1 && (
-                                <div className="text-[10px] text-[var(--muted)] font-medium pt-1">
+                                <div className={`text-[10px] ${styles.textBody} opacity-80 font-medium pt-1`}>
                                     Message {currentIndex + 1} of {broadcasts.length}
                                 </div>
                             )}
@@ -124,7 +128,7 @@ export default function BroadcastDisplay() {
                     {currentBroadcast.dismissible && (
                         <button
                             onClick={handleDismiss}
-                            className={`shrink-0 p-1 rounded-md transition-colors ${styles.button} text-[var(--muted)] hover:text-[var(--text-primary)]`}
+                            className={`shrink-0 p-1 rounded-md transition-colors ${styles.button}`}
                             title="Dismiss"
                         >
                             <XMarkIcon className="h-5 w-5" />

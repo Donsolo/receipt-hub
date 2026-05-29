@@ -26,6 +26,13 @@ export async function GET(request: Request) {
             eligibleTargets.push('BUSINESS_USERS'); // Mapping PRO to BUSINESS for now
         }
 
+        if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+            // Admins see everything to verify broadcasts
+            if (!eligibleTargets.includes('FREE_USERS')) eligibleTargets.push('FREE_USERS');
+            if (!eligibleTargets.includes('PRO_USERS')) eligibleTargets.push('PRO_USERS');
+            if (!eligibleTargets.includes('BUSINESS_USERS')) eligibleTargets.push('BUSINESS_USERS');
+        }
+
         // Fetch broadcasts that:
         // 1. Are active
         // 2. Haven't expired

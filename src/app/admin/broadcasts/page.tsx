@@ -180,58 +180,41 @@ export default function AdminBroadcastsPage() {
                         <h2 className="text-lg font-semibold text-[var(--text)]">Active Broadcasts</h2>
                         <span className="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Live</span>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-[#1F2937]">
-                            <thead className="bg-[var(--bg)]/30">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Title</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Type</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Target</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Views</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Expires</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[#1F2937]">
-                                {loading ? (
-                                    <tr><td colSpan={6} className="px-6 py-10 text-center text-sm text-[var(--muted)] animate-pulse">Loading...</td></tr>
-                                ) : activeBroadcasts.length === 0 ? (
-                                    <tr><td colSpan={6} className="px-6 py-10 text-center text-sm text-[var(--muted)]">No active broadcasts.</td></tr>
-                                ) : (
-                                    activeBroadcasts.map(b => (
-                                        <tr key={b.id} className="hover:bg-white/[0.01] transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-[var(--text)]">{b.title}</div>
-                                                <div className="text-[10px] text-[var(--muted)] font-mono truncate max-w-[150px]">{b.id}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <span className={`px-2 py-0.5 rounded text-[10px] font-medium border uppercase tracking-wider ${b.type === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                                    b.type === 'WARNING' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                                                        b.type === 'UPDATE' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
-                                                            'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                                                    }`}>
-                                                    {b.type}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-[11px] text-[var(--muted)] uppercase font-medium">
-                                                {b.target.replace('_', ' ')}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text)] font-medium">
-                                                {b.viewCount.toLocaleString()}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-xs text-[var(--muted)]">
-                                                {b.expiresAt ? new Date(b.expiresAt).toLocaleDateString() : 'Never'}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-medium space-x-2">
-                                                <button onClick={() => handleOpenModal(b)} className="text-indigo-400 hover:text-indigo-300">Edit</button>
-                                                <button onClick={() => handleToggleActive(b.id, b.isActive)} className="text-amber-500 hover:text-amber-400">Disable</button>
-                                                <button onClick={() => handleDelete(b.id)} className="text-red-500 hover:text-red-400">Delete</button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                    <div className="p-4 space-y-3 bg-[var(--bg)]/30">
+                        {loading ? (
+                            <div className="text-center py-6 text-sm text-[var(--muted)] animate-pulse">Loading...</div>
+                        ) : activeBroadcasts.length === 0 ? (
+                            <div className="text-center py-6 text-sm text-[var(--muted)]">No active broadcasts.</div>
+                        ) : (
+                            activeBroadcasts.map(b => (
+                                <div key={b.id} className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors hover:border-emerald-500/30">
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider ${b.type === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                                b.type === 'WARNING' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                                    b.type === 'UPDATE' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
+                                                        'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                                }`}>
+                                                {b.type}
+                                            </span>
+                                            <h3 className="text-sm font-bold text-[var(--text)]">{b.title}</h3>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--muted)]">
+                                            <span>Target: <span className="font-medium text-[var(--text-secondary)]">{b.target.replace('_', ' ')}</span></span>
+                                            <span className="hidden sm:inline">•</span>
+                                            <span>Views: <span className="font-medium text-[var(--text-secondary)]">{b.viewCount.toLocaleString()}</span></span>
+                                            <span className="hidden sm:inline">•</span>
+                                            <span>Expires: <span className="font-medium text-[var(--text-secondary)]">{b.expiresAt ? new Date(b.expiresAt).toLocaleDateString() : 'Never'}</span></span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border)] md:border-none pt-3 md:pt-0">
+                                        <button onClick={() => handleOpenModal(b)} className="flex-1 md:flex-none text-xs font-semibold px-3 py-2 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 rounded-md transition-colors text-center">Edit</button>
+                                        <button onClick={() => handleToggleActive(b.id, b.isActive)} className="flex-1 md:flex-none text-xs font-semibold px-3 py-2 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 rounded-md transition-colors text-center">Disable</button>
+                                        <button onClick={() => handleDelete(b.id)} className="flex-1 md:flex-none text-xs font-semibold px-3 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors text-center">Delete</button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </section>
 
@@ -240,48 +223,37 @@ export default function AdminBroadcastsPage() {
                     <div className="px-6 py-4 border-b border-[var(--border)] bg-gray-500/[0.02]">
                         <h2 className="text-lg font-semibold text-[var(--text)]">Past & Inactive</h2>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-[#1F2937]">
-                            <thead className="bg-[var(--bg)]/30">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Title</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Target</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Views</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[#1F2937]">
-                                {loading ? (
-                                    <tr><td colSpan={5} className="px-6 py-10 text-center text-sm text-[var(--muted)] animate-pulse">Loading...</td></tr>
-                                ) : pastBroadcasts.length === 0 ? (
-                                    <tr><td colSpan={5} className="px-6 py-10 text-center text-sm text-[var(--muted)]">No past history.</td></tr>
-                                ) : (
-                                    pastBroadcasts.map(b => (
-                                        <tr key={b.id} className="hover:bg-white/[0.01] transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-[var(--muted)]">{b.title}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 py-0.5 rounded text-[10px] font-medium border uppercase tracking-wider bg-gray-500/10 text-gray-400 border-gray-500/20`}>
-                                                    {!b.isActive ? 'Disabled' : 'Expired'}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-[11px] text-[var(--muted)] uppercase">
-                                                {b.target.replace('_', ' ')}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted)]">
-                                                {b.viewCount.toLocaleString()}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-medium space-x-2">
-                                                <button onClick={() => handleToggleActive(b.id, b.isActive)} className="text-emerald-500 hover:text-emerald-400">Enable</button>
-                                                <button onClick={() => handleDelete(b.id)} className="text-red-500 hover:text-red-400">Delete</button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                    <div className="p-4 space-y-3 bg-[var(--bg)]/30">
+                        {loading ? (
+                            <div className="text-center py-6 text-sm text-[var(--muted)] animate-pulse">Loading...</div>
+                        ) : pastBroadcasts.length === 0 ? (
+                            <div className="text-center py-6 text-sm text-[var(--muted)]">No past history.</div>
+                        ) : (
+                            pastBroadcasts.map(b => (
+                                <div key={b.id} className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors opacity-80 hover:opacity-100">
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider bg-gray-500/10 text-gray-400 border-gray-500/20">
+                                                {!b.isActive ? 'Disabled' : 'Expired'}
+                                            </span>
+                                            <h3 className="text-sm font-bold text-[var(--muted)]">{b.title}</h3>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--muted)]">
+                                            <span>Target: <span className="font-medium text-[var(--text-secondary)]">{b.target.replace('_', ' ')}</span></span>
+                                            <span className="hidden sm:inline">•</span>
+                                            <span>Views: <span className="font-medium text-[var(--text-secondary)]">{b.viewCount.toLocaleString()}</span></span>
+                                            <span className="hidden sm:inline">•</span>
+                                            <span>Type: <span className="font-medium text-[var(--text-secondary)]">{b.type}</span></span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border)] md:border-none pt-3 md:pt-0">
+                                        <button onClick={() => handleOpenModal(b)} className="flex-1 md:flex-none text-xs font-semibold px-3 py-2 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 rounded-md transition-colors text-center">Edit</button>
+                                        <button onClick={() => handleToggleActive(b.id, b.isActive)} className="flex-1 md:flex-none text-xs font-semibold px-3 py-2 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-md transition-colors text-center">Enable</button>
+                                        <button onClick={() => handleDelete(b.id)} className="flex-1 md:flex-none text-xs font-semibold px-3 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-md transition-colors text-center">Delete</button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </section>
             </div>

@@ -79,6 +79,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import GlobalVeroBubble from '@/components/vero/GlobalVeroBubble';
 import NativeFetchInterceptor from '@/components/NativeFetchInterceptor';
 import PullToRefreshWrapper from '@/components/PullToRefreshWrapper';
+import BroadcastDisplay from '@/components/BroadcastDisplay';
 
 export default async function RootLayout({
   children,
@@ -182,6 +183,7 @@ export default async function RootLayout({
                 <NotificationToasts />
                 <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} userName={userName} businessName={businessName} businessLogoPath={businessLogoPath} activeInvoicesCount={activeInvoicesCount} />
                 <div className="flex-1 flex flex-col w-full relative">
+                  <BroadcastDisplay />
                   <main className="flex-grow w-full flex flex-col relative">
                     <PullToRefreshWrapper>
                       {children}
@@ -216,6 +218,7 @@ export default async function RootLayout({
               />
               <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} userName={userName} businessName={businessName} businessLogoPath={businessLogoPath} activeInvoicesCount={activeInvoicesCount} />
               <div className="flex-1 flex flex-col w-full relative">
+                <BroadcastDisplay />
                 <main className="flex-grow w-full flex flex-col relative">
                   <PullToRefreshWrapper>
                     {children}

@@ -217,7 +217,7 @@ export default function Navbar({
     if (pathname?.startsWith('/admin')) {
         mobileContextLinks = [
             { href: '/admin/hero-manager', label: 'Global Heros' },
-            { href: '/admin/announcements', label: 'Announcements & Popups' },
+            { href: '/admin/broadcasts', label: 'Announcements & Popups' },
             { href: '/admin/users', label: 'User Management' },
             { href: '/admin/global-message', label: 'Global Messaging' },
             { href: '/admin/app-releases', label: 'App Releases' }
