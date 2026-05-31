@@ -79,8 +79,16 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
     let fetchError: string | null = null;
     try {
         const allInvoices = await db.invoice.findMany({
-            where: { userId: authUser.userId },
-            include: { items: true }
+            where: {
+                OR: [
+                    { userId: authUser.userId },
+                    { paymentRequestLogs: { some: { recipientUserId: authUser.userId } } }
+                ]
+            },
+            include: { 
+                items: true,
+                user: { select: { name: true, businessName: true } }
+            }
         });
 
         const now = new Date();
@@ -290,6 +298,7 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
 
                                 const isOverdue = inv.status !== 'PAID' && inv.dueDate && inv.dueDate < new Date();
                                 const displayStatus = isOverdue ? 'OVERDUE' : inv.status;
+                                const isReceived = inv.userId !== authUser.userId;
 
                                 return (
                                     <div key={inv.id} className="bg-white dark:bg-[var(--card)] rounded-[14px] border border-[#E2E6F3] dark:border-[var(--border)] p-4 flex flex-col shadow-sm hover:shadow-md transition-shadow">
@@ -303,7 +312,7 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                                         {inv.title || 'Untitled Invoice'}
                                                     </span>
                                                     <span className="font-mono text-[11px] text-[#6B7280] dark:text-[var(--muted)] mt-1 truncate w-full">
-                                                        {inv.invoiceNumber ? `#${inv.invoiceNumber} • ` : ''}{inv.clientName || 'No Client'}
+                                                        {inv.invoiceNumber ? `#${inv.invoiceNumber} • ` : ''}{isReceived ? `From: ${inv.user?.businessName || inv.user?.name || 'Unknown'}` : `To: ${inv.clientName || 'No Client'}`}
                                                     </span>
                                                 </div>
                                             </div>
@@ -312,24 +321,26 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                                     ${inv.total.toFixed(2)}
                                                 </span>
                                                 <div className="relative">
-                                                    <InvoiceActions 
-                                                        invoice={{ 
-                                                            id: inv.id, 
-                                                            status: inv.status, 
-                                                            isConverted: inv.isConverted, 
-                                                            publicToken: inv.publicToken, 
-                                                            convertedReceiptId: inv.convertedReceiptId,
-                                                            acceptOnlinePayment: inv.acceptOnlinePayment,
-                                                            paymentStatus: inv.paymentStatus,
-                                                            remainingBalance: inv.remainingBalance
-                                                        }} 
-                                                        isPro={isPro}
-                                                        trigger={
-                                                            <button className="w-7 h-7 rounded-[7px] bg-[#F4F5F9] dark:bg-gray-800 hover:bg-[#E2E6F3] dark:hover:bg-gray-700 flex items-center justify-center transition-colors text-[#6B7280] dark:text-[var(--muted)] mt-0.5">
-                                                                <IconDotsVertical className="w-4 h-4" />
-                                                            </button>
-                                                        }
-                                                    />
+                                                    {!isReceived && (
+                                                        <InvoiceActions 
+                                                            invoice={{ 
+                                                                id: inv.id, 
+                                                                status: inv.status, 
+                                                                isConverted: inv.isConverted, 
+                                                                publicToken: inv.publicToken, 
+                                                                convertedReceiptId: inv.convertedReceiptId,
+                                                                acceptOnlinePayment: inv.acceptOnlinePayment,
+                                                                paymentStatus: inv.paymentStatus,
+                                                                remainingBalance: inv.remainingBalance
+                                                            }} 
+                                                            isPro={isPro}
+                                                            trigger={
+                                                                <button className="w-7 h-7 rounded-[7px] bg-[#F4F5F9] dark:bg-gray-800 hover:bg-[#E2E6F3] dark:hover:bg-gray-700 flex items-center justify-center transition-colors text-[#6B7280] dark:text-[var(--muted)] mt-0.5">
+                                                                    <IconDotsVertical className="w-4 h-4" />
+                                                                </button>
+                                                            }
+                                                        />
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -349,6 +360,10 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                                 {inv.status === 'PAID' ? (
                                                     <Link href={inv.convertedReceiptId ? `/receipt/${inv.convertedReceiptId}` : `/history`} className="px-4 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg text-xs font-bold transition-colors">
                                                         View
+                                                    </Link>
+                                                ) : isReceived ? (
+                                                    <Link href={`/invoice/${inv.publicToken}`} className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-colors shadow-md shadow-indigo-500/20">
+                                                        Pay Online
                                                     </Link>
                                                 ) : isOverdue ? (
                                                     <Link href={`/dashboard/invoices/edit/${inv.id}`} className="px-4 py-1.5 bg-[#A32D2D] hover:bg-red-800 text-white rounded-lg text-xs font-bold transition-colors shadow-sm shadow-red-900/20">

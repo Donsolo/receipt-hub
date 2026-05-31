@@ -173,7 +173,7 @@ export async function POST(
                     type: 'MESSAGE_RECEIVED',
                     title: 'New Payment Request',
                     message: `${businessName} sent you a payment request for Invoice #${invoice.invoiceNumber || invoice.title}.`,
-                    link: `/dashboard/messages/${conversation.id}`,
+                    link: `/dashboard/invoices`,
                     read: false
                 }
             });

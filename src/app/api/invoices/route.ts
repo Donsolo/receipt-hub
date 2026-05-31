@@ -16,9 +16,11 @@ export async function GET(req: Request) {
         const status = searchParams.get('status');
         const startDate = searchParams.get('startDate');
         const endDate = searchParams.get('endDate');
-
         const where: any = {
-            userId: user.userId
+            OR: [
+                { userId: user.userId },
+                { paymentRequestLogs: { some: { recipientUserId: user.userId } } }
+            ]
         };
 
         if (status) {
