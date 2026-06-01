@@ -110,6 +110,7 @@ export async function POST(req: Request) {
                 // Invoice Payment Logic
                 if (session.metadata?.source === 'invoice_payment' && session.metadata?.invoiceId) {
                     const invoiceId = session.metadata.invoiceId;
+                    const installmentId = session.metadata?.installmentId;
                     const amountPaid = (session.amount_total || 0) / 100;
                     const currency = (session.currency || 'usd').toUpperCase();
                     
@@ -124,37 +125,34 @@ export async function POST(req: Request) {
                             break;
                         }
 
-                        // Create Payment Record
-                        const paymentRecord = await db.invoicePayment.create({
-                            data: {
-                                invoiceId: invoiceId,
-                                amount: amountPaid,
-                                currency: currency,
-                                status: 'SUCCEEDED',
-                                paymentMethod: 'Stripe Checkout',
-                                stripePaymentIntentId: session.payment_intent as string | undefined,
-                                stripeCheckoutSessionId: session.id,
-                                payerEmail: session.customer_details?.email || undefined,
-                                payerName: session.customer_details?.name || undefined
-                            }
-                        });
+                        let paymentRecordId = '';
+                        let isFullyPaid = false;
+                        let invoiceUserId = '';
+                        let invoiceNumber = '';
+                        let invoiceTitle = '';
 
-                        // Re-calculate invoice totals
-                        const invoice = await db.invoice.findUnique({
-                            where: { id: invoiceId }
-                        });
+                        await db.$transaction(async (tx) => {
+                            // 1. Create Payment Record
+                            const paymentRecord = await tx.invoicePayment.create({
+                                data: {
+                                    invoiceId: invoiceId,
+                                    amount: amountPaid,
+                                    currency: currency,
+                                    status: 'SUCCEEDED',
+                                    paymentMethod: 'Stripe Checkout',
+                                    stripePaymentIntentId: session.payment_intent as string | undefined,
+                                    stripeCheckoutSessionId: session.id,
+                                    payerEmail: session.customer_details?.email || undefined,
+                                    payerName: session.customer_details?.name || undefined
+                                }
+                            });
+                            paymentRecordId = paymentRecord.id;
 
-                        if (invoice) {
-                            const newAmountPaid = (invoice.amountPaid || 0) + amountPaid;
-                            const remainingBalance = Math.max(0, invoice.total - newAmountPaid);
-                            
-                            const isFullyPaid = remainingBalance <= 0;
-                            
-                            // If installment payment, mark it as PAID (idempotent)
-                            if (session.metadata?.installmentId) {
-                                await db.invoiceInstallment.updateMany({
+                            // 2. If installmentId, mark PAID
+                            if (installmentId) {
+                                await tx.invoiceInstallment.updateMany({
                                     where: { 
-                                        id: session.metadata.installmentId,
+                                        id: installmentId,
                                         status: { not: 'PAID' }
                                     },
                                     data: {
@@ -166,59 +164,82 @@ export async function POST(req: Request) {
                                 });
                             }
 
-                            // If fully paid, mark all remaining unpaid installments as PAID to keep clean
-                            if (isFullyPaid === true && invoice.paymentPlanEnabled) {
-                                await db.invoiceInstallment.updateMany({
-                                    where: { invoiceId: invoice.id, status: { not: 'PAID' } },
-                                    data: { status: 'PAID', paidAt: new Date() }
-                                });
-                            }
-                            
-                            await db.invoice.update({
+                            // 3. Re-calculate invoice totals
+                            const invoice = await tx.invoice.findUnique({
                                 where: { id: invoiceId },
-                                data: {
-                                    amountPaid: newAmountPaid,
-                                    remainingBalance: remainingBalance,
-                                    paymentStatus: isFullyPaid ? 'PAID' : 'PARTIAL_PAID',
-                                    status: isFullyPaid ? 'PAID' : invoice.status,
-                                    lastPaymentAt: new Date(),
-                                    paymentConfirmed: isFullyPaid ? true : invoice.paymentConfirmed,
-                                    paymentConfirmedAt: isFullyPaid ? new Date() : invoice.paymentConfirmedAt,
-                                }
+                                include: { installments: true, onlinePayments: { where: { status: 'SUCCEEDED' } } }
                             });
 
-                            if (isFullyPaid) {
-                                // Auto-generate Receipt
-                                const result = await convertInvoiceToReceipt(invoiceId);
-                                if (result.success && result.receiptId) {
-                                    await db.invoicePayment.update({
-                                        where: { id: paymentRecord.id },
-                                        data: { receiptGeneratedAt: new Date() }
+                            if (invoice) {
+                                invoiceUserId = invoice.userId;
+                                invoiceNumber = invoice.invoiceNumber || '';
+                                invoiceTitle = invoice.title;
+
+                                let newAmountPaid = 0;
+                                if (invoice.paymentPlanEnabled && invoice.installments.length > 0) {
+                                    newAmountPaid = invoice.installments
+                                        .filter((i: any) => i.status === 'PAID')
+                                        .reduce((sum: number, i: any) => sum + i.amount, 0);
+                                } else {
+                                    newAmountPaid = invoice.onlinePayments.reduce((sum: number, p: any) => sum + p.amount, 0);
+                                }
+
+                                const remainingBalance = Math.max(0, invoice.total - newAmountPaid);
+                                isFullyPaid = remainingBalance < 0.01;
+
+                                if (isFullyPaid && invoice.paymentPlanEnabled) {
+                                    await tx.invoiceInstallment.updateMany({
+                                        where: { invoiceId: invoice.id, status: { not: 'PAID' } },
+                                        data: { status: 'PAID', paidAt: new Date() }
                                     });
                                 }
 
-                                // Create Notification
-                                await db.notification.create({
+                                await tx.invoice.update({
+                                    where: { id: invoiceId },
                                     data: {
-                                        userId: invoice.userId,
-                                        type: 'SYSTEM',
-                                        title: 'Invoice Paid',
-                                        message: `Invoice #${invoice.invoiceNumber || invoice.title} was paid successfully.`,
-                                        link: `/dashboard/invoices`
-                                    }
-                                });
-                            } else {
-                                // Create Partial Payment Notification
-                                await db.notification.create({
-                                    data: {
-                                        userId: invoice.userId,
-                                        type: 'SYSTEM',
-                                        title: 'Payment Received',
-                                        message: `A payment of $${amountPaid.toFixed(2)} was received for Invoice #${invoice.invoiceNumber || invoice.title}.`,
-                                        link: `/dashboard/invoices`
+                                        amountPaid: newAmountPaid,
+                                        remainingBalance,
+                                        paymentStatus: isFullyPaid ? 'PAID' : (newAmountPaid > 0 ? 'PARTIAL_PAID' : 'UNPAID'),
+                                        status: isFullyPaid ? 'PAID' : invoice.status,
+                                        lastPaymentAt: new Date(),
+                                        paymentConfirmed: isFullyPaid ? true : invoice.paymentConfirmed,
+                                        paymentConfirmedAt: isFullyPaid ? new Date() : invoice.paymentConfirmedAt,
                                     }
                                 });
                             }
+                        });
+
+                        if (isFullyPaid && paymentRecordId && invoiceUserId) {
+                            // Auto-generate Receipt (outside transaction)
+                            const result = await convertInvoiceToReceipt(invoiceId);
+                            if (result.success && result.receiptId) {
+                                await db.invoicePayment.update({
+                                    where: { id: paymentRecordId },
+                                    data: { receiptGeneratedAt: new Date() }
+                                });
+                            }
+
+                            // Create Notification
+                            await db.notification.create({
+                                data: {
+                                    userId: invoiceUserId,
+                                    type: 'SYSTEM',
+                                    title: 'Invoice Paid',
+                                    message: `Invoice #${invoiceNumber || invoiceTitle} was paid successfully.`,
+                                    link: `/dashboard/invoices`
+                                }
+                            });
+                        } else if (invoiceUserId) {
+                            // Create Partial Payment Notification
+                            await db.notification.create({
+                                data: {
+                                    userId: invoiceUserId,
+                                    type: 'SYSTEM',
+                                    title: 'Payment Received',
+                                    message: `A payment of $${amountPaid.toFixed(2)} was received for Invoice #${invoiceNumber || invoiceTitle}.`,
+                                    link: `/dashboard/invoices`
+                                }
+                            });
                         }
                     }
                 }
@@ -275,9 +296,28 @@ export async function POST(req: Request) {
                 }
                 break;
             }
-            case 'invoice.payment_succeeded':
-            case 'invoice.payment_failed': {
-                // Not actively used right now, but keeping for completeness
+            case 'checkout.session.expired': {
+                const session = event.data.object as Stripe.Checkout.Session;
+                if (session.id) {
+                    await db.invoiceInstallment.updateMany({
+                        where: { stripeCheckoutSessionId: session.id, status: 'PAYMENT_PENDING' },
+                        data: { status: 'UNPAID', stripeCheckoutSessionId: null }
+                    });
+                    await db.invoice.updateMany({
+                        where: { stripeCheckoutSessionId: session.id, paymentStatus: 'PAYMENT_PENDING' },
+                        data: { paymentStatus: 'UNPAID', stripeCheckoutSessionId: null }
+                    });
+                }
+                break;
+            }
+            case 'payment_intent.payment_failed': {
+                const intent = event.data.object as Stripe.PaymentIntent;
+                if (intent.id) {
+                    await db.invoiceInstallment.updateMany({
+                        where: { stripePaymentIntentId: intent.id, status: 'PAYMENT_PENDING' },
+                        data: { status: 'UNPAID', stripePaymentIntentId: null }
+                    });
+                }
                 break;
             }
             default:

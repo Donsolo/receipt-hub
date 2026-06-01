@@ -77,6 +77,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
                 return NextResponse.json({ success: false, error: 'This installment is already paid' }, { status: 400 });
             }
 
+            if (installment.status === 'PAYMENT_PENDING') {
+                return NextResponse.json({ success: false, error: 'A payment is already pending for this installment. Please complete it or wait for it to expire.' }, { status: 400 });
+            }
+
             amountInCents = Math.round(installment.amount * 100);
             itemName = installment.label || `Installment for Invoice ${invoice.invoiceNumber ? `#${invoice.invoiceNumber}` : ''}`;
             itemDescription = `Payment for ${installment.label || 'installment'} of ${invoice.title}`;

@@ -161,6 +161,36 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             include: { items: true }
         });
 
+        // Sync payments[] to InvoiceInstallment
+        if (payments !== undefined && Array.isArray(payments) && payments.length > 0) {
+            const currentTotal = dataToUpdate.total !== undefined ? dataToUpdate.total : invoice.total;
+            const paymentsSum = payments.reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+            if (Math.abs(paymentsSum - currentTotal) < 0.01) {
+                // Delete existing unpaid installments
+                await prisma.invoiceInstallment.deleteMany({
+                    where: { invoiceId: invoice.id, status: { not: 'PAID' } }
+                });
+                
+                // Create new installments mapping
+                const installmentData = payments.map((p: any) => ({
+                    invoiceId: invoice.id,
+                    label: p.note || (p.isDeposit ? 'Deposit' : 'Payment'),
+                    amount: Number(p.amount) || 0,
+                    dueDate: p.date ? new Date(p.date) : null,
+                    status: 'UNPAID'
+                }));
+
+                await prisma.invoiceInstallment.createMany({
+                    data: installmentData
+                });
+
+                await prisma.invoice.update({
+                    where: { id: invoice.id },
+                    data: { paymentPlanEnabled: true }
+                });
+            }
+        }
+
         revalidatePath('/dashboard/invoices');
         return NextResponse.json({ success: true, invoice: updatedInvoice }, { status: 200 });
 
