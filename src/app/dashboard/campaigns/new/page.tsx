@@ -4,7 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
 import NewCampaignClient from './NewCampaignClient';
 
-export const dynamic = "force-dynamic";
+// export const dynamic stripped by mobile build
 
 export default async function NewCampaignPage() {
     const cookieStore = await cookies();

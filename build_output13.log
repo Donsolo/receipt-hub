@@ -1,0 +1,117 @@
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 3 errors:
+./src/lib/actions.ts:4:10
+Ecmascript file had an error
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { db } [36mfrom[39m [32m"./db"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m { revalidatePath } [36mfrom[39m [32m"next/cache"[39m[33m;[39m
+ [90m   |[39m          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m
+ [90m 6 |[39m [36mexport[39m [36masync[39m [36mfunction[39m getBusinessProfile() {
+ [90m 7 |[39m     [36mlet[39m profile [33m=[39m [36mawait[39m db[33m.[39mbusinessProfile[33m.[39mfindFirst()[33m;[39m[0m
+
+You're importing a component that needs "revalidatePath". That only works in a Server Component which is not supported in the pages/ directory. Read more: https://nextjs.org/docs/app/building-your-application/rendering/server-components
+
+
+
+Import traces:
+  App Route:
+    ./src/lib/actions.ts
+    ./src/app/api/invoices/create/route.ts
+
+  Server Component:
+    ./src/lib/actions.ts
+    ./src/app/create/page.tsx
+
+  Client Component Browser:
+    ./src/lib/actions.ts [Client Component Browser]
+    ./src/app/create/ReceiptForm.tsx [Client Component Browser]
+    ./src/app/create/ReceiptForm.tsx [Server Component]
+    ./src/app/create/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/actions.ts [Client Component SSR]
+    ./src/app/create/ReceiptForm.tsx [Client Component SSR]
+    ./src/app/create/ReceiptForm.tsx [Server Component]
+    ./src/app/create/page.tsx [Server Component]
+
+
+./src/lib/auth.ts:52:1
+Ecmascript file had an error
+[0m [90m 50 |[39m }
+ [90m 51 |[39m
+[31m[1m>[22m[39m[90m 52 |[39m [36mimport[39m { cookies } [36mfrom[39m [32m'next/headers'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 53 |[39m
+ [90m 54 |[39m [36mexport[39m [36masync[39m [36mfunction[39m getCurrentUser() {
+ [90m 55 |[39m     [36mconst[39m cookieStore [33m=[39m [36mawait[39m [33mPromise[39m[33m.[39mresolve(cookies())[33m;[39m[0m
+
+You're importing a component that needs "next/headers". That only works in a Server Component which is not supported in the pages/ directory. Read more: https://nextjs.org/docs/app/building-your-application/rendering/server-components
+
+
+
+Import traces:
+  App Route:
+    ./src/lib/auth.ts
+    ./src/app/api/admin/activation-stats/route.ts
+
+  Edge Middleware:
+    ./src/lib/auth.ts
+    ./src/middleware.ts
+
+  Server Component:
+    ./src/lib/auth.ts
+    ./src/app/layout.tsx
+
+  Client Component Browser:
+    ./src/lib/auth.ts [Client Component Browser]
+    ./src/lib/reportActions.ts [Client Component Browser]
+    ./src/app/dashboard/reports/ReportsClient.tsx [Client Component Browser]
+    ./src/app/dashboard/reports/ReportsClient.tsx [Server Component]
+    ./src/app/dashboard/reports/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/auth.ts [Client Component SSR]
+    ./src/lib/reportActions.ts [Client Component SSR]
+    ./src/app/dashboard/reports/ReportsClient.tsx [Client Component SSR]
+    ./src/app/dashboard/reports/ReportsClient.tsx [Server Component]
+    ./src/app/dashboard/reports/page.tsx [Server Component]
+
+
+./src/lib/reportActions.ts:5:1
+Ecmascript file had an error
+[0m [90m 3 |[39m [36mimport[39m { db } [36mfrom[39m [32m"./db"[39m[33m;[39m
+ [90m 4 |[39m [36mimport[39m { verifyToken } [36mfrom[39m [32m"./auth"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 5 |[39m [36mimport[39m { cookies } [36mfrom[39m [32m"next/headers"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 6 |[39m
+ [90m 7 |[39m [36mexport[39m [36masync[39m [36mfunction[39m generateReportData(startDateStr[33m:[39m string[33m,[39m endDateStr[33m:[39m string) {
+ [90m 8 |[39m     [36mconst[39m cookieStore [33m=[39m [36mawait[39m cookies()[33m;[39m[0m
+
+You're importing a component that needs "next/headers". That only works in a Server Component which is not supported in the pages/ directory. Read more: https://nextjs.org/docs/app/building-your-application/rendering/server-components
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/reportActions.ts [Client Component Browser]
+    ./src/app/dashboard/reports/ReportsClient.tsx [Client Component Browser]
+    ./src/app/dashboard/reports/ReportsClient.tsx [Server Component]
+    ./src/app/dashboard/reports/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/reportActions.ts [Client Component SSR]
+    ./src/app/dashboard/reports/ReportsClient.tsx [Client Component SSR]
+    ./src/app/dashboard/reports/ReportsClient.tsx [Server Component]
+    ./src/app/dashboard/reports/page.tsx [Server Component]
+
+
+    at <unknown> (./src/lib/actions.ts:4:10)
+    at <unknown> (./src/lib/auth.ts:52:1)
+    at <unknown> (./src/lib/reportActions.ts:5:1)

@@ -1,0 +1,114 @@
+
+> verihub@0.1.0 build:mobile:win
+> node scripts/build-mobile.js && npx cap copy android
+
+Moving api folder temporarily: C:\Users\dariu\Documents\AntiG Agents\Verihub\src\app\api -> C:\Users\dariu\Documents\AntiG Agents\Verihub\api_temp_mobile_excluded
+▲ Next.js 16.1.6 (webpack)
+- Environments: .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.9s
+  Running TypeScript ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/61) ...
+  Generating static pages using 15 workers (15/61) 
+  Generating static pages using 15 workers (30/61) 
+  Generating static pages using 15 workers (45/61) 
+✓ Generating static pages using 15 workers (61/61) in 848.6ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+⚠ Statically exporting a Next.js application via `next export` disables API routes and middleware.
+This command is meant for static-only hosts, and is not necessary to make your application static.
+Pages in your application without server-side data dependencies will be automatically statically exported by `next build`, including pages powered by `getStaticProps`.
+Learn more: https://nextjs.org/docs/messages/api-routes-static-export
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /about
+├ ○ /activate
+├ ○ /admin
+├ ○ /admin/announcements
+├ ○ /admin/app-releases
+├ ○ /admin/broadcasts
+├ ○ /admin/global-message
+├ ○ /admin/hero-manager
+├ ○ /admin/users
+├ ● /admin/users/[id]
+│ └ /admin/users/fallback
+├ ○ /billing
+├ ○ /billing/success
+├ ○ /create
+├ ○ /dashboard
+├ ○ /dashboard/billing
+├ ○ /dashboard/bundles
+├ ● /dashboard/bundles/[id]
+│ └ /dashboard/bundles/fallback
+├ ○ /dashboard/campaigns
+├ ● /dashboard/campaigns/[id]
+│ └ /dashboard/campaigns/fallback
+├ ○ /dashboard/campaigns/new
+├ ○ /dashboard/connections
+├ ● /dashboard/connections/[connectionId]
+│ └ /dashboard/connections/fallback
+├ ○ /dashboard/contacts
+├ ● /dashboard/contacts/[id]
+│ └ /dashboard/contacts/fallback
+├ ○ /dashboard/contacts/import
+├ ○ /dashboard/invoices
+├ ○ /dashboard/invoices/aging
+├ ○ /dashboard/invoices/create
+├ ● /dashboard/invoices/edit/[id]
+│ └ /dashboard/invoices/edit/fallback
+├ ○ /dashboard/messages
+├ ● /dashboard/messages/[conversationId]
+│ └ /dashboard/messages/fallback
+├ ○ /dashboard/profile
+├ ○ /dashboard/reports
+├ ○ /dashboard/vero
+├ ○ /dashboard/vero/lens
+├ ○ /dashboard/vero/lens/analytics
+├ ○ /data-deletion
+├ ○ /download-beta
+├ ○ /feedback
+├ ○ /forgot-password
+├ ○ /history
+├ ● /invoice/[token]
+│ └ /invoice/fallback
+├ ● /invoice/[token]/bundle
+│ └ /invoice/fallback/bundle
+├ ○ /login
+├ ○ /payment/success
+├ ● /portal/invoice/[token]
+│ └ /portal/invoice/fallback
+├ ○ /pricing
+├ ○ /privacy
+├ ● /quote/[token]
+│ └ /quote/fallback
+├ ● /receipt/[id]
+│ └ /receipt/fallback
+├ ● /receipt/[id]/edit
+│ └ /receipt/fallback/edit
+├ ○ /register
+├ ○ /reset-password
+├ ○ /settings
+├ ○ /terms
+├ ○ /upgrade
+└ ○ /uploads
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)  prerendered as static content
+●  (SSG)     prerendered as static HTML (uses generateStaticParams)
+
+Restoring api folder...
+Api folder restored.
+Restoring tsconfig.json...
+Restoring actions.ts...
+Restoring reportActions.ts...
+Build succeeded. api folder restored.
+√ Copying web assets from public to android\app\src\main\assets\public in 55.33ms
+√ Creating capacitor.config.json in android\app\src\main\assets in 700.10μs
+√ copy android in 126.37ms

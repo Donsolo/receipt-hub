@@ -1,0 +1,31 @@
+
+> verihub@0.1.0 build:mobile:win
+> node scripts/build-mobile.js && npx cap copy android
+
+Moving api folder temporarily: C:\Users\dariu\Documents\AntiG Agents\Verihub\src\app\api -> C:\Users\dariu\Documents\AntiG Agents\Verihub\api_temp_mobile_excluded
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.0s
+  Running TypeScript ...
+Failed to compile.
+
+./api_temp_mobile_excluded/invoices/create/route.ts:58:51
+Type error: Expected 0 arguments, but got 2.
+
+[0m [90m 56 |[39m
+ [90m 57 |[39m         [90m// Generate Document Sequence Number[39m
+[31m[1m>[22m[39m[90m 58 |[39m         [36mconst[39m seqData [33m=[39m [36mawait[39m getNextSequenceData(user[33m.[39muserId[33m,[39m [32m'INVOICE'[39m)[33m;[39m
+ [90m    |[39m                                                   [31m[1m^[22m[39m
+ [90m 59 |[39m
+ [90m 60 |[39m         [90m// Generate safe 30-day URL Token[39m
+ [90m 61 |[39m         [36mconst[39m tokenValue [33m=[39m crypto[33m.[39mrandomUUID()[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+Build failed: Command failed: cross-env NEXT_MOBILE_BUILD=true next build
+Restoring api folder...
+Api folder restored.
+Restoring actions.ts...
+Restoring reportActions.ts...
+Mobile build failed. api folder has been restored. Fix errors and retry.

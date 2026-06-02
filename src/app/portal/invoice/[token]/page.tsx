@@ -1,20 +1,15 @@
-import CustomerPortalViewer from '@/components/invoices/CustomerPortalViewer';
+import ClientPage from './ClientPage';
 
-export default async function CustomerPortalPage({
-    params,
-    searchParams
-}: {
-    params: Promise<{ token: string }>,
-    searchParams: Promise<{ src?: string, rid?: string }>
-}) {
-    const { token } = await params;
-    const { src, rid } = await searchParams;
+export async function generateStaticParams() {
+    return [{ token: 'fallback' }];
+}
 
+import { Suspense } from 'react';
+
+export default function Page({ params }: { params: any }) {
     return (
-        <CustomerPortalViewer 
-            token={token} 
-            source={src} 
-            requestLogId={rid} 
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+            <ClientPage />
+        </Suspense>
     );
 }

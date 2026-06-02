@@ -7,7 +7,7 @@ import DashboardUpgradeButton from '@/components/ui/DashboardUpgradeButton';
 import BillingDashboardWidget from '@/components/billing/BillingDashboardWidget';
 import DashboardHero from '@/components/dashboard/DashboardHero';
 
-export const dynamic = "force-dynamic";
+// export const dynamic stripped by mobile build
 
 export default async function Dashboard() {
     const cookieStore = await cookies();
@@ -27,7 +27,7 @@ export default async function Dashboard() {
     const isPro = (authUser.plan === "PRO" && authUser.planStatus !== "inactive") || authUser.role === "ADMIN" || authUser.role === "SUPER_ADMIN";
 
     // Fetch receipts for stats
-    const receipts = await getReceipts("");
+    const receipts = process.env.NEXT_MOBILE_BUILD === 'true' ? [] : await getReceipts("");
 
     // Fetch invoices if Pro user
     let userInvoices: any[] = [];

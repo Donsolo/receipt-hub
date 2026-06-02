@@ -1,0 +1,32 @@
+
+> verihub@0.1.0 build:mobile:win
+> node scripts/build-mobile.js && npx cap copy android
+
+Moving api folder temporarily: C:\Users\dariu\Documents\AntiG Agents\Verihub\src\app\api -> C:\Users\dariu\Documents\AntiG Agents\Verihub\api_temp_mobile_excluded
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.9s
+  Running TypeScript ...
+Failed to compile.
+
+./src/app/dashboard/page.tsx:78:47
+Type error: Parameter 'r' implicitly has an 'any' type.
+
+[0m [90m 76 |[39m     [36mconst[39m now [33m=[39m [36mnew[39m [33mDate[39m()[33m;[39m
+ [90m 77 |[39m     [36mconst[39m startOfMonth [33m=[39m [36mnew[39m [33mDate[39m(now[33m.[39mgetFullYear()[33m,[39m now[33m.[39mgetMonth()[33m,[39m [35m1[39m)[33m;[39m
+[31m[1m>[22m[39m[90m 78 |[39m     [36mconst[39m thisMonthReceipts [33m=[39m receipts[33m.[39mfilter(r [33m=>[39m [36mnew[39m [33mDate[39m(r[33m.[39mcreatedAt) [33m>=[39m startOfMonth)[33m.[39mlength[33m;[39m
+ [90m    |[39m                                               [31m[1m^[22m[39m
+ [90m 79 |[39m
+ [90m 80 |[39m     [36mlet[39m lastActivityStr [33m=[39m [32m"No activity yet"[39m[33m;[39m
+ [90m 81 |[39m     [36mlet[39m relativeTimeStr [33m=[39m [32m""[39m[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+Build failed: Command failed: cross-env NEXT_MOBILE_BUILD=true next build
+Restoring api folder...
+Api folder restored.
+Restoring tsconfig.json...
+Restoring actions.ts...
+Restoring reportActions.ts...
+Mobile build failed. api folder has been restored. Fix errors and retry.

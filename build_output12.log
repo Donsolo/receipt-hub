@@ -1,0 +1,20 @@
+
+> verihub@0.1.0 build:mobile:win
+> node scripts/build-mobile.js && npx cap copy android
+
+Moving api folder temporarily: C:\Users\dariu\Documents\AntiG Agents\Verihub\src\app\api -> C:\Users\dariu\Documents\AntiG Agents\Verihub\api_temp_mobile_excluded
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.1s
+  Running TypeScript ...
+  Collecting page data using 15 workers ...
+
+> Server Actions are not supported with static export.
+Read more: https://nextjs.org/docs/app/building-your-application/deploying/static-exports#unsupported-features
+Build failed: Command failed: cross-env NEXT_MOBILE_BUILD=true next build
+Restoring api folder...
+Api folder restored.
+Mobile build failed. api folder has been restored. Fix errors and retry.

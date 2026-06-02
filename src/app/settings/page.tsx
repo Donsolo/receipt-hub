@@ -1,10 +1,10 @@
 import { getBusinessProfile } from "@/lib/actions";
 import SettingsForm from "./SettingsForm";
 
-export const dynamic = "force-dynamic";
+// export const dynamic stripped by mobile build
 
 export default async function SettingsPage() {
-    const profile = await getBusinessProfile();
+    const profile = process.env.NEXT_MOBILE_BUILD === 'true' ? {} : await getBusinessProfile();
 
     return (
         <div className="space-y-6">

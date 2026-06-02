@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
     output: 'export',
     trailingSlash: true,
     images: { unoptimized: true },
+    webpack: (config) => {
+      const path = require('path');
+      config.resolve.alias['next/headers'] = path.resolve(__dirname, 'mock-headers.js');
+      return config;
+    },
   }),
   /* config options here */
 };

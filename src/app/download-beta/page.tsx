@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default async function DownloadBetaPage() {
-    const settings = await getSystemSettings();
-    const downloadUrl = settings.BETA_APK_URL || null;
+    const settings = process.env.NEXT_MOBILE_BUILD === 'true' ? {} : await getSystemSettings();
+    const downloadUrl = (settings as any).BETA_APK_URL || null;
 
     return (
         <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans">

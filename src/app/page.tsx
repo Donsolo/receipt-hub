@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 import HeroSection from '@/components/ui/HeroSection';
 import LandingPricing from '@/components/ui/LandingPricing';
 
-export const dynamic = 'force-dynamic';
+// export const dynamic stripped by mobile build
 
 export default async function LandingPage() {
   const cookieStore = await cookies();

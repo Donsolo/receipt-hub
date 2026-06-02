@@ -1,15 +1,9 @@
-import QuoteClient from './QuoteClient';
-import { Metadata } from 'next';
+import ClientPage from './ClientPage';
 
-export const metadata: Metadata = {
-    title: 'Review Quote',
-    robots: {
-        index: false,
-        follow: false,
-    }
-};
+export async function generateStaticParams() {
+    return [{ token: 'fallback' }];
+}
 
-export default async function QuotePage(props: { params: Promise<{ token: string }> }) {
-    const params = await props.params;
-    return <QuoteClient token={params.token} />;
+export default function Page({ params }: { params: any }) {
+    return <ClientPage />;
 }

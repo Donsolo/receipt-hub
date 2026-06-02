@@ -16,8 +16,8 @@ export default async function LensAnalyticsPage({ searchParams }: { searchParams
     if (!authUser) return <div className="p-8">Unauthorized</div>;
 
     // Parse range
-    const params = await searchParams;
-    const rangeParam = params.range;
+    const params = process.env.NEXT_MOBILE_BUILD === 'true' ? {} : await searchParams;
+    const rangeParam = (params as any).range;
     const daysBack = rangeParam === 'all' ? null : (rangeParam === '7' ? 7 : 30);
 
     const data = await getLensAnalytics(authUser.userId, daysBack);

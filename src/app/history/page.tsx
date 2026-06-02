@@ -1,18 +1,21 @@
 import { getReceipts } from "@/lib/actions";
 import HistoryClient from '@/components/HistoryClient';
+import { Suspense } from 'react';
 
-export const dynamic = "force-dynamic";
+// export const dynamic stripped by mobile build
 
 export default async function HistoryPage(props: {
     searchParams: Promise<{ query?: string }>;
 }) {
-    const searchParams = await props.searchParams;
-    const searchQuery = searchParams?.query || "";
-    const receipts = await getReceipts(searchQuery);
+    const searchParams = process.env.NEXT_MOBILE_BUILD === 'true' ? {} : await props.searchParams;
+    const searchQuery = (searchParams as any)?.query || "";
+    const receipts = process.env.NEXT_MOBILE_BUILD === 'true' ? [] : await getReceipts(searchQuery);
 
     return (
         <div className="min-h-screen bg-[#F4F5F9] font-sans overflow-x-hidden pb-24">
-            <HistoryClient initialReceipts={receipts} />
+            <Suspense fallback={<div>Loading history...</div>}>
+                <HistoryClient initialReceipts={receipts} />
+            </Suspense>
         </div>
     );
 }

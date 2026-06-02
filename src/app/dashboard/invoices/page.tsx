@@ -7,12 +7,12 @@ import { clsx } from 'clsx';
 import InvoiceActions from '@/components/invoices/InvoiceActions';
 import { IconFileInvoice, IconClock, IconDotsVertical } from '@tabler/icons-react';
 
-export const dynamic = "force-dynamic";
+// export const dynamic stripped by mobile build
 
 export default async function InvoicesHub(props: { searchParams?: Promise<{ filter?: string, sort?: string }> }) {
-    const searchParams = await props.searchParams;
-    const filterParam = searchParams?.filter || 'all';
-    const sortParam = searchParams?.sort || 'newest';
+    const searchParams = process.env.NEXT_MOBILE_BUILD === 'true' ? {} : await props.searchParams;
+    const filterParam = (searchParams as any)?.filter || 'all';
+    const sortParam = (searchParams as any)?.sort || 'newest';
 
     const cookieStore = await cookies();
     const token = cookieStore.get('auth_token')?.value;

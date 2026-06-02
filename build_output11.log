@@ -1,0 +1,21 @@
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 8.2s
+  Running TypeScript ...
+  Collecting page data using 15 workers ...
+Error: export const dynamic = "force-static"/export const revalidate not configured on route "/api/admin/announcements" with "output: export". See more info here: https://nextjs.org/docs/advanced-features/static-html-export
+    at module evaluation (C:\Users\dariu\Documents\AntiG Agents\Verihub\.next\server\chunks\[root-of-the-server]__3c34aa3b._.js:1:7315)
+    at instantiateModule (C:\Users\dariu\Documents\AntiG Agents\Verihub\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at instantiateRuntimeModule (C:\Users\dariu\Documents\AntiG Agents\Verihub\.next\server\chunks\[turbopack]_runtime.js:768:12)
+    at getOrInstantiateRuntimeModule (C:\Users\dariu\Documents\AntiG Agents\Verihub\.next\server\chunks\[turbopack]_runtime.js:781:12)
+    at Object.m (C:\Users\dariu\Documents\AntiG Agents\Verihub\.next\server\chunks\[turbopack]_runtime.js:790:18)
+    at Object.<anonymous> (C:\Users\dariu\Documents\AntiG Agents\Verihub\.next\server\app\api\admin\announcements\route.js:7:3)
+
+> Build error occurred
+Error: Failed to collect page data for /api/admin/announcements
+    at ignore-listed frames {
+  type: 'Error'
+}

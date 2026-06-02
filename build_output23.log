@@ -1,0 +1,35 @@
+
+> verihub@0.1.0 build:mobile:win
+> node scripts/build-mobile.js && npx cap copy android
+
+Moving api folder temporarily: C:\Users\dariu\Documents\AntiG Agents\Verihub\src\app\api -> C:\Users\dariu\Documents\AntiG Agents\Verihub\api_temp_mobile_excluded
+▲ Next.js 16.1.6 (webpack)
+- Environments: .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.0s
+  Running TypeScript ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/61) ...
+⨯ useSearchParams() should be wrapped in a suspense boundary at page "/history". Read more: https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout
+    at Q (C:\Users\dariu\Documents\AntiG Agents\Verihub\.next\server\chunks\7471.js:2:2111)
+    at o (C:\Users\dariu\Documents\AntiG Agents\Verihub\.next\server\chunks\7471.js:11:50547)
+    at A (C:\Users\dariu\Documents\AntiG Agents\Verihub\.next\server\app\history\page.js:2:20378)
+    at an (C:\Users\dariu\Documents\AntiG Agents\Verihub\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:2:84360)
+    at ai (C:\Users\dariu\Documents\AntiG Agents\Verihub\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:2:86179)
+    at ai (C:\Users\dariu\Documents\AntiG Agents\Verihub\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:2:104708)
+    at al (C:\Users\dariu\Documents\AntiG Agents\Verihub\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:2:107953)
+    at as (C:\Users\dariu\Documents\AntiG Agents\Verihub\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:2:105368)
+    at am (C:\Users\dariu\Documents\AntiG Agents\Verihub\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:2:112882)
+    at ai (C:\Users\dariu\Documents\AntiG Agents\Verihub\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:2:98808)
+Error occurred prerendering page "/history". Read more: https://nextjs.org/docs/messages/prerender-error
+Export encountered an error on /history/page: /history, exiting the build.
+⨯ Next.js build worker exited with code: 1 and signal: null
+Build failed: Command failed: cross-env NEXT_MOBILE_BUILD=true next build --webpack
+Restoring api folder...
+Api folder restored.
+Restoring tsconfig.json...
+Restoring actions.ts...
+Restoring reportActions.ts...
+Mobile build failed. api folder has been restored. Fix errors and retry.

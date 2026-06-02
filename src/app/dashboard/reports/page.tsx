@@ -3,7 +3,7 @@ import { verifyToken } from '@/lib/auth';
 import ReportsClient from './ReportsClient';
 import HeroSection from '@/components/ui/HeroSection';
 
-export const dynamic = "force-dynamic";
+// export const dynamic stripped by mobile build
 
 export default async function ReportsPage() {
     const cookieStore = await cookies();

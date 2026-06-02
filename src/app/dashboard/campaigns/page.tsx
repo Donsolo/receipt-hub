@@ -5,7 +5,7 @@ import { db } from '@/lib/db';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
-export const dynamic = "force-dynamic";
+// export const dynamic stripped by mobile build
 
 export default async function CampaignsPage() {
     const cookieStore = await cookies();

@@ -4,7 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 
-export const dynamic = "force-dynamic";
+// export const dynamic stripped by mobile build
 
 export default async function CreateInvoicePage() {
     const cookieStore = await cookies();

@@ -1,0 +1,31 @@
+
+> verihub@0.1.0 build:mobile:win
+> node scripts/build-mobile.js && npx cap copy android
+
+Moving api folder temporarily: C:\Users\dariu\Documents\AntiG Agents\Verihub\src\app\api -> C:\Users\dariu\Documents\AntiG Agents\Verihub\api_temp_mobile_excluded
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.0s
+  Running TypeScript ...
+Failed to compile.
+
+./api_temp_mobile_excluded/invoices/create/route.ts:68:40
+Type error: Property 'documentNumber' does not exist on type 'void'.
+
+[0m [90m 66 |[39m                 userId[33m:[39m user[33m.[39muserId[33m,[39m
+ [90m 67 |[39m                 customerContactId[33m:[39m customerContactId [33m||[39m [36mnull[39m[33m,[39m
+[31m[1m>[22m[39m[90m 68 |[39m                 invoiceNumber[33m:[39m seqData[33m.[39mdocumentNumber[33m,[39m
+ [90m    |[39m                                        [31m[1m^[22m[39m
+ [90m 69 |[39m                 sequenceNumber[33m:[39m seqData[33m.[39msequenceNumber[33m,[39m
+ [90m 70 |[39m                 clientName[33m,[39m
+ [90m 71 |[39m                 clientEmail[33m:[39m clientEmail [33m||[39m [36mnull[39m[33m,[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+Build failed: Command failed: cross-env NEXT_MOBILE_BUILD=true next build
+Restoring api folder...
+Api folder restored.
+Restoring actions.ts...
+Restoring reportActions.ts...
+Mobile build failed. api folder has been restored. Fix errors and retry.
