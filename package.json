@@ -8,8 +8,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "build:mobile": "NEXT_MOBILE_BUILD=true next build --webpack && npx cap copy android",
-    "build:mobile:win": "cross-env NEXT_MOBILE_BUILD=true next build --webpack && npx cap copy android",
+    "build:mobile": "node scripts/build-mobile.js && npx cap copy android",
+    "build:mobile:win": "node scripts/build-mobile.js && npx cap copy android",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate"
@@ -66,7 +66,6 @@
     "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "null-loader": "^4.0.1",
     "prisma": "^5.10.2",
     "puppeteer": "^24.37.5",
     "tailwindcss": "^4",
