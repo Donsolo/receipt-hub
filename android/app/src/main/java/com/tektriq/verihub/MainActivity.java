@@ -11,8 +11,5 @@ public class MainActivity extends BridgeActivity {
         EdgeToEdge.enable(this);
         
         super.onCreate(savedInstanceState);
-
-        // FORCE load your live app
-        bridge.getWebView().loadUrl("https://verihub.app");
     }
 }
