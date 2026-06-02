@@ -1,9 +1,9 @@
 {
   "appId": "com.tektriq.verihub",
   "appName": "Verihub",
-  "webDir": "public",
+  "webDir": "out",
   "server": {
-    "url": "https://verihub.app",
+    "androidScheme": "https",
     "allowNavigation": [
       "verihub.app",
       "*.verihub.app",
