@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -9,7 +11,7 @@ export default function BillingDashboardWidget() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/billing/summary')
+        (async () => fetch(`${API_BASE_URL}/api/billing/summary`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(res => res.json())
             .then(data => {
                 if (data.success) {

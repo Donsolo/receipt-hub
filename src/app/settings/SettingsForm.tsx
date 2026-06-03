@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState } from "react";
@@ -32,7 +34,7 @@ export default function SettingsForm({ initialData }: { initialData: BusinessPro
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch("/api/upload", {
+        const res = await fetch(`${API_BASE_URL}/api/upload`, { headers: { ...((await getAuthHeader()) as any) },
             method: "POST",
             body: formData,
         });

@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useRef } from 'react';
@@ -74,7 +76,7 @@ export default function LensUploader({ sessionId, onUploadComplete }: LensUpload
             const formData = new FormData();
             formData.append('file', compressedBlob, file.name || 'mobile_capture.jpg');
 
-            const uploadRes = await fetch('/api/upload/s3', {
+            const uploadRes = await fetch(`${API_BASE_URL}/api/upload/s3`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'POST',
                 body: formData
             });
@@ -83,9 +85,9 @@ export default function LensUploader({ sessionId, onUploadComplete }: LensUpload
             const { fileUrl } = await uploadRes.json();
 
             // Save to Session
-            const saveRes = await fetch(`/api/vero/lens/sessions/${sessionId}/images`, {
+            const saveRes = await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${sessionId}/images`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     imageUrl: fileUrl, 
                     fileSize: compressedBlob.size,

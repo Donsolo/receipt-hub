@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -35,7 +37,7 @@ function PaymentRequestCard({ metadata, isSelf }: { metadata: any, isSelf: boole
         if (!metadata?.invoiceToken || isPaid) return;
 
         const checkStatus = () => {
-            fetch(`/api/public/invoice/${metadata.invoiceToken}/payment-summary`)
+            (async () => fetch(`${API_BASE_URL}/api/public/invoice/${metadata.invoiceToken}/payment-summary`, { headers: { ...((await getAuthHeader()) as any) } }))()
                 .then(res => res.json())
                 .then(data => {
                     if (!data.error) setLiveData(data);
@@ -116,7 +118,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
 
     // Fetch Auth User
     useEffect(() => {
-        fetch('/api/auth/me')
+        (async () => fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(res => res.json())
             .then(data => {
                 if (data.id) setAuthUserId(data.id);
@@ -153,7 +155,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
     // Load Conversation Metadata (via the list API)
     useEffect(() => {
         if (!authUserId) return;
-        fetch('/api/conversations')
+        (async () => fetch(`${API_BASE_URL}/api/conversations`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(res => res.json())
             .then((data: any[]) => {
                 const convo = data.find(c => c.id === conversationId);
@@ -172,7 +174,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         if (!authUserId) return;
         const fetchMsgs = async () => {
             try {
-                const res = await fetch(`/api/conversations/${conversationId}/messages`);
+                const res = await fetch(`${API_BASE_URL}/api/conversations/${conversationId}/messages`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (res.ok) {
                     setMessages(await res.json());
                 }
@@ -228,9 +230,9 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         setMessages(prev => [...prev, newMsg]);
 
         try {
-            const res = await fetch(`/api/conversations/${conversationId}/messages`, {
+            const res = await fetch(`${API_BASE_URL}/api/conversations/${conversationId}/messages`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text })
             });
             if (res.ok) {
@@ -255,7 +257,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         if (!confirm('Are you sure you want to clear this chat history? This cannot be undone.')) return;
         setIsMenuOpen(false);
         try {
-            const res = await fetch(`/api/conversations/${conversationId}?action=clear`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/conversations/${conversationId}?action=clear`, { headers: { ...((await getAuthHeader()) as any) }, method: 'DELETE' });
             if (res.ok) {
                 setMessages([]);
             }
@@ -268,7 +270,7 @@ export default function ChatClient({ conversationId }: { conversationId: string 
         if (!confirm('Are you sure you want to delete this entire conversation?')) return;
         setIsMenuOpen(false);
         try {
-            const res = await fetch(`/api/conversations/${conversationId}?action=delete`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/conversations/${conversationId}?action=delete`, { headers: { ...((await getAuthHeader()) as any) }, method: 'DELETE' });
             if (res.ok) {
                 router.push('/dashboard/messages');
             }

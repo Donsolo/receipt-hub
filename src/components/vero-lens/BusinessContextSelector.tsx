@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -43,7 +45,7 @@ export default function BusinessContextSelector({ value, onChange }: BusinessCon
 
     const fetchCustomContexts = async () => {
         try {
-            const res = await fetch('/api/vero/lens/custom-contexts');
+            const res = await fetch(`${API_BASE_URL}/api/vero/lens/custom-contexts`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setCustomContexts(data);
@@ -57,9 +59,9 @@ export default function BusinessContextSelector({ value, onChange }: BusinessCon
         if (!newContextName.trim()) return;
         setIsSubmitting(true);
         try {
-            const res = await fetch('/api/vero/lens/custom-contexts', {
+            const res = await fetch(`${API_BASE_URL}/api/vero/lens/custom-contexts`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     name: newContextName, 
                     description: newContextDescription 

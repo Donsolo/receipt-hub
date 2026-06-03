@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -23,7 +25,7 @@ export default function VeroLensPage() {
     useEffect(() => {
         const checkAuthAndInit = async () => {
             try {
-                const res = await fetch('/api/user/profile');
+                const res = await fetch(`${API_BASE_URL}/api/user/profile`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (!res.ok) throw new Error('Unauthorized');
                 const data = await res.json();
                 
@@ -32,9 +34,9 @@ export default function VeroLensPage() {
 
                 if (isUserPro) {
                     // Create initial draft session
-                    const sessionRes = await fetch('/api/vero/lens/sessions', { 
+                    const sessionRes = await fetch(`${API_BASE_URL}/api/vero/lens/sessions`, { 
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                         body: JSON.stringify({ tradeMode })
                     });
                     if (sessionRes.ok) {
@@ -57,9 +59,9 @@ export default function VeroLensPage() {
         setIsAnalyzing(true);
         
         try {
-            const analyzeRes = await fetch(`/api/vero/lens/sessions/${session.id}/analyze`, {
+            const analyzeRes = await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}/analyze`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ tradeMode, usePricingPreset })
             });
             
@@ -78,7 +80,7 @@ export default function VeroLensPage() {
 
     const refreshSession = async () => {
         if (!session) return;
-        const res = await fetch(`/api/vero/lens/sessions/${session.id}`);
+        const res = await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}`, { headers: { ...((await getAuthHeader()) as any) } });
         if (res.ok) {
             const data = await res.json();
             setSession(data);

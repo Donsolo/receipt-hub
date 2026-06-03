@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -64,7 +66,7 @@ export default function AdminHeroManager() {
 
     const fetchHeroes = async () => {
         try {
-            const res = await fetch('/api/admin/heroes');
+            const res = await fetch(`${API_BASE_URL}/api/admin/heroes`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setHeroes(data);
@@ -82,9 +84,9 @@ export default function AdminHeroManager() {
         e.preventDefault();
         setIsSaving(true);
         try {
-            const res = await fetch(`/api/admin/heroes/${selectedPage}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/heroes/${selectedPage}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify(formState)
             });
 
@@ -121,7 +123,7 @@ export default function AdminHeroManager() {
         formData.append('file', file);
 
         try {
-            const res = await fetch('/api/admin/heroes/upload', {
+            const res = await fetch(`${API_BASE_URL}/api/admin/heroes/upload`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'POST',
                 body: formData
             });

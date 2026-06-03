@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 'use client';
 
 import { useState, useRef } from 'react';
@@ -39,7 +41,7 @@ export default function ImportContactsPage() {
         formData.append('file', file);
 
         try {
-            const res = await fetch('/api/contacts/import/preview', {
+            const res = await fetch(`${API_BASE_URL}/api/contacts/import/preview`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'POST',
                 body: formData
             });
@@ -69,7 +71,7 @@ export default function ImportContactsPage() {
         formData.append('source', source);
 
         try {
-            const res = await fetch('/api/contacts/import/confirm', {
+            const res = await fetch(`${API_BASE_URL}/api/contacts/import/confirm`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'POST',
                 body: formData
             });

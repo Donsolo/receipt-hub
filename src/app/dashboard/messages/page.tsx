@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -34,7 +36,7 @@ export default function ConversationsPage() {
 
     useEffect(() => {
         // Fetch User
-        fetch('/api/auth/me')
+        (async () => fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(res => res.json())
             .then(data => {
                 if (data.id) setAuthUserId(data.id);
@@ -42,7 +44,7 @@ export default function ConversationsPage() {
             .catch(() => { });
 
         // Fetch Conversations
-        fetch('/api/conversations')
+        (async () => fetch(`${API_BASE_URL}/api/conversations`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(res => {
                 if (res.ok) return res.json();
                 return [];

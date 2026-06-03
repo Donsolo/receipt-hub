@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -68,7 +70,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await fetch('/api/categories');
+                const res = await fetch(`${API_BASE_URL}/api/categories`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (res.ok) {
                     const data = await res.json();
                     setCategories(data);
@@ -84,9 +86,9 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
         if (!newCategoryName.trim()) return;
         setCreatingCategoryLoading(true);
         try {
-            const res = await fetch('/api/categories', {
+            const res = await fetch(`${API_BASE_URL}/api/categories`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: newCategoryName.trim() })
             });
             if (res.ok) {
@@ -138,7 +140,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
             }
             try {
                 const queryStr = debouncedQuery ? debouncedQuery : "";
-                const res = await fetch(`/api/items/suggest?q=${encodeURIComponent(queryStr)}`);
+                const res = await fetch(`${API_BASE_URL}/api/items/suggest?q=${encodeURIComponent(queryStr)}`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (res.ok) {
                     const data = await res.json();
                     setSuggestions(data);
@@ -304,7 +306,7 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
             const formData = new FormData();
             formData.append('file', file);
 
-            const res = await fetch('/api/receipts/scan', {
+            const res = await fetch(`${API_BASE_URL}/api/receipts/scan`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'POST',
                 body: formData,
             });

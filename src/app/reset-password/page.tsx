@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, Suspense } from 'react';
@@ -42,9 +44,9 @@ function ResetPasswordForm() {
         setErrorMessage('');
 
         try {
-            const res = await fetch('/api/auth/reset-password', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, token, newPassword: password }),
             });
 

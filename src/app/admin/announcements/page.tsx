@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -23,7 +25,7 @@ export default function AdminAnnouncementsPage() {
 
     const fetchAnnouncements = async () => {
         try {
-            const res = await fetch('/api/admin/announcements');
+            const res = await fetch(`${API_BASE_URL}/api/admin/announcements`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setAnnouncements(data);
@@ -43,9 +45,9 @@ export default function AdminAnnouncementsPage() {
 
         setIsSubmitting(true);
         try {
-            const res = await fetch('/api/admin/announcements', {
+            const res = await fetch(`${API_BASE_URL}/api/admin/announcements`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify(formState)
             });
 
@@ -65,9 +67,9 @@ export default function AdminAnnouncementsPage() {
 
     const handleToggleActive = async (id: string, currentActive: boolean) => {
         try {
-            const res = await fetch(`/api/admin/announcements/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/announcements/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isActive: !currentActive })
             });
 
@@ -86,7 +88,7 @@ export default function AdminAnnouncementsPage() {
         if (!confirm('Are you sure you want to completely delete this? Users who haven\'t seen it yet will never see it.')) return;
 
         try {
-            const res = await fetch(`/api/admin/announcements/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/admin/announcements/${id}`, { headers: { ...((await getAuthHeader()) as any) }, method: 'DELETE' });
             if (res.ok) {
                 setAnnouncements(announcements.filter(a => a.id !== id));
             } else {

@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -50,9 +52,9 @@ export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: {
         setIsLoading(true);
         try {
             if (action === 'toggle-payment') {
-                const res = await fetch(`/api/invoices/${invoice.id}`, {
+                const res = await fetch(`${API_BASE_URL}/api/invoices/${invoice.id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                     body: JSON.stringify({ acceptOnlinePayment: !invoice.acceptOnlinePayment })
                 });
                 if (!res.ok) {
@@ -80,7 +82,7 @@ export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: {
     };
 
     const getOrCreateToken = async () => {
-        const res = await fetch(`/api/invoices/${invoice.id}/generate-token`, { method: 'POST' });
+        const res = await fetch(`${API_BASE_URL}/api/invoices/${invoice.id}/generate-token`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' });
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.error || 'Failed to generate access link');
         return data.token;
@@ -96,7 +98,7 @@ export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: {
             alert('Secure portal link copied.');
             
             // Log activity silently
-            fetch(`/api/invoices/${invoice.id}/log-link-copy`, { method: 'POST' }).catch(() => {});
+            fetch(`${API_BASE_URL}/api/invoices/${invoice.id}/log-link-copy`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' }).catch(() => {});
         } catch (error: any) {
             console.error(error);
             alert('Failed to copy link: ' + error.message);
@@ -125,7 +127,7 @@ export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: {
     const loadConnections = async () => {
         setIsLoadingConnections(true);
         try {
-            const res = await fetch('/api/connections');
+            const res = await fetch(`${API_BASE_URL}/api/connections`, { headers: { ...((await getAuthHeader()) as any) } });
             const data = await res.json();
             if (res.ok) setConnections(data || []);
         } catch (e) {
@@ -141,9 +143,9 @@ export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: {
             const token = await getOrCreateToken();
             const link = `${window.location.origin}/invoice/${token}`;
             
-            const res = await fetch(`/api/messages/${userId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/messages/${userId}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     text: `You have received a new secure Invoice.\n\nPlease review and confirm payment here:\n${link}`
                 })
@@ -166,9 +168,9 @@ export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: {
     const handleSendPaymentRequest = async (userId: string) => {
         setIsSending(true);
         try {
-            const res = await fetch(`/api/invoices/${invoice.id}/send-payment-request`, {
+            const res = await fetch(`${API_BASE_URL}/api/invoices/${invoice.id}/send-payment-request`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     recipientUserId: userId,
                     enableOnlinePayment: true // Enable it if they agreed to the prompt
@@ -195,9 +197,9 @@ export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: {
         e.preventDefault();
         setIsSending(true);
         try {
-            const res = await fetch(`/api/invoices/${invoice.id}/send-payment-email`, {
+            const res = await fetch(`${API_BASE_URL}/api/invoices/${invoice.id}/send-payment-email`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: emailRecipient, message: customMessage, enableOnlinePayment: true })
             });
             const data = await res.json();
@@ -222,9 +224,9 @@ export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: {
             if (channel === 'EMAIL') body.email = recipientIdOrEmail;
             if (channel === 'NETWORK') body.recipientUserId = recipientIdOrEmail;
 
-            const res = await fetch(`/api/invoices/${invoice.id}/send-payment-reminder`, {
+            const res = await fetch(`${API_BASE_URL}/api/invoices/${invoice.id}/send-payment-reminder`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
             const data = await res.json();

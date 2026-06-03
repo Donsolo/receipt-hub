@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -86,12 +88,16 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
     const [contacts, setContacts] = useState<any[]>([]);
     useEffect(() => {
         if (isPro) {
-            fetch('/api/contacts')
-                .then(res => res.json())
-                .then(data => {
+            const fetchContacts = async () => {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/contacts`, { headers: { ...((await getAuthHeader()) as any) } });
+                    const data = await res.json();
                     if (data && Array.isArray(data)) setContacts(data);
-                })
-                .catch(console.error);
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+            fetchContacts();
         }
     }, [isPro]);
 
@@ -161,7 +167,7 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
             }
             try {
                 const queryStr = debouncedQuery ? debouncedQuery : "";
-                const res = await fetch(`/api/items/suggest?q=${encodeURIComponent(queryStr)}`);
+                const res = await fetch(`${API_BASE_URL}/api/items/suggest?q=${encodeURIComponent(queryStr)}`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (res.ok) {
                     const data = await res.json();
                     setSuggestions(data);

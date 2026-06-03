@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,15 +10,20 @@ export default function PaymentInsightsCard({ invoiceId }: { invoiceId: string }
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`/api/invoices/${invoiceId}/payment-insights`)
-            .then(res => res.json())
-            .then(data => {
+        const fetchInsights = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/invoices/${invoiceId}/payment-insights`, { headers: { ...((await getAuthHeader()) as any) } });
+                const data = await res.json();
                 if (data.success) {
                     setInsights(data.insights);
                 }
-            })
-            .catch(console.error)
-            .finally(() => setLoading(false));
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchInsights();
     }, [invoiceId]);
 
     if (loading) {

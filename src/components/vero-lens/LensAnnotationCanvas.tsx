@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -38,9 +40,9 @@ export default function LensAnnotationCanvas({ imageId, imageUrl, initialAnnotat
 
     const saveAnnotations = useCallback(async (newAnnotations: Annotation[]) => {
         try {
-            await fetch(`/api/vero/lens/images/${imageId}/annotations`, {
+            await fetch(`${API_BASE_URL}/api/vero/lens/images/${imageId}/annotations`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ annotations: newAnnotations })
             });
         } catch (error) {

@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -31,7 +33,7 @@ export default function BundlesClient() {
 
     const fetchBundles = async () => {
         try {
-            const res = await fetch('/api/bundles');
+            const res = await fetch(`${API_BASE_URL}/api/bundles`, { headers: { ...((await getAuthHeader()) as any) } });
             if (!res.ok) throw new Error('Failed to fetch bundles');
             const data = await res.json();
             setBundles(data);
@@ -87,7 +89,7 @@ export default function BundlesClient() {
         if (!window.confirm(`Are you sure you want to delete the bundle "${name}"? Receipts inside it will NOT be deleted.`)) return;
 
         try {
-            const res = await fetch(`/api/bundles/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/bundles/${id}`, { headers: { ...((await getAuthHeader()) as any) }, method: 'DELETE' });
             if (!res.ok) throw new Error('Failed to delete bundle');
             setBundles(prev => prev.filter(b => b.id !== id));
         } catch (err: any) {

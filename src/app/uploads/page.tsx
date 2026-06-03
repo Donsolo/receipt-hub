@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -49,7 +51,7 @@ export default function UploadsPage() {
 
     const fetchCategories = async () => {
         try {
-            const res = await fetch('/api/categories');
+            const res = await fetch(`${API_BASE_URL}/api/categories`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setCategories(data);
@@ -61,7 +63,7 @@ export default function UploadsPage() {
 
     const fetchReceipts = async () => {
         try {
-            const res = await fetch('/api/uploaded-receipts');
+            const res = await fetch(`${API_BASE_URL}/api/uploaded-receipts`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setReceipts(data);
@@ -84,7 +86,7 @@ export default function UploadsPage() {
         if (!confirm('Are you sure you want to delete this receipt?')) return;
 
         try {
-            const res = await fetch(`/api/receipts/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/receipts/${id}`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'DELETE',
             });
             if (res.ok) {
@@ -116,9 +118,9 @@ export default function UploadsPage() {
 
         setSaving(true);
         try {
-            const res = await fetch(`/api/receipts/${editingReceipt.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/receipts/${editingReceipt.id}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     clientName: editForm.clientName,
                     total: parseFloat(editForm.total) || 0,
@@ -148,7 +150,7 @@ export default function UploadsPage() {
         setIsBundleModalOpen(true);
         setIsBundlesLoading(true);
         try {
-            const res = await fetch('/api/bundles');
+            const res = await fetch(`${API_BASE_URL}/api/bundles`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setUserBundles(data);
@@ -164,9 +166,9 @@ export default function UploadsPage() {
         if (!selectedReceiptForBundle) return;
         setAddingToBundleId(bundleId);
         try {
-            const res = await fetch(`/api/bundles/${bundleId}/add-receipt`, {
+            const res = await fetch(`${API_BASE_URL}/api/bundles/${bundleId}/add-receipt`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ receiptId: selectedReceiptForBundle.id })
             });
             const data = await res.json();

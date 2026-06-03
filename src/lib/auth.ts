@@ -49,11 +49,20 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
     }
 }
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 export async function getCurrentUser() {
     const cookieStore = await Promise.resolve(cookies());
-    const token = cookieStore.get('auth_token')?.value;
+    let token = cookieStore.get('auth_token')?.value;
+    
+    if (!token) {
+        const headersList = await Promise.resolve(headers());
+        const authHeader = headersList.get('authorization');
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.substring(7);
+        }
+    }
+
     if (!token) return null;
     const user = await verifyToken(token);
     if (!user) return null;

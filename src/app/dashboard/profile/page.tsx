@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -36,9 +38,9 @@ export default function ProfilePage() {
         if (newTheme === theme) return;
         setTheme(newTheme);
         try {
-            await fetch('/api/user/theme', {
+            await fetch(`${API_BASE_URL}/api/user/theme`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ theme: newTheme })
             });
         } catch (error) {
@@ -82,7 +84,7 @@ export default function ProfilePage() {
         formData.append("file", file);
 
         try {
-            const res = await fetch("/api/upload", {
+            const res = await fetch(`${API_BASE_URL}/api/upload`, { headers: { ...((await getAuthHeader()) as any) },
                 method: "POST",
                 body: formData,
             });
@@ -100,7 +102,7 @@ export default function ProfilePage() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await fetch('/api/auth/me'); // Using existing route to get core info
+                const res = await fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } }); // Using existing route to get core info
                 if (!res.ok) {
                     router.push('/login');
                     return;
@@ -112,7 +114,7 @@ export default function ProfilePage() {
                 // but let's just make /api/user/profile accept GET.
                 // Wait, I only created PATCH. Let me update the route to support GET as well.
                 // Try to fetch profile directly
-                const profileRes = await fetch('/api/user/profile', { cache: 'no-store' });
+                const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, { headers: { ...((await getAuthHeader()) as any) }, cache: 'no-store' });
 
                 if (profileRes.ok) {
                     // Fetch core auth to securely get role
@@ -131,7 +133,7 @@ export default function ProfilePage() {
 
                     // Fetch notification preferences directly after profile works
                     try {
-                        const notifRes = await fetch('/api/user/notification-preferences');
+                        const notifRes = await fetch(`${API_BASE_URL}/api/user/notification-preferences`, { headers: { ...((await getAuthHeader()) as any) } });
                         if (notifRes.ok) {
                             const notifData = await notifRes.json();
                             setNotifyConnectionRequests(notifData.notifyConnectionRequests ?? true);
@@ -145,7 +147,7 @@ export default function ProfilePage() {
 
                 } else if (profileRes.status === 404) {
                     // User exists in cookie but not in database (ghost session due to DB swap)
-                    await fetch('/api/auth/logout', { method: 'POST', cache: 'no-store' });
+                    await fetch(`${API_BASE_URL}/api/auth/logout`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST', cache: 'no-store' });
                     router.refresh();
                     router.push('/login');
                 } else {
@@ -167,9 +169,9 @@ export default function ProfilePage() {
         setToastMessage(null);
 
         try {
-            const res = await fetch('/api/user/profile', {
+            const res = await fetch(`${API_BASE_URL}/api/user/profile`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: name.trim() || null,
                     businessName: businessName.trim() || null,
@@ -217,9 +219,9 @@ export default function ProfilePage() {
         if (key === 'notifySystem') setNotifySystem(newValue);
 
         try {
-            await fetch('/api/user/notification-preferences', {
+            await fetch(`${API_BASE_URL}/api/user/notification-preferences`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ [key]: newValue })
             });
         } catch (err) {
@@ -671,9 +673,9 @@ export default function ProfilePage() {
                                 }
                                 setSavingPassword(true);
                                 try {
-                                    const res = await fetch('/api/auth/password', {
+                                    const res = await fetch(`${API_BASE_URL}/api/auth/password`, {
                                         method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
+                                        headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                                         body: JSON.stringify({ currentPassword, newPassword })
                                     });
                                     const data = await res.json();
@@ -746,7 +748,7 @@ export default function ProfilePage() {
                             </div>
                             <button
                                 onClick={async () => {
-                                    await fetch('/api/auth/logout', { method: 'POST' });
+                                    await fetch(`${API_BASE_URL}/api/auth/logout`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' });
                                     router.refresh();
                                     router.push('/');
                                 }}

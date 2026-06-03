@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         // Set Cookie using shared helper
         const cookie = createAuthCookie(token);
 
-        const response = NextResponse.json({ success: true, user: { email: user.email, role: user.role } });
+        const response = NextResponse.json({ success: true, user: { email: user.email, role: user.role }, token });
         response.headers.set('Set-Cookie', cookie);
 
         return response;

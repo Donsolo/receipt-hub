@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -22,7 +24,7 @@ export default function BroadcastDisplay() {
 
     const fetchActiveBroadcasts = async () => {
         try {
-            const res = await fetch('/api/broadcasts/active');
+            const res = await fetch(`${API_BASE_URL}/api/broadcasts/active`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 if (data.length > 0) {
@@ -40,7 +42,7 @@ export default function BroadcastDisplay() {
     useEffect(() => {
         if (currentBroadcast) {
             // Track view when shown
-            fetch(`/api/broadcasts/view/${currentBroadcast.id}`, { method: 'POST' })
+            (async () => fetch(`${API_BASE_URL}/api/broadcasts/view/${currentBroadcast.id}`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' }))()
                 .catch(err => console.error('Failed to track view:', err));
         }
     }, [currentBroadcast?.id]);
@@ -49,9 +51,9 @@ export default function BroadcastDisplay() {
         if (!currentBroadcast) return;
 
         try {
-            await fetch('/api/broadcasts/dismiss', {
+            await fetch(`${API_BASE_URL}/api/broadcasts/dismiss`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ broadcastId: currentBroadcast.id })
             });
 

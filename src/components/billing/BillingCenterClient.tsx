@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -15,9 +17,9 @@ export default function BillingCenterClient() {
 
     useEffect(() => {
         Promise.all([
-            fetch('/api/billing/incoming').then(res => res.json()),
-            fetch('/api/billing/outgoing').then(res => res.json()),
-            fetch('/api/billing/installments').then(res => res.json())
+            (async () => fetch(`${API_BASE_URL}/api/billing/incoming`, { headers: { ...((await getAuthHeader()) as any) } }))().then(res => res.json()),
+            (async () => fetch(`${API_BASE_URL}/api/billing/outgoing`, { headers: { ...((await getAuthHeader()) as any) } }))().then(res => res.json()),
+            (async () => fetch(`${API_BASE_URL}/api/billing/installments`, { headers: { ...((await getAuthHeader()) as any) } }))().then(res => res.json())
         ]).then(([incRes, outRes, instRes]) => {
             if (incRes.success) setIncoming(incRes.data);
             if (outRes.success) setOutgoing(outRes.data);

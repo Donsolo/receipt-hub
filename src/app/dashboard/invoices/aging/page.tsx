@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -10,7 +12,7 @@ export default function InvoiceAgingDashboard() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        fetch('/api/invoices/aging')
+        (async () => fetch(`${API_BASE_URL}/api/invoices/aging`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(res => res.json())
             .then(data => {
                 if (data.error) throw new Error(data.error);

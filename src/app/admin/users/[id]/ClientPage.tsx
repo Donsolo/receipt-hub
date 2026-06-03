@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState, use } from 'react';
@@ -30,7 +32,7 @@ export default function AdminUserDetailsPage() {
     const fetchUser = async () => {
         try {
             // Fetch target user
-            const res = await fetch(`/api/admin/users/${params.id}`);
+            const res = await fetch(`${API_BASE_URL}/api/admin/users/${params.id}`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setUser(data);
@@ -44,7 +46,7 @@ export default function AdminUserDetailsPage() {
             }
 
             // Fetch current user (me) for permissions
-            const meRes = await fetch('/api/auth/me');
+            const meRes = await fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } });
             if (meRes.ok) {
                 const me = await meRes.json();
                 setCurrentUser(me);
@@ -65,9 +67,9 @@ export default function AdminUserDetailsPage() {
         const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
 
         try {
-            const res = await fetch(`/api/admin/users/${user.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/users/${user.id}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: newRole }),
             });
 
@@ -85,7 +87,7 @@ export default function AdminUserDetailsPage() {
         if (!user || !confirm('Are you sure you want to delete this user and ALL their data?')) return;
 
         try {
-            const res = await fetch(`/api/admin/users/${user.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/users/${user.id}`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'DELETE',
             });
             if (res.ok) {
@@ -102,7 +104,7 @@ export default function AdminUserDetailsPage() {
         if (!confirm(`Are you sure you want to delete this ${type} receipt?`)) return;
 
         try {
-            const res = await fetch(`/api/admin/receipts/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/receipts/${id}`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'DELETE',
             });
             if (res.ok) {

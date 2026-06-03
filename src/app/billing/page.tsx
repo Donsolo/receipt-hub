@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -13,7 +15,7 @@ export default function BillingPage() {
 
     useEffect(() => {
         // Fetch user profile to determine current plan
-        fetch('/api/user/profile')
+        (async () => fetch(`${API_BASE_URL}/api/user/profile`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(res => res.json())
             .then(data => {
                 setPlan(data.plan || 'CORE');
@@ -31,7 +33,7 @@ export default function BillingPage() {
         try {
             setLoading(true);
             setError(null);
-            const res = await fetch('/api/billing/create-checkout-session', {
+            const res = await fetch(`${API_BASE_URL}/api/billing/create-checkout-session`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'POST',
             });
             const data = await res.json();
@@ -53,7 +55,7 @@ export default function BillingPage() {
         try {
             setLoading(true);
             setError(null);
-            const res = await fetch('/api/billing/create-portal-session', {
+            const res = await fetch(`${API_BASE_URL}/api/billing/create-portal-session`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'POST',
             });
             const data = await res.json();

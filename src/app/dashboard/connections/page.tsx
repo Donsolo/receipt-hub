@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -88,7 +90,7 @@ export default function ConnectionsPage() {
 
     // Fetch auth userId on mount for message rendering logic
     useEffect(() => {
-        fetch('/api/auth/me')
+        (async () => fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(res => res.json())
             .then(data => {
                 if (data.id) {
@@ -109,8 +111,8 @@ export default function ConnectionsPage() {
         try {
             const timestamp = Date.now();
             const [incomingRes, connectionsRes] = await Promise.all([
-                fetch(`/api/connections/incoming?t=${timestamp}`, { cache: 'no-store' }),
-                fetch(`/api/connections?t=${timestamp}`, { cache: 'no-store' })
+                (async () => fetch(`${API_BASE_URL}/api/connections/incoming?t=${timestamp}`, { headers: { ...((await getAuthHeader()) as any) }, cache: 'no-store' }))(),
+                (async () => fetch(`${API_BASE_URL}/api/connections?t=${timestamp}`, { headers: { ...((await getAuthHeader()) as any) }, cache: 'no-store' }))()
             ]);
 
             if (incomingRes.ok) setIncomingRequests(await incomingRes.json());
@@ -130,7 +132,7 @@ export default function ConnectionsPage() {
         const fetchSuggested = async () => {
             try {
                 // simple seed to get some businesses for suggestions
-                const res = await fetch(`/api/connections/search?q=a`);
+                const res = await fetch(`${API_BASE_URL}/api/connections/search?q=a`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (res.ok) {
                     const data: UserResult[] = await res.json();
                     const connIds = new Set(connections.map(c => c.connectedUser.id));
@@ -156,7 +158,7 @@ export default function ConnectionsPage() {
 
             setIsSearching(true);
             try {
-                const res = await fetch(`/api/connections/search?q=${encodeURIComponent(searchQuery)}`);
+                const res = await fetch(`${API_BASE_URL}/api/connections/search?q=${encodeURIComponent(searchQuery)}`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (res.ok) {
                     setSearchResults(await res.json());
                 }
@@ -178,7 +180,7 @@ export default function ConnectionsPage() {
 
         setEmailSearchStatus('searching');
         try {
-            const res = await fetch(`/api/connections/search-email?email=${encodeURIComponent(email)}`);
+            const res = await fetch(`${API_BASE_URL}/api/connections/search-email?email=${encodeURIComponent(email)}`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 if (data.found) {
@@ -198,9 +200,9 @@ export default function ConnectionsPage() {
     const handleConnect = async (userId: string) => {
         setActionLoading(userId);
         try {
-            const res = await fetch('/api/connections/request', {
+            const res = await fetch(`${API_BASE_URL}/api/connections/request`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ receiverId: userId })
             });
 
@@ -227,9 +229,9 @@ export default function ConnectionsPage() {
     const handleRespond = async (connectionId: string, status: 'accepted' | 'declined') => {
         setActionLoading(connectionId);
         try {
-            const res = await fetch(`/api/connections/${connectionId}/respond`, {
+            const res = await fetch(`${API_BASE_URL}/api/connections/${connectionId}/respond`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status })
             });
 
@@ -271,9 +273,9 @@ export default function ConnectionsPage() {
     const handleOpenMessages = async (userId: string) => {
         setActionLoading(userId);
         try {
-            const res = await fetch('/api/conversations', {
+            const res = await fetch(`${API_BASE_URL}/api/conversations`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ targetUserId: userId })
             });
             if (res.ok) {

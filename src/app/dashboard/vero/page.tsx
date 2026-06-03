@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -28,7 +30,7 @@ export default function VeroSuitePage() {
 
         const checkPlan = async () => {
             try {
-                const res = await fetch('/api/user/profile');
+                const res = await fetch(`${API_BASE_URL}/api/user/profile`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (res.ok) {
                     const data = await res.json();
                     const isUserPro = (data.plan === 'PRO' && data.planStatus !== 'inactive') || data.role === 'ADMIN' || data.role === 'SUPER_ADMIN';

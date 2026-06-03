@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -56,8 +58,8 @@ export default function AdminUsersPage() {
     const fetchData = async () => {
         try {
             const [usersRes, usageRes] = await Promise.all([
-                fetch('/api/admin/users'),
-                fetch('/api/admin/usage')
+                fetch(`${API_BASE_URL}/api/admin/users`, { headers: { ...((await getAuthHeader()) as any) } }),
+                fetch(`${API_BASE_URL}/api/admin/usage`, { headers: { ...((await getAuthHeader()) as any) } })
             ]);
 
             if (usersRes.status === 401 || usageRes.status === 401) {
@@ -110,7 +112,7 @@ export default function AdminUsersPage() {
         if (!confirm(`Are you sure you want to delete user ${email} AND all their receipts (including images)? This cannot be undone.`)) return;
 
         try {
-            const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, { headers: { ...((await getAuthHeader()) as any) }, method: 'DELETE' });
             if (res.ok) {
                 fetchData();
             } else {

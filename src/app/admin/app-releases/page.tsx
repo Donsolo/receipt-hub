@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -15,7 +17,7 @@ export default function AppReleasesAdminPage() {
         // Fetch current settings to see if BETA_APK_URL exists
         const fetchSettings = async () => {
             try {
-                const res = await fetch('/api/admin/settings');
+                const res = await fetch(`${API_BASE_URL}/api/admin/settings`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (res.ok) {
                     const data = await res.json();
                     if (data.BETA_APK_URL) {
@@ -53,9 +55,9 @@ export default function AppReleasesAdminPage() {
         try {
             // 1. Get Presigned URL
             setUploadProgress(10);
-            const presignRes = await fetch('/api/admin/upload-apk/presign', {
+            const presignRes = await fetch(`${API_BASE_URL}/api/admin/upload-apk/presign`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     filename: file.name,
                     fileType: 'application/vnd.android.package-archive',
@@ -99,9 +101,9 @@ export default function AppReleasesAdminPage() {
             setUploadProgress(95);
 
             // 3. Save URL to Settings
-            const setRes = await fetch('/api/admin/settings', {
+            const setRes = await fetch(`${API_BASE_URL}/api/admin/settings`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ BETA_APK_URL: fileUrl }),
             });
 

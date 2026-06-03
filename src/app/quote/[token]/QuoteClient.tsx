@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -20,7 +22,7 @@ export default function QuoteClient({ token }: { token: string }) {
     useEffect(() => {
         const fetchQuote = async () => {
             try {
-                const res = await fetch(`/api/public/lens/quote/${token}`);
+                const res = await fetch(`${API_BASE_URL}/api/public/lens/quote/${token}`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (!res.ok) {
                     const text = await res.text();
                     setError(text);
@@ -40,9 +42,9 @@ export default function QuoteClient({ token }: { token: string }) {
     const handleAction = async (actionType: 'approve' | 'reject' | 'revision') => {
         setIsSubmitting(true);
         try {
-            const res = await fetch(`/api/public/lens/quote/${token}/action`, {
+            const res = await fetch(`${API_BASE_URL}/api/public/lens/quote/${token}/action`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: actionType,
                     customerName,

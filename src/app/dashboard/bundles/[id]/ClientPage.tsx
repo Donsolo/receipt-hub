@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -46,7 +48,7 @@ export default function BundleDetailPage() {
 
     const fetchBundle = async () => {
         try {
-            const res = await fetch(`/api/bundles/${params.id}`);
+            const res = await fetch(`${API_BASE_URL}/api/bundles/${params.id}`, { headers: { ...((await getAuthHeader()) as any) } });
             if (!res.ok) throw new Error('Failed to fetch bundle details');
             const data = await res.json();
             setBundle(data);
@@ -61,7 +63,7 @@ export default function BundleDetailPage() {
         if (!confirm('Remove this receipt from the bundle?')) return;
 
         try {
-            const res = await fetch(`/api/bundles/${params.id}/remove-receipt?receiptId=${receiptId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/bundles/${params.id}/remove-receipt?receiptId=${receiptId}`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'DELETE'
             });
             if (!res.ok) throw new Error('Failed to remove receipt');

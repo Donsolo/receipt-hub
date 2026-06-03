@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -20,7 +22,7 @@ export default function GlobalMessagePage() {
 
     useEffect(() => {
         // Fetch approximate user counts for the warning dialog
-        fetch('/api/admin/global-message/stats')
+        (async () => fetch(`${API_BASE_URL}/api/admin/global-message/stats`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(res => res.json())
             .then(data => {
                 setStats(data);
@@ -39,9 +41,9 @@ export default function GlobalMessagePage() {
         setShowConfirm(false);
 
         try {
-            const res = await fetch('/api/admin/global-message', {
+            const res = await fetch(`${API_BASE_URL}/api/admin/global-message`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify(formState)
             });
 

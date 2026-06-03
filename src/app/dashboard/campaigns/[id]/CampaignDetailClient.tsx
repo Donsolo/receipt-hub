@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 'use client';
 
 import { useState } from 'react';
@@ -16,7 +18,7 @@ export default function CampaignDetailClient({ campaign }: { campaign: any }) {
         setSending(true);
         setError('');
         try {
-            const res = await fetch(`/api/campaigns/${campaign.id}/send`, { method: 'POST' });
+            const res = await fetch(`${API_BASE_URL}/api/campaigns/${campaign.id}/send`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' });
             const data = await res.json();
             if (res.ok) {
                 setSuccess(`Campaign successfully sent to ${data.successCount} recipients.`);

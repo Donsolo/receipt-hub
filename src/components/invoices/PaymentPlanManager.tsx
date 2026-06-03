@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -90,9 +92,9 @@ export default function PaymentPlanManager({ invoiceId, invoiceTotal, initialPla
         setError('');
 
         try {
-            const res = await fetch(`/api/invoices/${invoiceId}/installments`, {
+            const res = await fetch(`${API_BASE_URL}/api/invoices/${invoiceId}/installments`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     paymentPlanEnabled: enabled,
                     installments: enabled ? installments.map(i => ({ ...i, amount: Number(i.amount) })) : []

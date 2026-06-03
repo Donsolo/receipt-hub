@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState } from "react";
@@ -10,7 +12,7 @@ export default function DuplicateButton({ receiptId }: { receiptId: string }) {
     const handleDuplicate = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/receipts/${receiptId}/duplicate`, {
+            const res = await fetch(`${API_BASE_URL}/api/receipts/${receiptId}/duplicate`, { headers: { ...((await getAuthHeader()) as any) },
                 method: "POST",
             });
             if (res.ok) {

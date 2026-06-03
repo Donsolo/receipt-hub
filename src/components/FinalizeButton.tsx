@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState } from "react";
@@ -11,7 +13,7 @@ export default function FinalizeButton({ receiptId, className }: { receiptId: st
     const handleFinalize = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/receipts/${receiptId}/finalize`, {
+            const res = await fetch(`${API_BASE_URL}/api/receipts/${receiptId}/finalize`, { headers: { ...((await getAuthHeader()) as any) },
                 method: "POST",
             });
             if (res.ok) {

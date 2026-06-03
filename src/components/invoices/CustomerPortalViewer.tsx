@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -28,15 +30,15 @@ export default function CustomerPortalViewer({ token, source, requestLogId }: Cu
     useEffect(() => {
         async function fetchInvoice() {
             try {
-                const res = await fetch(`/api/public/invoice/${token}`);
+                const res = await fetch(`${API_BASE_URL}/api/public/invoice/${token}`, { headers: { ...((await getAuthHeader()) as any) } });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Failed to load portal');
                 setInvoice(data.invoice);
 
                 // Safely track the view
-                fetch(`/api/public/invoice/${token}/track-payment-event`, {
+                fetch(`${API_BASE_URL}/api/public/invoice/${token}/track-payment-event`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         eventType: 'PORTAL_VIEW',
                         channel: source || 'PUBLIC',
@@ -80,9 +82,9 @@ export default function CustomerPortalViewer({ token, source, requestLogId }: Cu
         setIsCheckoutLoading(true);
         try {
             // Track Click
-            await fetch(`/api/public/invoice/${token}/track-payment-event`, {
+            await fetch(`${API_BASE_URL}/api/public/invoice/${token}/track-payment-event`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     eventType: installmentId ? 'INSTALLMENT_CTA_CLICK' : 'PAYMENT_CTA_CLICK',
                     channel: source || 'PUBLIC',
@@ -92,9 +94,9 @@ export default function CustomerPortalViewer({ token, source, requestLogId }: Cu
             }).catch(() => {});
 
             // Redirect to Stripe
-            const res = await fetch(`/api/public/invoice/${token}/create-checkout-session`, {
+            const res = await fetch(`${API_BASE_URL}/api/public/invoice/${token}/create-checkout-session`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ installmentId })
             });
             const data = await res.json();

@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState } from 'react';
@@ -16,9 +18,9 @@ export default function ConnectionProfileClient({ targetUserId, connectionId }: 
     const handleOpenMessages = async () => {
         setActionLoading(true);
         try {
-            const res = await fetch('/api/conversations', {
+            const res = await fetch(`${API_BASE_URL}/api/conversations`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ targetUserId })
             });
             if (res.ok) {

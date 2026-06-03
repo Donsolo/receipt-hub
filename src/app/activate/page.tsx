@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import React, { useState } from 'react';
@@ -8,7 +10,7 @@ export default function ActivatePage() {
     const handleActivate = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/activate/create-session', { method: 'POST' });
+            const res = await fetch(`${API_BASE_URL}/api/activate/create-session`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' });
             const data = await res.json();
             if (data.url) {
                 window.location.href = data.url;

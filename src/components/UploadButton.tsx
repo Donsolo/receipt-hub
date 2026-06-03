@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useRef } from 'react';
@@ -77,7 +79,7 @@ export default function UploadButton({
             const formData = new FormData();
             formData.append('file', compressedBlob, file.name || 'mobile_capture.jpg');
 
-            const uploadRes = await fetch('/api/upload/s3', {
+            const uploadRes = await fetch(`${API_BASE_URL}/api/upload/s3`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'POST',
                 body: formData
             });

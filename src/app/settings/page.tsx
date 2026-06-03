@@ -4,7 +4,7 @@ import SettingsForm from "./SettingsForm";
 // export const dynamic stripped by mobile build
 
 export default async function SettingsPage() {
-    const profile = process.env.NEXT_MOBILE_BUILD === 'true' ? {} : await getBusinessProfile();
+    const profile = process.env.NEXT_MOBILE_BUILD === 'true' ? ({} as any) : await getBusinessProfile();
 
     return (
         <div className="space-y-6">

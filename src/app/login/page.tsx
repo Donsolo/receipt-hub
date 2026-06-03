@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState } from 'react';
@@ -15,9 +17,9 @@ export default function LoginPage() {
         e.preventDefault();
         setError('');
 
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
         });
 

@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -94,9 +96,9 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
     const handleSign = async (dataUrl: string) => {
         setIsSigning(true);
         try {
-            const res = await fetch(`/api/public/invoice/${token}/sign`, {
+            const res = await fetch(`${API_BASE_URL}/api/public/invoice/${token}/sign`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ signature: dataUrl })
             });
             const data = await res.json();
@@ -117,7 +119,7 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
     useEffect(() => {
         const fetchInvoice = async () => {
             try {
-                const res = await fetch(`/api/public/invoice/${token}`);
+                const res = await fetch(`${API_BASE_URL}/api/public/invoice/${token}`, { headers: { ...((await getAuthHeader()) as any) } });
                 const data = await res.json();
                 
                 if (!res.ok || !data.success) {
@@ -130,7 +132,7 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
                 const userAgent = navigator.userAgent.toLowerCase();
                 const isBot = /bot|googlebot|crawler|spider|robot|crawling|headlesschrome|puppeteer|verihub-pdf/i.test(userAgent);
                 if (!isBot) {
-                    fetch(`/api/public/invoice/${token}/track`, { method: 'POST' }).catch(() => {});
+                    fetch(`${API_BASE_URL}/api/public/invoice/${token}/track`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' }).catch(() => {});
                 }
             } catch (err: any) {
                 setError(err.message);
@@ -434,9 +436,9 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
                                                     onClick={async () => {
                                                         setIsCheckoutLoading(true);
                                                         try {
-                                                            const res = await fetch(`/api/public/invoice/${token}/create-checkout-session`, { 
+                                                            const res = await fetch(`${API_BASE_URL}/api/public/invoice/${token}/create-checkout-session`, { 
                                                                 method: 'POST',
-                                                                headers: { 'Content-Type': 'application/json' },
+                                                                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({ installmentId: inst.id })
                                                             });
                                                             const data = await res.json();
@@ -487,7 +489,7 @@ export default function PublicInvoiceViewer({ token, isAuthenticated = false }: 
                                     onClick={async () => {
                                         setIsCheckoutLoading(true);
                                         try {
-                                            const res = await fetch(`/api/public/invoice/${token}/create-checkout-session`, { method: 'POST' });
+                                            const res = await fetch(`${API_BASE_URL}/api/public/invoice/${token}/create-checkout-session`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' });
                                             const data = await res.json();
                                             if (!res.ok || !data.success) {
                                                 throw new Error(data.error || 'Failed to initialize secure checkout.');

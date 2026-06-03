@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState } from "react";
@@ -35,9 +37,9 @@ export default function LensResultsPanel({ session, onLineItemUpdate }: { sessio
 
     const handleSaveEdit = async () => {
         try {
-            await fetch(`/api/vero/lens/sessions/${session.id}/line-items/${editingItemId}`, {
+            await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}/line-items/${editingItemId}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title: editForm.title,
                     description: editForm.description,
@@ -56,9 +58,9 @@ export default function LensResultsPanel({ session, onLineItemUpdate }: { sessio
 
     const handleQuestionAnswer = async (qId: string, answer: string) => {
         try {
-            await fetch(`/api/vero/lens/sessions/${session.id}/questions/${qId}`, {
+            await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}/questions/${qId}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ answer })
             });
         } catch (error) {
@@ -74,9 +76,9 @@ export default function LensResultsPanel({ session, onLineItemUpdate }: { sessio
 
         setIsSaving(true);
         try {
-            const res = await fetch(`/api/vero/lens/sessions/${session.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: 'SAVED' })
             });
             if (res.ok) {
@@ -95,9 +97,9 @@ export default function LensResultsPanel({ session, onLineItemUpdate }: { sessio
     const handleReAnalyze = async () => {
         setIsReAnalyzing(true);
         try {
-            const analyzeRes = await fetch(`/api/vero/lens/sessions/${session.id}/analyze`, {
+            const analyzeRes = await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}/analyze`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     tradeMode: session.tradeMode,
                     usePricingPreset: true 
@@ -121,9 +123,9 @@ export default function LensResultsPanel({ session, onLineItemUpdate }: { sessio
     const handleConvert = async () => {
         setIsConverting(true);
         try {
-            const res = await fetch(`/api/vero/lens/sessions/${session.id}/convert-to-invoice`, {
+            const res = await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}/convert-to-invoice`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' }
             });
             if (res.ok) {
                 const data = await res.json();
@@ -142,9 +144,9 @@ export default function LensResultsPanel({ session, onLineItemUpdate }: { sessio
     const handleCreateShare = async () => {
         setIsSharing(true);
         try {
-            const res = await fetch(`/api/vero/lens/sessions/${session.id}/share`, {
+            const res = await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}/share`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ allowApproval: true, allowSignature: true, customerEmail: shareEmail })
             });
             if (res.ok) {
@@ -170,9 +172,9 @@ export default function LensResultsPanel({ session, onLineItemUpdate }: { sessio
         }
         setIsReminding(true);
         try {
-            const res = await fetch(`/api/vero/lens/sessions/${session.id}/share/reminder`, {
+            const res = await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}/share/reminder`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ customerEmail: shareEmail })
             });
             if (res.ok) {
@@ -193,7 +195,7 @@ export default function LensResultsPanel({ session, onLineItemUpdate }: { sessio
     const handleRevokeShare = async () => {
         setIsSharing(true);
         try {
-            const res = await fetch(`/api/vero/lens/sessions/${session.id}/share`, {
+            const res = await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}/share`, { headers: { ...((await getAuthHeader()) as any) },
                 method: 'DELETE'
             });
             if (res.ok) {
@@ -213,9 +215,9 @@ export default function LensResultsPanel({ session, onLineItemUpdate }: { sessio
         }
         setIsVersioning(true);
         try {
-            const res = await fetch(`/api/vero/lens/sessions/${session.id}/versions`, {
+            const res = await fetch(`${API_BASE_URL}/api/vero/lens/sessions/${session.id}/versions`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ changeSummary: versionSummary })
             });
             if (res.ok) {

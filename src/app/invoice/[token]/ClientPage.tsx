@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 'use client';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -9,7 +11,7 @@ export default function PublicInvoicePage() {
 
     useEffect(() => {
         // TODO Phase 4: replace with fetch(`${API_BASE_URL}/api/...`)
-        fetch('/api/PLACEHOLDER/auth-status')
+        (async () => fetch(`${API_BASE_URL}/api/PLACEHOLDER/auth-status`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(r => r.json())
             .then(data => setIsAuthenticated(data.isAuthenticated))
             .catch(err => console.error(err));

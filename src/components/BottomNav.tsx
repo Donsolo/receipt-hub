@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import Link from 'next/link';
@@ -17,7 +19,7 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
     const isLongPress = useRef(false);
 
     useEffect(() => {
-        fetch('/api/billing/summary')
+        (async () => fetch(`${API_BASE_URL}/api/billing/summary`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(res => res.json())
             .then(data => {
                 if (data?.success && data?.data?.incoming?.unpaidCount) {

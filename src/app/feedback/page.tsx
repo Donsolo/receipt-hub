@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -42,7 +44,7 @@ export default function FeedbackPage() {
 
     const fetchPolls = async () => {
         try {
-            const res = await fetch('/api/polls');
+            const res = await fetch(`${API_BASE_URL}/api/polls`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setPolls(data);
@@ -57,9 +59,9 @@ export default function FeedbackPage() {
     const handleVote = async (pollId: string, optionId: string) => {
         setVotingPollId(pollId);
         try {
-            const res = await fetch(`/api/polls/${pollId}/vote`, {
+            const res = await fetch(`${API_BASE_URL}/api/polls/${pollId}/vote`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ optionId })
             });
 
@@ -98,9 +100,9 @@ export default function FeedbackPage() {
         setIsSubmitting(true);
 
         try {
-            const res = await fetch('/api/feedback', {
+            const res = await fetch(`${API_BASE_URL}/api/feedback`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type,
                     message,

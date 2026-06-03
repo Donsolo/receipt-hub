@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -20,7 +22,7 @@ export default function InvoiceActivityLog({ invoiceId }: { invoiceId: string })
     useEffect(() => {
         const fetchLogs = async () => {
             try {
-                const res = await fetch(`/api/invoices/${invoiceId}/activity`);
+                const res = await fetch(`${API_BASE_URL}/api/invoices/${invoiceId}/activity`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (res.ok) {
                     const data = await res.json();
                     setLogs(data.logs);

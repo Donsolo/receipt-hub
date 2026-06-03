@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, Suspense } from 'react';
@@ -29,9 +31,9 @@ function RegisterForm() {
             return;
         }
 
-        const res = await fetch('/api/auth/register', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password, name, businessName }),
         });
 

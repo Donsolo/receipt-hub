@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 'use client';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -11,7 +13,7 @@ export default function InvoiceBundlePage() {
     useEffect(() => {
         if (!params.token) return;
         // TODO Phase 4: replace with fetch(`${API_BASE_URL}/api/...`)
-        fetch(`/api/PLACEHOLDER/${params.token}`)
+        (async () => fetch(`${API_BASE_URL}/api/PLACEHOLDER/${params.token}`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(r => r.json())
             .then(setInvoice)
             .catch(err => console.error(err));

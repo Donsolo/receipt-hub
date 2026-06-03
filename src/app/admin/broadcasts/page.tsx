@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -41,7 +43,7 @@ export default function AdminBroadcastsPage() {
 
     const fetchBroadcasts = async () => {
         try {
-            const res = await fetch('/api/admin/broadcasts');
+            const res = await fetch(`${API_BASE_URL}/api/admin/broadcasts`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setBroadcasts(data);
@@ -117,9 +119,9 @@ export default function AdminBroadcastsPage() {
 
     const handleToggleActive = async (id: string, currentActive: boolean) => {
         try {
-            const res = await fetch(`/api/admin/broadcasts/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/broadcasts/${id}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isActive: !currentActive })
             });
 
@@ -136,7 +138,7 @@ export default function AdminBroadcastsPage() {
         if (!confirm('Are you sure you want to delete this broadcast? This will remove all engagement data.')) return;
 
         try {
-            const res = await fetch(`/api/admin/broadcasts/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/admin/broadcasts/${id}`, { headers: { ...((await getAuthHeader()) as any) }, method: 'DELETE' });
             if (res.ok) {
                 setBroadcasts(broadcasts.filter(b => b.id !== id));
             }

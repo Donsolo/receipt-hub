@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 import { useState, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { getTradePreset } from '@/lib/vero-ai/tradePresets';
@@ -22,7 +24,7 @@ export default function PricingPresetModal({ isOpen, onClose, tradeMode }: { isO
         if (tradeMode.startsWith('custom_')) {
             const fetchCustomName = async () => {
                 try {
-                    const res = await fetch('/api/vero/lens/custom-contexts');
+                    const res = await fetch(`${API_BASE_URL}/api/vero/lens/custom-contexts`, { headers: { ...((await getAuthHeader()) as any) } });
                     if (res.ok) {
                         const data = await res.json();
                         const found = data.find((c: any) => c.id === tradeMode.replace('custom_', ''));
@@ -38,7 +40,7 @@ export default function PricingPresetModal({ isOpen, onClose, tradeMode }: { isO
         const fetchPreset = async () => {
             setLoading(true);
             try {
-                const res = await fetch('/api/vero/lens/pricing-presets');
+                const res = await fetch(`${API_BASE_URL}/api/vero/lens/pricing-presets`, { headers: { ...((await getAuthHeader()) as any) } });
                 if (res.ok) {
                     const data = await res.json();
                     const preset = data.find((p: any) => p.tradeMode === tradeMode);
@@ -78,9 +80,9 @@ export default function PricingPresetModal({ isOpen, onClose, tradeMode }: { isO
                 defaultUnit: form.defaultUnit || null,
                 notes: form.notes || null
             };
-            const res = await fetch('/api/vero/lens/pricing-presets', {
+            const res = await fetch(`${API_BASE_URL}/api/vero/lens/pricing-presets`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
             if (res.ok) {

@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -22,9 +24,9 @@ export default function ContactDetailPage() {
 
     useEffect(() => {
         Promise.all([
-            fetch(`/api/contacts/${id}`).then(res => res.json()),
-            fetch(`/api/contacts/${id}/activity`).then(res => res.json()),
-            fetch(`/api/tags`).then(res => res.json()) // Load all tags for dropdown
+            (async () => fetch(`${API_BASE_URL}/api/contacts/${id}`, { headers: { ...((await getAuthHeader()) as any) } }))().then(res => res.json()),
+            (async () => fetch(`${API_BASE_URL}/api/contacts/${id}/activity`, { headers: { ...((await getAuthHeader()) as any) } }))().then(res => res.json()),
+            (async () => fetch(`${API_BASE_URL}/api/tags`, { headers: { ...((await getAuthHeader()) as any) } }))().then(res => res.json()) // Load all tags for dropdown
         ])
         .then(([contactData, activityData, tagsData]) => {
             if (contactData.error) throw new Error(contactData.error);
@@ -74,9 +76,9 @@ export default function ContactDetailPage() {
     const handleAddNote = async () => {
         if (!newNote.trim()) return;
         try {
-            const res = await fetch(`/api/contacts/${id}/notes`, {
+            const res = await fetch(`${API_BASE_URL}/api/contacts/${id}/notes`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: newNote })
             });
             const data = await res.json();
@@ -101,7 +103,7 @@ export default function ContactDetailPage() {
     const handleDeleteNote = async (noteId: string) => {
         if (!confirm('Delete this note?')) return;
         try {
-            const res = await fetch(`/api/contacts/${id}/notes/${noteId}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/contacts/${id}/notes/${noteId}`, { headers: { ...((await getAuthHeader()) as any) }, method: 'DELETE' });
             if (res.ok) {
                 setNotes(notes.filter(n => n.id !== noteId));
                 setActivity(activity.filter(a => a.id !== `note_${noteId}`));
@@ -115,9 +117,9 @@ export default function ContactDetailPage() {
         const tagId = e.target.value;
         if (!tagId) return;
         try {
-            const res = await fetch(`/api/contacts/${id}/tags`, {
+            const res = await fetch(`${API_BASE_URL}/api/contacts/${id}/tags`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ tagId })
             });
             if (res.ok) {
@@ -134,7 +136,7 @@ export default function ContactDetailPage() {
 
     const handleRemoveTag = async (tagId: string) => {
         try {
-            const res = await fetch(`/api/contacts/${id}/tags/${tagId}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/contacts/${id}/tags/${tagId}`, { headers: { ...((await getAuthHeader()) as any) }, method: 'DELETE' });
             if (res.ok) {
                 setTags(tags.filter(t => t.id !== tagId));
             }

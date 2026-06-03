@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -91,9 +93,9 @@ export default function NewCampaignClient({ contacts, tags }: { contacts: any[],
         setError('');
 
         try {
-            const res = await fetch('/api/campaigns', {
+            const res = await fetch(`${API_BASE_URL}/api/campaigns`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name,
                     subject,

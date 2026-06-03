@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState, Suspense } from 'react';
@@ -20,7 +22,7 @@ function SuccessContent() {
 
         const checkStatus = async () => {
             try {
-                const res = await fetch(`/api/public/payment/session/${sessionId}`);
+                const res = await fetch(`${API_BASE_URL}/api/public/payment/session/${sessionId}`, { headers: { ...((await getAuthHeader()) as any) } });
                 const data = await res.json();
                 
                 if (!res.ok || !data.success) {

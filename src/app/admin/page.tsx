@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -40,11 +42,11 @@ export default function AdminPage() {
     const fetchData = async () => {
         try {
             const [usageRes, settingsRes, actStatsRes, feedbackRes, pollsRes] = await Promise.all([
-                fetch('/api/admin/usage'),
-                fetch('/api/admin/settings'),
-                fetch('/api/admin/activation-stats'),
-                fetch('/api/admin/feedback'),
-                fetch('/api/admin/polls')
+                fetch(`${API_BASE_URL}/api/admin/usage`, { headers: { ...((await getAuthHeader()) as any) } }),
+                fetch(`${API_BASE_URL}/api/admin/settings`, { headers: { ...((await getAuthHeader()) as any) } }),
+                fetch(`${API_BASE_URL}/api/admin/activation-stats`, { headers: { ...((await getAuthHeader()) as any) } }),
+                fetch(`${API_BASE_URL}/api/admin/feedback`, { headers: { ...((await getAuthHeader()) as any) } }),
+                fetch(`${API_BASE_URL}/api/admin/polls`, { headers: { ...((await getAuthHeader()) as any) } })
             ]);
 
             if (usageRes.status === 401 || settingsRes.status === 401 || actStatsRes.status === 401) {
@@ -104,9 +106,9 @@ export default function AdminPage() {
         setSettings({ ...settings, [key]: newValue });
 
         try {
-            const res = await fetch('/api/admin/settings', {
+            const res = await fetch(`${API_BASE_URL}/api/admin/settings`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ [key]: newValue })
             });
             if (!res.ok) {
@@ -124,9 +126,9 @@ export default function AdminPage() {
         const payload = action === 'approve' ? { isApproved: !currentValue } : { isShowcased: !currentValue };
 
         try {
-            const res = await fetch(`/api/admin/feedback/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/feedback/${id}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
@@ -169,9 +171,9 @@ export default function AdminPage() {
 
         setIsSubmittingPoll(true);
         try {
-            const res = await fetch('/api/admin/polls', {
+            const res = await fetch(`${API_BASE_URL}/api/admin/polls`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     question: pollQuestion,
                     description: pollDescription,
@@ -198,9 +200,9 @@ export default function AdminPage() {
 
     const handleTogglePollActive = async (id: string, currentActive: boolean) => {
         try {
-            const res = await fetch(`/api/admin/polls/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/polls/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isActive: !currentActive })
             });
             if (res.ok) {
@@ -215,7 +217,7 @@ export default function AdminPage() {
     const handleDeletePoll = async (id: string) => {
         if (!confirm('Are you sure you want to completely delete this poll? All votes will be lost.')) return;
         try {
-            const res = await fetch(`/api/admin/polls/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/admin/polls/${id}`, { headers: { ...((await getAuthHeader()) as any) }, method: 'DELETE' });
             if (res.ok) {
                 setPolls(polls.filter(p => p.id !== id));
             }

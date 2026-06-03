@@ -1,3 +1,5 @@
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -197,7 +199,7 @@ export default function Navbar({
     if (pathname?.startsWith('/invoice/')) return null;
 
     const handleLogout = async () => {
-        await fetch('/api/auth/logout', { method: 'POST' });
+        await fetch(`${API_BASE_URL}/api/auth/logout`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' });
         router.refresh();
         router.push('/');
     };
