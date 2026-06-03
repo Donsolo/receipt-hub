@@ -1,6 +1,7 @@
-import { getAuthHeader } from '@/lib/auth-client';
-import { API_BASE_URL } from '@/lib/config';
 "use client";
+import { Capacitor } from '@capacitor/core';
+import { storeAuthToken } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -33,13 +34,16 @@ function RegisterForm() {
 
         const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
             method: 'POST',
-            headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password, name, businessName }),
         });
 
         const data = await res.json();
 
         if (res.ok) {
+            if (Capacitor.isNativePlatform() && data.token) {
+                await storeAuthToken(data.token);
+            }
             setIsSuccess(true);
             setTimeout(() => {
                 router.refresh();

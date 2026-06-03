@@ -1,5 +1,5 @@
+"use client";
 // @ts-nocheck
-'use client';
 import { useParams } from 'next/navigation';
 // import { verifyToken } from '@/lib/auth';
 // import { db } from '@/lib/db';
@@ -48,7 +48,7 @@ export default function ConnectionProfilePage() {
     };
 
     // Dummy values for now
-    const connection = { status: 'pending', updatedAt: new Date() };
+    const connection = { id: connectionId, status: 'pending', updatedAt: new Date() };
     const otherUser = { id: '', businessName: '', name: '', email: '', businessLogoPath: '' };
     const primary = 'Loading...';
     const secondary = '';

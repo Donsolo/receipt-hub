@@ -96,6 +96,13 @@ try {
       fs.writeFileSync(reportActionsSrc, reportActionsMock);
   }
 
+  // Clear .next cache to avoid stale api routes crashing the build
+  const nextCacheDir = path.join(root, '.next');
+  if (fs.existsSync(nextCacheDir)) {
+      console.log('Clearing .next cache...');
+      fs.rmSync(nextCacheDir, { recursive: true, force: true });
+  }
+
   // Run the Next.js static export build using webpack
   execSync('cross-env NEXT_MOBILE_BUILD=true next build --webpack', {
     stdio: 'inherit',

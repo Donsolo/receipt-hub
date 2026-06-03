@@ -1,7 +1,6 @@
+"use client";
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
-"use client";
-
 import React, { useEffect, useState } from 'react';
 import LensAnnotationCanvas from '@/components/vero-lens/LensAnnotationCanvas';
 import SignaturePad from '@/components/vero-lens/SignaturePad';

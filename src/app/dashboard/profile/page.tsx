@@ -1,7 +1,6 @@
+"use client";
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
-"use client";
-
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -9,6 +8,8 @@ import { useTheme } from '@/components/ThemeProvider';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import HeroSection from '@/components/ui/HeroSection';
 import { usePlatform } from '@/lib/platform';
+import { useNetwork } from '@/lib/network-context';
+import { getCached, setCached } from '@/lib/api-cache';
 
 type UserProfile = {
     email: string;
@@ -33,6 +34,8 @@ export default function ProfilePage() {
     const [saving, setSaving] = useState(false);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const { isNativeAndroid } = usePlatform();
+    const { isOnline } = useNetwork();
+    const [isStale, setIsStale] = useState(false);
 
     const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
         if (newTheme === theme) return;
@@ -102,57 +105,55 @@ export default function ProfilePage() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } }); // Using existing route to get core info
-                if (!res.ok) {
-                    router.push('/login');
-                    return;
-                }
+                let authData, profileData, notifData;
+                
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } });
+                    if (!res.ok) throw new Error('Network error');
+                    authData = await res.json();
+                    await setCached('auth_me', authData);
+                    
+                    const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, { headers: { ...((await getAuthHeader()) as any) }, cache: 'no-store' });
+                    if (!profileRes.ok) throw new Error('Network error');
+                    profileData = await profileRes.json();
+                    await setCached('user_profile', profileData);
 
-                // Wait, /api/auth/me only returns { userId, email, role }. 
-                // We need the full user object to get joined date and business fields.
-                // Creating a specific GET request to /api/user/profile makes more sense, 
-                // but let's just make /api/user/profile accept GET.
-                // Wait, I only created PATCH. Let me update the route to support GET as well.
-                // Try to fetch profile directly
-                const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, { headers: { ...((await getAuthHeader()) as any) }, cache: 'no-store' });
-
-                if (profileRes.ok) {
-                    // Fetch core auth to securely get role
-                    const authData = await res.json();
-                    setRole(authData.role);
-
-                    const data = await profileRes.json();
-                    setProfile(data);
-                    setName(data.name || '');
-                    setBusinessName(data.businessName || '');
-                    setBusinessPhone(data.businessPhone || '');
-                    setBusinessAddress(data.businessAddress || '');
-                    setBusinessLogoPath(data.businessLogoPath || null);
-                    setBusinessRegistrationNumber(data.businessRegistrationNumber || '');
-                    setTimezone(data.timezone || 'America/New_York');
-
-                    // Fetch notification preferences directly after profile works
-                    try {
-                        const notifRes = await fetch(`${API_BASE_URL}/api/user/notification-preferences`, { headers: { ...((await getAuthHeader()) as any) } });
-                        if (notifRes.ok) {
-                            const notifData = await notifRes.json();
-                            setNotifyConnectionRequests(notifData.notifyConnectionRequests ?? true);
-                            setNotifyConnectionAccepted(notifData.notifyConnectionAccepted ?? true);
-                            setNotifyMessages(notifData.notifyMessages ?? true);
-                            setNotifySystem(notifData.notifySystem ?? true);
-                        }
-                    } catch (notifErr) {
-                        console.error('Failed to fetch notification preferences', notifErr);
+                    const notifRes = await fetch(`${API_BASE_URL}/api/user/notification-preferences`, { headers: { ...((await getAuthHeader()) as any) } });
+                    if (notifRes.ok) {
+                        notifData = await notifRes.json();
+                        await setCached('user_notif', notifData);
                     }
-
-                } else if (profileRes.status === 404) {
-                    // User exists in cookie but not in database (ghost session due to DB swap)
-                    await fetch(`${API_BASE_URL}/api/auth/logout`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST', cache: 'no-store' });
-                    router.refresh();
-                    router.push('/login');
-                } else {
-                    router.push('/login');
+                    setIsStale(false);
+                } catch (e) {
+                    console.warn('Network fetch failed, falling back to cache');
+                    authData = await getCached<any>('auth_me', 7 * 24 * 60 * 60 * 1000);
+                    profileData = await getCached<any>('user_profile', 7 * 24 * 60 * 60 * 1000);
+                    notifData = await getCached<any>('user_notif', 7 * 24 * 60 * 60 * 1000);
+                    setIsStale(true);
+                    
+                    if (!authData || !profileData) {
+                        router.push('/login');
+                        return;
+                    }
                 }
+
+                setRole(authData.role);
+                setProfile(profileData);
+                setName(profileData.name || '');
+                setBusinessName(profileData.businessName || '');
+                setBusinessPhone(profileData.businessPhone || '');
+                setBusinessAddress(profileData.businessAddress || '');
+                setBusinessLogoPath(profileData.businessLogoPath || null);
+                setBusinessRegistrationNumber(profileData.businessRegistrationNumber || '');
+                setTimezone(profileData.timezone || 'America/New_York');
+
+                if (notifData) {
+                    setNotifyConnectionRequests(notifData.notifyConnectionRequests ?? true);
+                    setNotifyConnectionAccepted(notifData.notifyConnectionAccepted ?? true);
+                    setNotifyMessages(notifData.notifyMessages ?? true);
+                    setNotifySystem(notifData.notifySystem ?? true);
+                }
+
             } catch (error) {
                 console.error('Failed to fetch profile', error);
             } finally {
@@ -264,6 +265,14 @@ export default function ProfilePage() {
             <div className="flex-1 w-full flex flex-col items-center px-4 sm:px-6 lg:px-8 py-8">
                 <div className="w-full max-w-6xl space-y-6 relative">
                     <PageHeaderCard title="Profile Settings" description="Manage your verified business identity and notification preferences." />
+                    {isStale && (
+                        <div className="bg-amber-900/40 border border-amber-500/30 rounded-lg p-3 flex items-center mb-4 text-sm text-amber-200/80">
+                            <svg className="w-4 h-4 mr-2 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            You are offline. Showing cached data.
+                        </div>
+                    )}
 
                     {needsBusinessName && showBanner && (
                         <div className="bg-indigo-900/40 border border-indigo-500/30 rounded-lg p-4 flex justify-between items-start mb-6">
@@ -491,7 +500,9 @@ export default function ProfilePage() {
                                         </div>
                                         <button
                                             type="submit"
-                                            disabled={saving || !isDirty}
+                                            disabled={saving || !isDirty || !isOnline}
+                                            title={!isOnline ? "Unavailable offline" : ""}
+
                                             className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-[var(--text)] bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-[var(--bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                         >
                                             {saving ? 'Saving...' : 'Save Changes'}

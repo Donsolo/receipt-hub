@@ -43,3 +43,8 @@ next-env.d.ts
 /src/generated/prisma
 
 api_temp_mobile_excluded/
+  
+# Android Keystores  
+android/app/release.keystore  
+android/app/*.keystore  
+android/app/*.jks 

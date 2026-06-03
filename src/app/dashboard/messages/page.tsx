@@ -1,10 +1,11 @@
+"use client";
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
-"use client";
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
+import { getCached, setCached } from '@/lib/api-cache';
+import { useNetwork } from '@/lib/network-context';
 import HeroSection from '@/components/ui/HeroSection';
 
 type ConversationListResponse = {
@@ -33,29 +34,49 @@ export default function ConversationsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [authUserId, setAuthUserId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isStale, setIsStale] = useState(false);
+    const { isOnline } = useNetwork();
 
-    useEffect(() => {
-        // Fetch User
-        (async () => fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } }))()
-            .then(res => res.json())
-            .then(data => {
-                if (data.id) setAuthUserId(data.id);
-            })
-            .catch(() => { });
+        useEffect(() => {
+        const loadData = async () => {
+            try {
+                const headers = { ...((await getAuthHeader()) as any) };
+                
+                let authData, convoData;
+                
+                try {
+                    const [authRes, convoRes] = await Promise.all([
+                        fetch(`${API_BASE_URL}/api/auth/me`, { headers }),
+                        fetch(`${API_BASE_URL}/api/conversations`, { headers })
+                    ]);
+                    
+                    if (!authRes.ok || !convoRes.ok) throw new Error('Network error');
+                    
+                    authData = await authRes.json();
+                    convoData = await convoRes.json();
+                    
+                    await setCached('auth_me', authData);
+                    await setCached('conversations', convoData);
+                    setIsStale(false);
+                } catch (e) {
+                    console.warn('Falling back to cache');
+                    authData = await getCached<any>('auth_me', 7 * 24 * 60 * 60 * 1000);
+                    convoData = await getCached<any>('conversations', 7 * 24 * 60 * 60 * 1000);
+                    setIsStale(true);
+                }
 
-        // Fetch Conversations
-        (async () => fetch(`${API_BASE_URL}/api/conversations`, { headers: { ...((await getAuthHeader()) as any) } }))()
-            .then(res => {
-                if (res.ok) return res.json();
-                return [];
-            })
-            .then(data => {
-                setConversations(data);
+                if (authData?.id) setAuthUserId(authData.id);
+                if (convoData) setConversations(convoData);
+                else setConversations([]);
+                
+            } catch (err) {
+                console.error(err);
+            } finally {
                 setIsLoading(false);
-            })
-            .catch(() => {
-                setIsLoading(false);
-            });
+            }
+        };
+
+        loadData();
     }, []);
 
     const getDisplayNameInfo = (targetUser: any) => {
@@ -79,6 +100,14 @@ export default function ConversationsPage() {
             <div className="flex-1 w-full flex flex-col items-center px-4 sm:px-6 lg:px-8 py-8">
                 <div className="w-full max-w-4xl space-y-6 relative">
                     <PageHeaderCard title="Messages" description="Manage your direct conversations with connections." />
+                    {isStale && (
+                        <div className="bg-amber-900/40 border border-amber-500/30 rounded-lg p-3 flex items-center mb-4 text-sm text-amber-200/80">
+                            <svg className="w-4 h-4 mr-2 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            You are offline. Showing cached messages.
+                        </div>
+                    )}
 
                     {isLoading ? (
                         <div className="flex justify-center items-center py-20">

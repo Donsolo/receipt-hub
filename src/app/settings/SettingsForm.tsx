@@ -1,7 +1,6 @@
+"use client";
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
-"use client";
-
 import { useState } from "react";
 import { updateBusinessProfile } from "@/lib/actions";
 import { clsx } from "clsx";

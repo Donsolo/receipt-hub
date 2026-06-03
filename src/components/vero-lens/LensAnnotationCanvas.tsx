@@ -1,7 +1,6 @@
+"use client";
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
-"use client";
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
 

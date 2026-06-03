@@ -1,6 +1,7 @@
-import { getAuthHeader } from '@/lib/auth-client';
-import { API_BASE_URL } from '@/lib/config';
 "use client";
+import { Capacitor } from '@capacitor/core';
+import { storeAuthToken } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -19,13 +20,16 @@ export default function LoginPage() {
 
         const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
             method: 'POST',
-            headers: { ...((await getAuthHeader()) as any), 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
         });
 
         const data = await res.json();
 
         if (res.ok) {
+            if (Capacitor.isNativePlatform() && data.token) {
+                await storeAuthToken(data.token);
+            }
             router.refresh();
             router.push('/dashboard');
         } else {

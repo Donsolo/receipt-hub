@@ -1,7 +1,6 @@
+"use client";
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
-"use client";
-
 import { useState, useRef, useEffect } from "react";
 import { createReceipt, updateReceipt } from "@/lib/actions";
 import { useRouter } from "next/navigation";

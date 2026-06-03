@@ -1,12 +1,7 @@
 import type { Metadata } from 'next';
 import { DM_Sans, DM_Mono } from 'next/font/google';
 import './globals.css';
-import Navbar from '@/components/Navbar';
-import BottomNav from '@/components/BottomNav';
-import Footer from '@/components/Footer';
-import InstallPrompt from '@/components/InstallPrompt';
-import { NotificationProvider } from '@/context/NotificationContext';
-import NotificationToasts from '@/components/notifications/NotificationToasts';
+import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 
 import { cookies } from 'next/headers';
 
@@ -76,10 +71,9 @@ export const viewport: Viewport = {
 import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import GlobalVeroBubble from '@/components/vero/GlobalVeroBubble';
 import NativeFetchInterceptor from '@/components/NativeFetchInterceptor';
-import PullToRefreshWrapper from '@/components/PullToRefreshWrapper';
-import BroadcastDisplay from '@/components/BroadcastDisplay';
+import { NetworkProvider } from '@/lib/network-context';
+import OfflineBanner from '@/components/OfflineBanner';
 
 export default async function RootLayout({
   children,
@@ -145,11 +139,6 @@ export default async function RootLayout({
                     isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   }
                   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-                  
-                  var meta = document.createElement('meta');
-                  meta.name = 'theme-color';
-                  meta.content = '#0B1220';
-                  document.head.appendChild(meta);
                 } catch (e) {}
               })();
             `,
@@ -157,79 +146,22 @@ export default async function RootLayout({
         />
       </head>
       <ThemeProvider initialTheme={initialTheme}>
-        <body className={`${dmSans.variable} ${dmMono.variable} font-sans antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out overflow-x-hidden w-full m-0 p-0`}>
-          <NativeFetchInterceptor />
-          {isAuthenticated ? (
-            <NotificationProvider>
-              <div className="flex flex-col min-h-screen relative" style={{ width: '100dvw', maxWidth: '100dvw' }}>
-                <script
-                  type="application/ld+json"
-                  dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                      '@context': 'https://schema.org',
-                      '@type': 'Organization',
-                      name: 'Tektriq LLC',
-                      url: 'https://tektriq.com',
-                      logo: 'https://verihub.tektriq.com/tektriq-logo.png',
-                      contactPoint: {
-                        '@type': 'ContactPoint',
-                        telephone: '',
-                        contactType: 'customer support',
-                        email: 'support@tektriq.com',
-                      },
-                    }),
-                  }}
-                />
-                <NotificationToasts />
-                <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} userName={userName} businessName={businessName} businessLogoPath={businessLogoPath} activeInvoicesCount={activeInvoicesCount} />
-                <div className="flex-1 flex flex-col w-full relative">
-                  <BroadcastDisplay />
-                  <main className="flex-grow w-full flex flex-col relative">
-                    <PullToRefreshWrapper>
-                      {children}
-                    </PullToRefreshWrapper>
-                  </main>
-                  <InstallPrompt />
-                  <Footer />
-                </div>
-                <BottomNav isPro={isPro} />
-                <GlobalVeroBubble isPro={isPro} />
-              </div>
-            </NotificationProvider>
-          ) : (
-            <div className="flex flex-col min-h-screen relative" style={{ width: '100dvw', maxWidth: '100dvw' }}>
-              <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                  __html: JSON.stringify({
-                    '@context': 'https://schema.org',
-                    '@type': 'Organization',
-                    name: 'Tektriq LLC',
-                    url: 'https://tektriq.com',
-                    logo: 'https://verihub.tektriq.com/tektriq-logo.png',
-                    contactPoint: {
-                      '@type': 'ContactPoint',
-                      telephone: '',
-                      contactType: 'customer support',
-                      email: 'support@tektriq.com',
-                    },
-                  }),
-                }}
-              />
-              <Navbar isAuthenticated={isAuthenticated} role={userRole} isPro={isPro} userName={userName} businessName={businessName} businessLogoPath={businessLogoPath} activeInvoicesCount={activeInvoicesCount} />
-              <div className="flex-1 flex flex-col w-full relative">
-                <BroadcastDisplay />
-                <main className="flex-grow w-full flex flex-col relative">
-                  <PullToRefreshWrapper>
-                    {children}
-                  </PullToRefreshWrapper>
-                </main>
-                <InstallPrompt />
-                <Footer />
-              </div>
-            </div>
-          )}
-        </body>
+        <NetworkProvider>
+          <body className={`${dmSans.variable} ${dmMono.variable} font-sans antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out overflow-x-hidden w-full m-0 p-0`}>
+            <NativeFetchInterceptor />
+            <OfflineBanner />
+            <AuthenticatedLayout 
+              role={userRole} 
+              isPro={isPro} 
+              userName={userName} 
+              businessName={businessName} 
+              businessLogoPath={businessLogoPath} 
+              activeInvoicesCount={activeInvoicesCount}
+            >
+              {children}
+            </AuthenticatedLayout>
+          </body>
+        </NetworkProvider>
       </ThemeProvider>
     </html>
   );

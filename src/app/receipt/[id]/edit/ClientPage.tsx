@@ -1,6 +1,6 @@
+"use client";
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
-'use client';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import ReceiptForm from "@/app/create/ReceiptForm";

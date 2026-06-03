@@ -1,10 +1,8 @@
+"use client";
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { getAuthHeader } from '@/lib/auth-client';
-import { API_BASE_URL } from '@/lib/config';
-"use client";
-
-import React, { useState } from 'react';
+import { API_BASE_URL } from '@/lib/config';import React, { useState } from 'react';
 
 export default function ActivatePage() {
     const [loading, setLoading] = useState(false);
