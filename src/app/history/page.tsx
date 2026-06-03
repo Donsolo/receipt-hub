@@ -12,7 +12,7 @@ export default async function HistoryPage(props: {
     const receipts = process.env.NEXT_MOBILE_BUILD === 'true' ? [] : await getReceipts(searchQuery);
 
     return (
-        <div className="min-h-screen bg-[#F4F5F9] font-sans overflow-x-hidden pb-24">
+        <div className="min-h-screen bg-[var(--bg)] font-sans overflow-x-hidden pb-24">
             <Suspense fallback={<div>Loading history...</div>}>
                 <HistoryClient initialReceipts={receipts} />
             </Suspense>

@@ -116,7 +116,7 @@ export default async function Dashboard() {
             </DashboardHero>
 
             {/* BODY SURFACE (Card Lift) */}
-            <div className="relative z-20 flex-1 bg-[#F4F5F9] rounded-t-[20px] -mt-4 px-4 sm:px-6 pt-6 pb-12 flex flex-col shadow-[0_-4px_24px_rgba(0,0,0,0.1)]">
+            <div className="relative z-20 flex-1 bg-[var(--bg)] rounded-t-[20px] -mt-4 px-4 sm:px-6 pt-6 pb-12 flex flex-col shadow-[0_-4px_24px_rgba(0,0,0,0.1)]">
                 <div className="max-w-5xl mx-auto w-full space-y-6">
 
                     {/* Billing Center Widget */}
@@ -127,7 +127,7 @@ export default async function Dashboard() {
 
                         {/* Receipts */}
                         <Link href="/history" className="block group h-full">
-                            <div className="bg-white rounded-[16px] border border-[#E2E6F3] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                            <div className="bg-[var(--card)] rounded-[16px] border border-[var(--border)] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="flex items-start gap-4 mb-2 relative z-10">
                                     <div className="h-12 w-12 shrink-0 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20 transition-colors shadow-inner border border-blue-500/10">
@@ -136,8 +136,8 @@ export default async function Dashboard() {
                                         </svg>
                                     </div>
                                     <div className="flex-1 pt-1.5">
-                                        <h2 className="text-[16px] font-semibold text-gray-900 group-hover:text-gray-900 transition-colors tracking-tight">Receipt Hub</h2>
-                                        <p className="text-[13px] text-gray-500 mt-2 leading-relaxed">Create, upload, manage, and share all of your business receipts in the vault.</p>
+                                        <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Receipt Hub</h2>
+                                        <p className="text-[13px] text-[var(--muted)] mt-2 leading-relaxed">Create, upload, manage, and share all of your business receipts in the vault.</p>
                                     </div>
                                 </div>
                             </div>
@@ -146,7 +146,7 @@ export default async function Dashboard() {
                         {/* Invoices (PRO ONLY) */}
                         {isPro && (
                             <Link href="/dashboard/invoices" className="block group h-full">
-                                <div className="bg-white rounded-[16px] border border-[#E2E6F3] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                                <div className="bg-[var(--card)] rounded-[16px] border border-[var(--border)] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                     <div className="flex justify-between items-start mb-4 relative z-10">
                                         <div className="flex items-center gap-3">
@@ -156,23 +156,23 @@ export default async function Dashboard() {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <h2 className="text-[16px] font-semibold text-gray-900 group-hover:text-gray-900 transition-colors tracking-tight">Invoices</h2>
-                                                <p className="text-[11px] text-gray-500 font-medium uppercase tracking-wider mt-0.5">Billing Engine</p>
+                                                <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Invoices</h2>
+                                                <p className="text-[11px] text-[var(--muted)] font-medium uppercase tracking-wider mt-0.5">Billing Engine</p>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    <div className="flex-1 flex flex-col justify-end relative z-10 pt-2 border-t border-[#E2E6F3] mt-2">
+                                    <div className="flex-1 flex flex-col justify-end relative z-10 pt-2 border-t border-[var(--border)] mt-2">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <span className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Total Invoices</span>
-                                                <span className="text-xl font-bold text-gray-900">{userInvoices.length}</span>
+                                                <span className="block text-[10px] uppercase font-bold text-[var(--muted)] mb-1">Total Invoices</span>
+                                                <span className="text-xl font-bold text-[var(--text)]">{userInvoices.length}</span>
                                             </div>
                                             <div>
-                                                <span className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Paid / Pending</span>
+                                                <span className="block text-[10px] uppercase font-bold text-[var(--muted)] mb-1">Paid / Pending</span>
                                                 <div className="flex items-center gap-1.5 text-sm font-semibold">
                                                     <span className="text-emerald-500">{userInvoices.filter(i => i.status === 'PAID').length}</span>
-                                                    <span className="text-gray-500 font-normal">/</span>
+                                                    <span className="text-[var(--muted)] font-normal">/</span>
                                                     <span className="text-amber-500">{userInvoices.filter(i => i.status !== 'PAID').length}</span>
                                                 </div>
                                             </div>
@@ -185,7 +185,7 @@ export default async function Dashboard() {
                         {/* Vero Lens Analytics (PRO ONLY) */}
                         {isPro && (
                             <Link href="/dashboard/vero/lens/analytics" className="block group h-full">
-                                <div className="bg-white rounded-[16px] border border-[#E2E6F3] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                                <div className="bg-[var(--card)] rounded-[16px] border border-[var(--border)] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                     <div className="flex justify-between items-start mb-4 relative z-10">
                                         <div className="flex items-center gap-3">
@@ -195,20 +195,20 @@ export default async function Dashboard() {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <h2 className="text-[16px] font-semibold text-gray-900 group-hover:text-gray-900 transition-colors tracking-tight">Lens Analytics</h2>
-                                                <p className="text-[11px] text-gray-500 font-medium uppercase tracking-wider mt-0.5">Quote Performance</p>
+                                                <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Lens Analytics</h2>
+                                                <p className="text-[11px] text-[var(--muted)] font-medium uppercase tracking-wider mt-0.5">Quote Performance</p>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    <div className="flex-1 flex flex-col justify-end relative z-10 pt-2 border-t border-[#E2E6F3] mt-2">
+                                    <div className="flex-1 flex flex-col justify-end relative z-10 pt-2 border-t border-[var(--border)] mt-2">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <span className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Approved</span>
+                                                <span className="block text-[10px] uppercase font-bold text-[var(--muted)] mb-1">Approved</span>
                                                 <span className="text-xl font-bold text-emerald-500">{lensStats.approved}</span>
                                             </div>
                                             <div>
-                                                <span className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Pending</span>
+                                                <span className="block text-[10px] uppercase font-bold text-[var(--muted)] mb-1">Pending</span>
                                                 <span className="text-xl font-bold text-amber-500">{lensStats.pending}</span>
                                             </div>
                                         </div>
@@ -219,7 +219,7 @@ export default async function Dashboard() {
 
                         {/* Reports */}
                         <Link href="/dashboard/reports" className="block group h-full">
-                            <div className="bg-white rounded-[16px] border border-[#E2E6F3] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                            <div className="bg-[var(--card)] rounded-[16px] border border-[var(--border)] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="flex items-start gap-4 mb-2 relative z-10">
                                     <div className="h-12 w-12 shrink-0 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500 group-hover:bg-amber-500/20 transition-colors shadow-inner border border-amber-500/10">
@@ -228,8 +228,8 @@ export default async function Dashboard() {
                                         </svg>
                                     </div>
                                     <div className="flex-1 pt-1.5">
-                                        <h2 className="text-[16px] font-semibold text-gray-900 group-hover:text-gray-900 transition-colors tracking-tight">Reports</h2>
-                                        <p className="text-[13px] text-gray-500 mt-2 leading-relaxed">Generate summaries, category breakdowns, and compliance-ready exports.</p>
+                                        <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Reports</h2>
+                                        <p className="text-[13px] text-[var(--muted)] mt-2 leading-relaxed">Generate summaries, category breakdowns, and compliance-ready exports.</p>
                                     </div>
                                 </div>
                             </div>
@@ -237,7 +237,7 @@ export default async function Dashboard() {
 
                         {/* Business Network */}
                         <Link href="/dashboard/connections" className="block group h-full">
-                            <div className="bg-white rounded-[16px] border border-[#E2E6F3] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                            <div className="bg-[var(--card)] rounded-[16px] border border-[var(--border)] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="flex items-start gap-4 mb-2 relative z-10">
                                     <div className="h-12 w-12 shrink-0 bg-teal-500/10 rounded-xl flex items-center justify-center text-teal-400 group-hover:bg-teal-500/20 transition-colors shadow-inner border border-teal-500/10">
@@ -246,8 +246,8 @@ export default async function Dashboard() {
                                         </svg>
                                     </div>
                                     <div className="flex-1 pt-1.5">
-                                        <h2 className="text-[16px] font-semibold text-gray-900 group-hover:text-gray-900 transition-colors tracking-tight">Business Network</h2>
-                                        <p className="text-[13px] text-gray-500 mt-2 leading-relaxed">Connect and securely message other verified early-access founders.</p>
+                                        <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Business Network</h2>
+                                        <p className="text-[13px] text-[var(--muted)] mt-2 leading-relaxed">Connect and securely message other verified early-access founders.</p>
                                     </div>
                                 </div>
                             </div>
@@ -255,7 +255,7 @@ export default async function Dashboard() {
 
                         {/* Submit Feedback */}
                         <Link href="/feedback" className="block group h-full">
-                            <div className="bg-white rounded-[16px] border border-[#E2E6F3] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
+                            <div className="bg-[var(--card)] rounded-[16px] border border-[var(--border)] px-5 py-6 hover:border-[#5B5FEF]/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all duration-200 flex flex-col h-full relative overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="flex items-start gap-4 mb-2 relative z-10">
                                     <div className="h-12 w-12 shrink-0 bg-fuchsia-500/10 rounded-xl flex items-center justify-center text-fuchsia-400 group-hover:bg-fuchsia-500/20 transition-colors shadow-inner border border-fuchsia-500/10">
@@ -264,8 +264,8 @@ export default async function Dashboard() {
                                         </svg>
                                     </div>
                                     <div className="flex-1 pt-1.5">
-                                        <h2 className="text-[16px] font-semibold text-gray-900 group-hover:text-gray-900 transition-colors tracking-tight">Submit Feedback</h2>
-                                        <p className="text-[13px] text-gray-500 mt-2 leading-relaxed">Help shape the future of Verihub. Share ideas or report any bugs you find.</p>
+                                        <h2 className="text-[16px] font-semibold text-[var(--text)] group-hover:text-[var(--text)] transition-colors tracking-tight">Submit Feedback</h2>
+                                        <p className="text-[13px] text-[var(--muted)] mt-2 leading-relaxed">Help shape the future of Verihub. Share ideas or report any bugs you find.</p>
                                     </div>
                                 </div>
                             </div>

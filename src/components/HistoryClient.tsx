@@ -126,7 +126,7 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                             <p className="text-sm text-gray-400 mt-0.5">Manage and organize your spending</p>
                         </div>
                         <div className="flex space-x-2">
-                            <Link href="/uploads" className="w-[40px] h-[40px] flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition backdrop-blur-md">
+                            <Link href="/uploads" className="w-[40px] h-[40px] flex items-center justify-center rounded-full bg-[var(--card)]/10 hover:bg-[var(--card)]/20 transition backdrop-blur-md">
                                 <IconUpload size={20} stroke={1.5} />
                             </Link>
                             <Link href="/create" className="w-[40px] h-[40px] flex items-center justify-center rounded-full bg-[#5B5FEF] hover:bg-[#4F54E5] transition shadow-[0_4px_12px_rgba(91,95,239,0.4)]">
@@ -137,7 +137,7 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
 
                     {/* Stats Pills */}
                     <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-                        <div className="flex-shrink-0 flex items-center space-x-2 bg-white/5 border border-white/10 rounded-[12px] px-3.5 py-2 backdrop-blur-md">
+                        <div className="flex-shrink-0 flex items-center space-x-2 bg-[var(--card)]/5 border border-white/10 rounded-[12px] px-3.5 py-2 backdrop-blur-md">
                             <div className="w-6 h-6 rounded-full bg-[#5B5FEF]/20 flex items-center justify-center text-[#5B5FEF]">
                                 <IconReceipt size={14} />
                             </div>
@@ -146,7 +146,7 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                 <span className="text-sm font-bold font-mono">${totalSpend.toFixed(2)}</span>
                             </div>
                         </div>
-                        <div className="flex-shrink-0 flex items-center space-x-2 bg-white/5 border border-white/10 rounded-[12px] px-3.5 py-2 backdrop-blur-md">
+                        <div className="flex-shrink-0 flex items-center space-x-2 bg-[var(--card)]/5 border border-white/10 rounded-[12px] px-3.5 py-2 backdrop-blur-md">
                             <div className="w-6 h-6 rounded-full bg-[#10b981]/20 flex items-center justify-center text-[#10b981]">
                                 <IconFileInvoice size={14} />
                             </div>
@@ -155,7 +155,7 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                 <span className="text-sm font-bold font-mono">{receiptCount}</span>
                             </div>
                         </div>
-                        <div className="flex-shrink-0 flex items-center space-x-2 bg-white/5 border border-white/10 rounded-[12px] px-3.5 py-2 backdrop-blur-md">
+                        <div className="flex-shrink-0 flex items-center space-x-2 bg-[var(--card)]/5 border border-white/10 rounded-[12px] px-3.5 py-2 backdrop-blur-md">
                             <div className="w-6 h-6 rounded-full bg-[#F59E0B]/20 flex items-center justify-center text-[#F59E0B]">
                                 <IconFolder size={14} />
                             </div>
@@ -169,10 +169,10 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
             </div>
 
             {/* BODY SURFACE (Card Lift) */}
-            <div className="relative z-20 flex-1 bg-[#F4F5F9] rounded-t-[20px] -mt-5 px-4 pt-5 pb-8 flex flex-col shadow-[0_-4px_24px_rgba(0,0,0,0.1)]">
+            <div className="relative z-20 flex-1 bg-[var(--bg)] rounded-t-[20px] -mt-5 px-4 pt-5 pb-8 flex flex-col shadow-[0_-4px_24px_rgba(0,0,0,0.1)]">
                 
                 {/* Segmented Control */}
-                <div className="flex p-1 bg-gray-200/60 rounded-full mb-5">
+                <div className="flex p-1 bg-[var(--border)]/60 rounded-full mb-5">
                     {[
                         { id: 'receipts', label: 'All Receipts', icon: <IconReceipt size={16} className="mr-1.5" /> },
                         { id: 'bundles', label: 'Bundles', icon: <IconFolder size={16} className="mr-1.5" /> },
@@ -185,7 +185,7 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                 onClick={() => router.push(`?view=${tab.id}`)}
                                 className={clsx(
                                     "flex-1 flex justify-center items-center py-2 text-sm font-semibold rounded-full transition-all duration-200",
-                                    isActive ? "bg-white text-gray-900 shadow-[0_2px_8px_rgba(0,0,0,0.06)]" : "text-gray-500 hover:text-gray-700"
+                                    isActive ? "bg-[var(--card)] text-[var(--text)] shadow-[0_2px_8px_rgba(0,0,0,0.06)]" : "text-[var(--muted)] hover:text-[var(--text)]"
                                 )}
                             >
                                 {tab.icon}
@@ -202,11 +202,11 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                     </div>
                 ) : activeTab === 'shared' ? (
                     <div className="py-20 text-center animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                        <div className="w-16 h-16 bg-[var(--border)] rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
                             <IconUsers size={32} />
                         </div>
-                        <h3 className="text-lg font-bold text-gray-800">Shared Receipts</h3>
-                        <p className="text-gray-500 text-sm mt-1">Receipts shared with you will appear here.</p>
+                        <h3 className="text-lg font-bold text-[var(--text)]">Shared Receipts</h3>
+                        <p className="text-[var(--muted)] text-sm mt-1">Receipts shared with you will appear here.</p>
                     </div>
                 ) : (
                     <div className="flex flex-col flex-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -220,9 +220,9 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                 placeholder="Search vendor, category, or amount..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-12 py-3 bg-white border-0 rounded-2xl text-sm font-medium text-gray-800 placeholder-gray-400 shadow-[0_2px_12px_rgba(0,0,0,0.03)] focus:ring-2 focus:ring-[#5B5FEF]/20 outline-none"
+                                className="w-full pl-10 pr-12 py-3 bg-[var(--card)] border-0 rounded-2xl text-sm font-medium text-[var(--text)] placeholder-gray-400 shadow-[0_2px_12px_rgba(0,0,0,0.03)] focus:ring-2 focus:ring-[#5B5FEF]/20 outline-none"
                             />
-                            <div className="absolute right-3 w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-400 rounded-xl cursor-pointer hover:bg-gray-100 transition border border-gray-100">
+                            <div className="absolute right-3 w-8 h-8 flex items-center justify-center bg-[var(--card-hover)] text-gray-400 rounded-xl cursor-pointer hover:bg-[var(--card-hover)] transition border border-[var(--border)]">
                                 <IconAdjustmentsHorizontal size={16} />
                             </div>
                         </div>
@@ -242,7 +242,7 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                             "flex-shrink-0 px-4 py-1.5 rounded-full text-[13px] font-semibold transition-colors border",
                                             isActive 
                                                 ? "bg-[#0B0F1A] text-white border-[#0B0F1A]" 
-                                                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                                                : "bg-[var(--card)] text-[var(--muted)] border-[var(--border)] hover:border-[var(--border)]"
                                         )}
                                     >
                                         {filter}
@@ -255,7 +255,7 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                         <div className="flex-1 pb-4">
                             {filteredReceipts.length === 0 ? (
                                 <div className="text-center py-16">
-                                    <p className="text-gray-500 font-medium">No receipts found.</p>
+                                    <p className="text-[var(--muted)] font-medium">No receipts found.</p>
                                 </div>
                             ) : (
                                 sortedCategoryNames.map((cat) => {
@@ -264,11 +264,11 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                         <div key={cat} className="mb-6">
                                             {/* Static Category Divider */}
                                             <div className="flex items-center space-x-3 mb-4">
-                                                <div className="h-[1px] flex-1 bg-gray-200"></div>
-                                                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider px-1">
+                                                <div className="h-[1px] flex-1 bg-[var(--border)]"></div>
+                                                <div className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider px-1">
                                                     {cat}
                                                 </div>
-                                                <div className="h-[1px] flex-1 bg-gray-200"></div>
+                                                <div className="h-[1px] flex-1 bg-[var(--border)]"></div>
                                             </div>
 
                                             {/* Cards */}
@@ -281,7 +281,7 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                                         <Link
                                                             href={receipt.receiptNumber ? `/receipt/${receipt.id}` : receipt.imageUrl || '#'}
                                                             key={receipt.id}
-                                                            className="flex items-center p-3.5 bg-white rounded-[16px] shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100 hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-[1px] transition-all"
+                                                            className="flex items-center p-3.5 bg-[var(--card)] rounded-[16px] shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[var(--border)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:-translate-y-[1px] transition-all"
                                                         >
                                                             {/* Icon Square */}
                                                             <div 
@@ -293,10 +293,10 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
                                                             
                                                             {/* Info */}
                                                             <div className="flex-1 min-w-0 pr-3">
-                                                                <h4 className="text-[15px] font-bold text-gray-900 truncate">
+                                                                <h4 className="text-[15px] font-bold text-[var(--text)] truncate">
                                                                     {receipt.clientName || receipt.receiptNumber || 'Unnamed Receipt'}
                                                                 </h4>
-                                                                <div className="flex items-center text-[13px] text-gray-500 mt-0.5 space-x-1.5">
+                                                                <div className="flex items-center text-[13px] text-[var(--muted)] mt-0.5 space-x-1.5">
                                                                     <span>{format(new Date(receipt.date || receipt.createdAt), 'MMM d, yyyy')}</span>
                                                                     {receipt.bundles && receipt.bundles.length > 0 && (
                                                                         <>
@@ -311,7 +311,7 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
 
                                                             {/* Right Amount & Status */}
                                                             <div className="flex flex-col items-end flex-shrink-0">
-                                                                <span className={clsx("font-bold text-[15px] font-mono", isPendingOrDraft ? "text-gray-400" : "text-gray-900")}>
+                                                                <span className={clsx("font-bold text-[15px] font-mono", isPendingOrDraft ? "text-gray-400" : "text-[var(--text)]")}>
                                                                     ${Number(receipt.total || 0).toFixed(2)}
                                                                 </span>
                                                                 <div 
@@ -334,12 +334,12 @@ export default function HistoryClient({ initialReceipts }: { initialReceipts: Re
 
                         {/* Inline Total Bar */}
                         {filteredReceipts.length > 0 && (
-                            <div className="mt-2 mb-4 p-4 bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-gray-100 flex items-center justify-between">
+                            <div className="mt-2 mb-4 p-4 bg-[var(--card)] rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-[var(--border)] flex items-center justify-between">
                                 <div className="flex flex-col">
                                     <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Amount</span>
-                                    <span className="text-sm font-medium text-gray-800">{receiptCount} receipts</span>
+                                    <span className="text-sm font-medium text-[var(--text)]">{receiptCount} receipts</span>
                                 </div>
-                                <div className="text-[20px] font-bold font-mono text-gray-900">
+                                <div className="text-[20px] font-bold font-mono text-[var(--text)]">
                                     ${totalSpend.toFixed(2)}
                                 </div>
                             </div>

@@ -342,7 +342,7 @@ export default function ConnectionsPage() {
             />
 
             {/* BODY SURFACE (Card Lift) */}
-            <div className="relative z-20 flex-1 bg-[#F4F5F9] rounded-t-[20px] -mt-4 px-4 sm:px-6 pt-5 pb-8 flex flex-col shadow-[0_-4px_24px_rgba(0,0,0,0.1)]">
+            <div className="relative z-20 flex-1 bg-[var(--bg)] rounded-t-[20px] -mt-4 px-4 sm:px-6 pt-5 pb-8 flex flex-col shadow-[0_-4px_24px_rgba(0,0,0,0.1)]">
                 {isStale && (
                     <div className="bg-amber-100 border border-amber-300 rounded-lg p-3 flex items-center mb-6 text-sm text-amber-800">
                         <svg className="w-4 h-4 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -352,7 +352,7 @@ export default function ConnectionsPage() {
                     </div>
                 )}
                 {toastMessage && (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[120%] bg-white text-gray-800 px-4 py-2 rounded-xl shadow-lg border border-gray-200 z-50 text-sm font-bold">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[120%] bg-[var(--card)] text-[var(--text)] px-4 py-2 rounded-xl shadow-lg border border-[var(--border)] z-50 text-sm font-bold">
                         {toastMessage}
                     </div>
                 )}
@@ -370,9 +370,9 @@ export default function ConnectionsPage() {
                         placeholder="Search network..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-12 py-3 bg-white border-0 rounded-2xl text-sm font-medium text-gray-800 placeholder-gray-400 shadow-[0_2px_12px_rgba(0,0,0,0.03)] focus:ring-2 focus:ring-[#5B5FEF]/20 outline-none"
+                        className="w-full pl-10 pr-12 py-3 bg-[var(--card)] border-0 rounded-2xl text-sm font-medium text-[var(--text)] placeholder-gray-400 shadow-[0_2px_12px_rgba(0,0,0,0.03)] focus:ring-2 focus:ring-[#5B5FEF]/20 outline-none"
                     />
-                    <div className="absolute right-3 w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-400 rounded-xl cursor-pointer hover:bg-gray-100 transition border border-gray-100">
+                    <div className="absolute right-3 w-8 h-8 flex items-center justify-center bg-[var(--card-hover)] text-gray-400 rounded-xl cursor-pointer hover:bg-[var(--card-hover)] transition border border-[var(--border)]">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                         </svg>
@@ -380,22 +380,22 @@ export default function ConnectionsPage() {
 
                     {/* Search Dropdown Results */}
                     {searchQuery.length >= 2 && (
-                        <div className="absolute top-full mt-2 left-0 right-0 z-50 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                        <div className="absolute top-full mt-2 left-0 right-0 z-50 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-xl max-h-60 overflow-y-auto">
                             {isSearching ? (
-                                <div className="p-4 text-sm text-gray-500 text-center">Searching...</div>
+                                <div className="p-4 text-sm text-[var(--muted)] text-center">Searching...</div>
                             ) : searchResults.length > 0 ? (
                                 <ul>
                                     {searchResults.map(user => {
                                         const { primary, secondary, logo } = getDisplayNameInfo(user);
                                         return (
-                                            <li key={user.id} className="p-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 flex items-center justify-between">
+                                            <li key={user.id} className="p-3 border-b border-gray-50 last:border-0 hover:bg-[var(--card-hover)] flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-[12px] bg-indigo-50 flex items-center justify-center text-indigo-500 font-bold shrink-0">
                                                         {logo ? <img src={logo} alt="" className="w-full h-full object-cover rounded-[12px]" /> : primary.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-semibold text-gray-900">{primary}</p>
-                                                        <p className="text-xs text-gray-500">{secondary}</p>
+                                                        <p className="text-sm font-semibold text-[var(--text)]">{primary}</p>
+                                                        <p className="text-xs text-[var(--muted)]">{secondary}</p>
                                                     </div>
                                                 </div>
                                                 <button
@@ -410,7 +410,7 @@ export default function ConnectionsPage() {
                                     })}
                                 </ul>
                             ) : (
-                                <div className="p-4 text-sm text-gray-500 text-center">No results found.</div>
+                                <div className="p-4 text-sm text-[var(--muted)] text-center">No results found.</div>
                             )}
                         </div>
                     )}
@@ -419,20 +419,20 @@ export default function ConnectionsPage() {
                 {/* My Network Section */}
                 <div className="mb-6">
                     <div className="flex items-center justify-between mb-4 px-1">
-                        <h2 className="text-[16px] font-semibold text-gray-900">My Network</h2>
+                        <h2 className="text-[16px] font-semibold text-[var(--text)]">My Network</h2>
                         <span className="text-sm text-gray-400 font-medium">{connections.length} active</span>
                     </div>
 
                     {connections.length === 0 ? (
                         <div className="text-center py-10">
-                            <p className="text-gray-500 text-sm font-medium">You have no connections yet.</p>
+                            <p className="text-[var(--muted)] text-sm font-medium">You have no connections yet.</p>
                         </div>
                     ) : (
                         <div className="space-y-3">
                             {connections.map(conn => {
                                 const { primary, secondary, logo } = getDisplayNameInfo(conn.connectedUser);
                                 return (
-                                    <div key={conn.connectionId} className="flex items-center p-3 bg-white rounded-[14px] border-[0.5px] border-[#E2E6F3] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                                    <div key={conn.connectionId} className="flex items-center p-3 bg-[var(--card)] rounded-[14px] border-[0.5px] border-[var(--border)] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
                                         <div className="relative shrink-0 mr-3">
                                             <div className="w-[44px] h-[44px] rounded-[12px] bg-[#10B981]/10 text-[#10B981] flex items-center justify-center font-bold shadow-inner overflow-hidden">
                                                 {logo ? <img src={logo} alt="" className="w-full h-full object-cover" /> : primary.charAt(0).toUpperCase()}
@@ -443,8 +443,8 @@ export default function ConnectionsPage() {
                                         </div>
                                         
                                         <div className="flex-1 min-w-0 pr-3">
-                                            <h4 className="text-[15px] font-semibold text-gray-900 truncate">{primary}</h4>
-                                            <p className="text-[13px] text-gray-500 truncate mt-0.5">{secondary}</p>
+                                            <h4 className="text-[15px] font-semibold text-[var(--text)] truncate">{primary}</h4>
+                                            <p className="text-[13px] text-[var(--muted)] truncate mt-0.5">{secondary}</p>
                                             <div className="inline-flex mt-1.5 px-2 py-0.5 rounded-md bg-[#E1F5EE] text-[#0F6E56] text-[10px] font-bold uppercase tracking-wider">
                                                 Connected
                                             </div>
@@ -452,7 +452,7 @@ export default function ConnectionsPage() {
 
                                         <button 
                                             onClick={() => handleOpenMessages(conn.connectedUser.id)}
-                                            className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors shrink-0"
+                                            className="w-8 h-8 rounded-lg bg-[var(--card-hover)] hover:bg-[var(--border)] flex items-center justify-center text-[var(--muted)] transition-colors shrink-0"
                                         >
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -469,38 +469,38 @@ export default function ConnectionsPage() {
             {/* Pending Requests Modal */}
             {isPendingModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-                        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50">
-                            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <div className="bg-[var(--card)] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                        <div className="flex items-center justify-between p-5 border-b border-[var(--border)] bg-[var(--card-hover)]/50">
+                            <h2 className="text-lg font-bold text-[var(--text)] flex items-center gap-2">
                                 Pending Requests
                                 <span className="bg-red-50 text-red-500 text-xs px-2 py-0.5 rounded-full font-bold">{incomingRequests.length}</span>
                             </h2>
-                            <button onClick={() => setIsPendingModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors">
+                            <button onClick={() => setIsPendingModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--card-hover)] hover:bg-[var(--border)] text-[var(--muted)] transition-colors">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         <div className="p-5 overflow-y-auto space-y-3 custom-scrollbar">
                             {incomingRequests.length === 0 ? (
-                                <p className="text-center text-sm text-gray-500 py-8">No pending requests.</p>
+                                <p className="text-center text-sm text-[var(--muted)] py-8">No pending requests.</p>
                             ) : (
                                 incomingRequests.map(req => {
                                     const { primary, secondary, logo } = getDisplayNameInfo(req.requester);
                                     return (
-                                        <div key={req.id} className="bg-white border border-gray-100 p-4 rounded-2xl flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                                        <div key={req.id} className="bg-[var(--card)] border border-[var(--border)] p-4 rounded-2xl flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 font-bold shrink-0">
                                                     {logo ? <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-xl" /> : primary.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-900">{primary}</p>
-                                                    <p className="text-xs text-gray-500">{secondary}</p>
+                                                    <p className="text-sm font-bold text-[var(--text)]">{primary}</p>
+                                                    <p className="text-xs text-[var(--muted)]">{secondary}</p>
                                                 </div>
                                             </div>
                                             <div className="flex gap-2 w-full">
                                                 <button onClick={() => handleRespond(req.id, 'accepted')} disabled={actionLoading === req.id || !isOnline} className="flex-1 text-xs font-bold bg-[#5B5FEF] hover:bg-[#4F54E5] text-white py-2.5 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50">
                                                     Accept
                                                 </button>
-                                                <button onClick={() => handleRespond(req.id, 'declined')} disabled={actionLoading === req.id || !isOnline} className="flex-1 text-xs font-bold bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 py-2.5 rounded-xl transition-all active:scale-95 disabled:opacity-50">
+                                                <button onClick={() => handleRespond(req.id, 'declined')} disabled={actionLoading === req.id || !isOnline} className="flex-1 text-xs font-bold bg-[var(--card-hover)] hover:bg-[var(--card-hover)] text-[var(--muted)] border border-[var(--border)] py-2.5 rounded-xl transition-all active:scale-95 disabled:opacity-50">
                                                     Decline
                                                 </button>
                                             </div>
@@ -516,22 +516,22 @@ export default function ConnectionsPage() {
             {/* Suggested Connections Modal */}
             {isSuggestedModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-                        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50">
-                            <h2 className="text-lg font-bold text-gray-900">Suggested for you</h2>
-                            <button onClick={() => setIsSuggestedModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors">
+                    <div className="bg-[var(--card)] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                        <div className="flex items-center justify-between p-5 border-b border-[var(--border)] bg-[var(--card-hover)]/50">
+                            <h2 className="text-lg font-bold text-[var(--text)]">Suggested for you</h2>
+                            <button onClick={() => setIsSuggestedModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--card-hover)] hover:bg-[var(--border)] text-[var(--muted)] transition-colors">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         <div className="p-5 overflow-y-auto space-y-3 custom-scrollbar">
                             {suggestedBusinesses.length === 0 ? (
-                                <p className="text-center text-sm text-gray-500 py-8">No suggestions available.</p>
+                                <p className="text-center text-sm text-[var(--muted)] py-8">No suggestions available.</p>
                             ) : (
                                 suggestedBusinesses.map(user => {
                                     const { primary, secondary, logo } = getDisplayNameInfo(user);
                                     const mutualCount = (user.id.charCodeAt(0) % 5) + 1;
                                     return (
-                                        <div key={user.id} className="flex items-center p-3 bg-white rounded-[16px] border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:border-[#5B5FEF]/30 transition-colors">
+                                        <div key={user.id} className="flex items-center p-3 bg-[var(--card)] rounded-[16px] border border-[var(--border)] shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:border-[#5B5FEF]/30 transition-colors">
                                             <div className="relative shrink-0 mr-3">
                                                 <div className="w-[44px] h-[44px] rounded-[12px] bg-[#5B5FEF]/10 text-[#5B5FEF] flex items-center justify-center font-bold shadow-inner overflow-hidden">
                                                     {logo ? <img src={logo} alt="" className="w-full h-full object-cover" /> : primary.charAt(0).toUpperCase()}
@@ -541,7 +541,7 @@ export default function ConnectionsPage() {
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0 pr-3">
-                                                <h4 className="text-[14px] font-semibold text-gray-900 truncate">{primary}</h4>
+                                                <h4 className="text-[14px] font-semibold text-[var(--text)] truncate">{primary}</h4>
                                                 <div className="inline-flex mt-1 px-2 py-0.5 rounded-md bg-[#FAEEDA] text-[#854F0B] text-[10px] font-bold uppercase tracking-wider">
                                                     {mutualCount} mutual
                                                 </div>
