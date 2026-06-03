@@ -10,26 +10,30 @@ import BroadcastDisplay from '@/components/BroadcastDisplay';
 import PullToRefreshWrapper from '@/components/PullToRefreshWrapper';
 import InstallPrompt from '@/components/InstallPrompt';
 
-export default function AuthenticatedLayout({ children, role, isPro, userName, businessName, businessLogoPath, activeInvoicesCount }: any) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export default function AuthenticatedLayout({ children, role, isPro, userName, businessName, businessLogoPath, activeInvoicesCount, initialIsAuthenticated = false }: any) {
+  const [isAuthenticated, setIsAuthenticated] = useState(initialIsAuthenticated);
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    const hasCookie = document.cookie.includes('auth_token');
+    // If the server already knows we are authenticated, we don't need to block rendering
+    if (initialIsAuthenticated) {
+      setChecked(true);
+    }
+    
     import('@capacitor/core').then(({ Capacitor }) => {
       if (Capacitor.isNativePlatform()) {
         import('@capacitor/preferences').then(({ Preferences }) => {
           Preferences.get({ key: 'auth_token' }).then(({ value }) => {
-            setIsAuthenticated(!!value || hasCookie);
+            setIsAuthenticated(!!value || initialIsAuthenticated);
             setChecked(true);
           });
         });
       } else {
-        setIsAuthenticated(hasCookie);
+        setIsAuthenticated(initialIsAuthenticated);
         setChecked(true);
       }
     });
-  }, []);
+  }, [initialIsAuthenticated]);
 
   if (!checked) return <div className="min-h-screen" />;
 

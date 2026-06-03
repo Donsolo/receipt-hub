@@ -157,6 +157,7 @@ export default async function RootLayout({
               businessName={businessName} 
               businessLogoPath={businessLogoPath} 
               activeInvoicesCount={activeInvoicesCount}
+              initialIsAuthenticated={isAuthenticated}
             >
               {children}
             </AuthenticatedLayout>
