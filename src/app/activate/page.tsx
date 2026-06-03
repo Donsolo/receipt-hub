@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
 "use client";
@@ -13,7 +15,11 @@ export default function ActivatePage() {
             const res = await fetch(`${API_BASE_URL}/api/activate/create-session`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' });
             const data = await res.json();
             if (data.url) {
-                window.location.href = data.url;
+                if (Capacitor.isNativePlatform()) {
+                    Browser.open({ url: data.url });
+                } else {
+                    window.location.href = data.url;
+                }
             } else {
                 alert(data.error || 'Failed to start activation.');
             }

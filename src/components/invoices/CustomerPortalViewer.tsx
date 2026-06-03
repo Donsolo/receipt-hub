@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
 'use client';
@@ -104,7 +106,11 @@ export default function CustomerPortalViewer({ token, source, requestLogId }: Cu
                 throw new Error(data.error || 'Failed to initialize secure checkout.');
             }
             if (data.url) {
-                window.location.href = data.url;
+                if (Capacitor.isNativePlatform()) {
+                    Browser.open({ url: data.url });
+                } else {
+                    window.location.href = data.url;
+                }
             }
         } catch (e: any) {
             alert(e.message);

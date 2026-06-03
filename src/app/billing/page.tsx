@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
 "use client";
@@ -38,7 +40,11 @@ export default function BillingPage() {
             });
             const data = await res.json();
             if (data.url) {
-                window.location.href = data.url;
+                if (Capacitor.isNativePlatform()) {
+                    Browser.open({ url: data.url });
+                } else {
+                    window.location.href = data.url;
+                }
             } else {
                 console.error(data.error);
                 setError(data.error || 'Failed to initialize checkout.');
@@ -60,7 +66,11 @@ export default function BillingPage() {
             });
             const data = await res.json();
             if (data.url) {
-                window.location.href = data.url;
+                if (Capacitor.isNativePlatform()) {
+                    Browser.open({ url: data.url });
+                } else {
+                    window.location.href = data.url;
+                }
             } else {
                 console.error(data.error);
                 setError(data.error || 'Failed to open billing portal.');
