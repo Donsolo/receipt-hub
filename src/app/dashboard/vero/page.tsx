@@ -206,7 +206,7 @@ export default function VeroSuitePage() {
                             {isPro && (
                                 <div onClick={() => router.push('/dashboard/vero/lens')} className="w-[280px] sm:w-[320px] h-[360px] shrink-0 snap-start bg-[var(--card)] border border-[var(--border)] rounded-2xl flex flex-col shadow-sm hover:shadow-md transition-all hover:-translate-y-1 focus-within:ring-2 focus-within:ring-indigo-500 relative overflow-hidden group cursor-pointer">
                                     <div className="relative flex-1 overflow-hidden bg-[var(--bg)]">
-                                        <img src="/images/Vero-lens-hero-card.png" alt="Vero Lens" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <img src="/images/Vero-lens-hero-card.png" alt="Vero Lens" className="w-full h-full object-cover object-left group-hover:scale-105 transition-transform duration-500" />
                                         <div className="absolute top-4 right-4">
                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase bg-black/60 text-white backdrop-blur-md border border-white/10 shadow-sm">
                                                 Vero+
