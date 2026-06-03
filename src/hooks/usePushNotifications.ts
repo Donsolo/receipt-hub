@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications, ActionPerformed, PushNotificationSchema, Token } from '@capacitor/push-notifications';
 import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/lib/config';
+import { getAuthHeader } from '@/lib/auth-client';
 
 function urlB64ToUint8Array(base64String: string) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -22,13 +24,15 @@ function urlB64ToUint8Array(base64String: string) {
 
 export function usePushNotifications() {
     const [token, setToken] = useState<string | null>(null);
+    const [foregroundNotification, setForegroundNotification] = useState<{ title: string, body: string } | null>(null);
     const router = useRouter();
 
     const registerPushToken = async (hardwareToken: string, platformType: string) => {
+        if (!Capacitor.isNativePlatform()) return;
         try {
-            await fetch('/api/user/push-tokens', {
+            await fetch(`${API_BASE_URL}/api/notifications/register-token`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...((await getAuthHeader()) as any) },
                 body: JSON.stringify({
                     token: hardwareToken,
                     platform: platformType,
@@ -101,20 +105,29 @@ export function usePushNotifications() {
             }
 
             // Hook up listeners
-            PushNotifications.addListener('registration', (token: Token) => {
+            PushNotifications.addListener('registration', (t: Token) => {
                 if (isMounted) {
-                    setToken(token.value);
-                    registerPushToken(token.value, Capacitor.getPlatform());
+                    setToken(t.value);
+                    registerPushToken(t.value, 'android');
                 }
             });
 
             PushNotifications.addListener('registrationError', (error: any) => {
-                console.error('Error on registration: ' + JSON.stringify(error));
+                console.error('Push registration error: ' + JSON.stringify(error));
             });
 
             // When a notification is received in the foreground
             PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
                 console.log('Push notification received: ', notification);
+                if (isMounted) {
+                    setForegroundNotification({
+                        title: notification.title || 'New Notification',
+                        body: notification.body || ''
+                    });
+                    setTimeout(() => {
+                        if (isMounted) setForegroundNotification(null);
+                    }, 5000);
+                }
             });
 
             // When a user taps on a notification from the OS drawer
@@ -133,7 +146,8 @@ export function usePushNotifications() {
             isMounted = false;
             PushNotifications.removeAllListeners();
         };
-    }, []);
+    }, [router]);
 
-    return { token, requestPermissions };
+    return { token, requestPermissions, foregroundNotification };
 }
+
