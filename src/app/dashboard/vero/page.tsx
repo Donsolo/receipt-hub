@@ -1,7 +1,6 @@
+"use client";
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
-"use client";
-
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -206,23 +205,12 @@ export default function VeroSuitePage() {
                             {/* NEW: Vero Lens Tool (PRO ONLY) */}
                             {isPro && (
                                 <div onClick={() => router.push('/dashboard/vero/lens')} className="w-[280px] sm:w-[320px] h-[360px] shrink-0 snap-start bg-[var(--card)] border border-[var(--border)] rounded-2xl flex flex-col shadow-sm hover:shadow-md transition-all hover:-translate-y-1 focus-within:ring-2 focus-within:ring-indigo-500 relative overflow-hidden group cursor-pointer">
-                                    <div className="relative flex-1 overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-800 to-black p-6 flex flex-col justify-end">
-                                        <div className="absolute top-0 right-0 p-4">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase bg-black/60 text-white backdrop-blur-md border border-white/20 shadow-sm">
+                                    <div className="relative flex-1 overflow-hidden bg-[var(--bg)]">
+                                        <img src="/images/Vero-lens-hero-card.png" alt="Vero Lens" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <div className="absolute top-4 right-4">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase bg-black/60 text-white backdrop-blur-md border border-white/10 shadow-sm">
                                                 Vero+
                                             </span>
-                                        </div>
-                                        <div className="absolute inset-0 bg-indigo-500/10 mix-blend-overlay group-hover:bg-transparent transition-colors duration-500"></div>
-                                        
-                                        <div className="relative z-10">
-                                            <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center mb-4 border border-white/20 shadow-xl group-hover:scale-110 group-hover:bg-indigo-500 transition-all duration-300">
-                                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                </svg>
-                                            </div>
-                                            <h3 className="text-xl font-bold text-white mb-1">Vero Lens</h3>
-                                            <p className="text-sm text-indigo-100/80 leading-relaxed font-medium">AI Camera Estimate Builder.</p>
                                         </div>
                                     </div>
                                     <div className="p-4 bg-[var(--card)] border-t border-[var(--border)] shrink-0 z-10">
