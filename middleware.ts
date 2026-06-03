@@ -5,8 +5,6 @@ export function middleware(request: NextRequest) {
     const origin = request.headers.get('origin') ?? '';
     const isTrustedOrigin =
         origin.startsWith('capacitor://') ||
-        origin.startsWith('http://localhost') ||
-        origin.startsWith('https://localhost') ||
         origin === 'https://verihub.app';
 
     // Handle preflight requests

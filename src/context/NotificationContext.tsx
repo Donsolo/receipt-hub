@@ -26,6 +26,8 @@ interface NotificationContextProps {
 const NotificationContext = createContext<NotificationContextProps | undefined>(undefined);
 
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { API_BASE_URL } from '@/lib/config';
+import { getAuthHeader } from '@/lib/auth-client';
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -33,11 +35,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const [loading, setLoading] = useState<boolean>(true);
     const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
     
-    const { requestPermissions } = usePushNotifications();
+    const { requestPermissions, foregroundNotification } = usePushNotifications();
 
     const fetchNotifications = useCallback(async () => {
         try {
-            const res = await fetch('/api/notifications');
+            const res = await fetch(`${API_BASE_URL}/api/notifications`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setNotifications(data);
@@ -49,7 +51,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     const fetchUnreadCount = useCallback(async () => {
         try {
-            const res = await fetch('/api/notifications/unread-count');
+            const res = await fetch(`${API_BASE_URL}/api/notifications/unread-count`, { headers: { ...((await getAuthHeader()) as any) } });
             if (res.ok) {
                 const data = await res.json();
                 setUnreadCount(data.count || 0);
@@ -70,9 +72,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
             setUnreadCount(prev => Math.max(0, prev - 1));
 
-            const res = await fetch('/api/notifications/mark-read', {
+            const res = await fetch(`${API_BASE_URL}/api/notifications/mark-read`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...((await getAuthHeader()) as any) },
                 body: JSON.stringify({ notificationId: id }),
             });
 
@@ -92,8 +94,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             setUnreadCount(0);
 
-            const res = await fetch('/api/notifications/mark-all-read', {
+            const res = await fetch(`${API_BASE_URL}/api/notifications/mark-all-read`, {
                 method: 'POST',
+                headers: { ...((await getAuthHeader()) as any) },
             });
 
             if (!res.ok) {
@@ -136,6 +139,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             markRead,
             markAllRead
         }}>
+            {foregroundNotification && (
+                <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-indigo-600 text-white px-6 py-4 rounded-xl shadow-2xl max-w-[90vw] w-max flex flex-col pointer-events-none transition-all duration-300">
+                    <div className="font-bold">{foregroundNotification.title}</div>
+                    <div className="text-sm opacity-90">{foregroundNotification.body}</div>
+                </div>
+            )}
             {children}
         </NotificationContext.Provider>
     );
