@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 export async function GET(req: Request) {
     try {
-        const token = req.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
-        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        const user = await verifyToken(token);
+        ')[0];
+        
+        const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const tags = await db.customerTag.findMany({
-            where: { ownerId: user.userId },
+            where: { ownerId: user.id },
             orderBy: { name: 'asc' }
         });
 
@@ -24,10 +23,9 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const token = req.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
-        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        const user = await verifyToken(token);
+        ')[0];
+        
+        const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const { name, color } = await req.json();
@@ -37,11 +35,11 @@ export async function POST(req: Request) {
 
         const tag = await db.customerTag.upsert({
             where: {
-                ownerId_name: { ownerId: user.userId, name: name.trim() }
+                ownerId_name: { ownerId: user.id, name: name.trim() }
             },
             update: { color },
             create: {
-                ownerId: user.userId,
+                ownerId: user.id,
                 name: name.trim(),
                 color
             }

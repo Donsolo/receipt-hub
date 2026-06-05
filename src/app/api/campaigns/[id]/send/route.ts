@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import nodemailer from 'nodemailer';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
-        const token = req.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
-        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        const user = await verifyToken(token);
+        ')[0];
+        
+        const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const campaign = await db.customerEmailCampaign.findUnique({
@@ -19,7 +18,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             }
         });
 
-        if (!campaign || campaign.ownerId !== user.userId) {
+        if (!campaign || campaign.ownerId !== user.id) {
             return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
         }
 
@@ -31,7 +30,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
         const recentCampaign = await db.customerEmailCampaign.findFirst({
             where: {
-                ownerId: user.userId,
+                ownerId: user.id,
                 status: 'SENT',
                 sentAt: { gte: fifteenMinsAgo }
             }
@@ -83,7 +82,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
                 await db.customerCommunicationLog.create({
                     data: {
-                        ownerId: user.userId,
+                        ownerId: user.id,
                         customerContactId: recipient.customerContactId,
                         channel: 'EMAIL',
                         direction: 'OUTBOUND',

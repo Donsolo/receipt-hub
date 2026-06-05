@@ -1,32 +1,57 @@
+"use client";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import InvoiceWizard from '@/components/invoices/InvoiceWizard';
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
-import { redirect } from 'next/navigation';
-import { db } from '@/lib/db';
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 
-// export const dynamic stripped by mobile build
+export default function CreateInvoicePage() {
+    const router = useRouter();
+    const [data, setData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-export default async function CreateInvoicePage() {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    const authUser = await verifyToken(token || '');
+    useEffect(() => {
+        (async () => {
+            try {
+                const headers = await getAuthHeader();
+                const res = await fetch(`${API_BASE_URL}/api/invoices/create/metadata`, {
+                    headers: { ...headers as any, 'Content-Type': 'application/json' }
+                });
 
-    if (!authUser) {
-        redirect('/login');
+                if (res.status === 401) {
+                    router.push('/login');
+                    return;
+                }
+
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success) {
+                        if (!json.isPro) {
+                            router.push('/dashboard/invoices');
+                            return;
+                        }
+                        setData(json);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load invoice metadata", err);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [router]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+        );
     }
 
-    const isPro = (authUser.plan === "PRO" && authUser.planStatus !== "inactive") || authUser.role === "ADMIN" || authUser.role === "SUPER_ADMIN";
-    
-    if (!isPro) {
-        redirect('/dashboard/invoices');
-    }
+    if (!data) return <div className="p-8 text-center text-[var(--muted)]">Failed to load data</div>;
 
-    const userRecord = await db.user.findUnique({
-        where: { id: authUser.userId },
-        select: { businessName: true, businessLogoPath: true, businessRegistrationNumber: true, email: true }
-    });
-
-    const globalProfile = await db.businessProfile.findFirst();
+    const { userRecord, globalProfile, isPro } = data;
 
     return (
         <div className="min-h-screen bg-[var(--bg)] pt-8 pb-32">

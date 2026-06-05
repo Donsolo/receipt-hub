@@ -1,38 +1,78 @@
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
-import { db } from '@/lib/db';
+"use client";
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 
-// export const dynamic stripped by mobile build
+export default function CampaignsPage() {
+    const router = useRouter();
+    const [campaigns, setCampaigns] = useState<any[]>([]);
+    const [isPro, setIsPro] = useState<boolean>(true); // assume true while loading
+    const [loading, setLoading] = useState(true);
 
-export default async function CampaignsPage() {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    const authUser = await verifyToken(token || '');
+    useEffect(() => {
+        (async () => {
+            try {
+                const headers = await getAuthHeader();
+                
+                // Fetch User
+                const userRes = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                    headers: { ...headers as any, 'Content-Type': 'application/json' }
+                });
 
-    if (!authUser) redirect('/login');
+                if (userRes.status === 401) {
+                    router.push('/login');
+                    return;
+                }
 
-    const owner = await db.user.findUnique({ where: { id: authUser.userId } });
-    const isPro = owner?.plan === 'PRO' || owner?.role === 'ADMIN' || owner?.role === 'SUPER_ADMIN';
+                if (userRes.ok) {
+                    const user = await userRes.json();
+                    const userIsPro = user.plan === 'PRO' || user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+                    setIsPro(userIsPro);
+
+                    if (userIsPro) {
+                        // Fetch campaigns
+                        const campRes = await fetch(`${API_BASE_URL}/api/campaigns`, {
+                            headers: { ...headers as any, 'Content-Type': 'application/json' }
+                        });
+                        
+                        if (campRes.ok) {
+                            const data = await campRes.json();
+                            if (data.success) {
+                                setCampaigns(data.campaigns);
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load campaigns", err);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [router]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+        );
+    }
 
     if (!isPro) {
         return (
             <div className="max-w-6xl mx-auto p-8 text-center">
                 <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-4">Bulk Email Campaigns</h1>
                 <p className="text-gray-500 mb-6">Bulk campaigns are a Pro-only feature.</p>
-                <Link href="/dashboard/upgrade" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all">
+                <Link href="/upgrade" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all">
                     Upgrade to Pro
                 </Link>
             </div>
         );
     }
-
-    const campaigns = await db.customerEmailCampaign.findMany({
-        where: { ownerId: authUser.userId },
-        orderBy: { createdAt: 'desc' }
-    });
 
     return (
         <div className="max-w-6xl mx-auto p-4 sm:p-8 font-sans">

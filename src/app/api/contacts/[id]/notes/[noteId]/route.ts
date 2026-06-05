@@ -1,18 +1,17 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string, noteId: string }> }) {
     try {
         const { id, noteId } = await params;
-        const token = req.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
-        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        const user = await verifyToken(token);
+        ')[0];
+        
+        const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const note = await db.customerContactNote.findUnique({ where: { id: noteId } });
-        if (!note || note.ownerId !== user.userId || note.customerContactId !== id) {
+        if (!note || note.ownerId !== user.id || note.customerContactId !== id) {
             return NextResponse.json({ error: 'Note not found' }, { status: 404 });
         }
 

@@ -1,15 +1,64 @@
-import { getNextReceiptNumber } from "@/lib/actions";
+"use client";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 import ReceiptForm from "./ReceiptForm";
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/auth";
 
-export default async function CreateReceiptPage() {
-    const nextReceiptNumber = process.env.NEXT_MOBILE_BUILD === 'true' ? "RCPT-XXXX" : await getNextReceiptNumber();
+export default function CreateReceiptPage() {
+    const router = useRouter();
+    const [user, setUser] = useState<any>(null);
+    const [nextReceiptNumber, setNextReceiptNumber] = useState<string>("RCPT-XXXX");
+    const [loading, setLoading] = useState(true);
 
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    const authUser = await verifyToken(token || '');
+    useEffect(() => {
+        (async () => {
+            try {
+                const headers = await getAuthHeader();
+                
+                // Fetch User
+                const userRes = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                    headers: { ...headers as any, 'Content-Type': 'application/json' }
+                });
+
+                if (userRes.status === 401) {
+                    router.push('/login');
+                    return;
+                }
+
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    setUser(userData);
+                }
+
+                // Fetch Next Receipt Number
+                const numRes = await fetch(`${API_BASE_URL}/api/receipts/next-number`, {
+                    headers: { ...headers as any, 'Content-Type': 'application/json' }
+                });
+
+                if (numRes.ok) {
+                    const numData = await numRes.json();
+                    if (numData.success) {
+                        setNextReceiptNumber(numData.nextReceiptNumber);
+                    }
+                }
+
+            } catch (err) {
+                console.error("Failed to load receipt creation data", err);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [router]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-[var(--bg)] min-h-screen p-6 md:p-10">
@@ -24,12 +73,12 @@ export default async function CreateReceiptPage() {
                     <h2 className="text-2xl font-bold tracking-tight text-[var(--text)]">
                         New Receipt
                     </h2>
-                    <p className="mt-1 text-sm text-white/50">
+                    <p className="mt-1 text-sm text-[var(--muted)]">
                         Create and save a receipt
                     </p>
                 </div>
 
-                <ReceiptForm initialData={{ receiptNumber: nextReceiptNumber, date: new Date(), taxType: 'none', items: [] }} user={authUser || undefined} />
+                <ReceiptForm initialData={{ receiptNumber: nextReceiptNumber, date: new Date(), taxType: 'none', items: [] }} user={user || undefined} />
             </div>
         </div>
     );

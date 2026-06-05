@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 export async function GET(req: Request) {
     try {
-        const token = req.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
-        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        const user = await verifyToken(token);
+        const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const campaigns = await db.customerEmailCampaign.findMany({
-            where: { ownerId: user.userId },
+            where: { ownerId: user.id },
             orderBy: { createdAt: 'desc' }
         });
 
@@ -24,13 +21,10 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const token = req.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
-        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        const user = await verifyToken(token);
+        const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        const owner = await db.user.findUnique({ where: { id: user.userId } });
+        const owner = await db.user.findUnique({ where: { id: user.id } });
         const isPro = owner?.plan === 'PRO' || owner?.role === 'ADMIN' || owner?.role === 'SUPER_ADMIN';
         if (!isPro) return NextResponse.json({ error: 'Pro feature only.' }, { status: 403 });
 
@@ -48,7 +42,7 @@ export async function POST(req: Request) {
         const contacts = await db.customerContact.findMany({
             where: {
                 id: { in: contactIds },
-                ownerId: user.userId,
+                ownerId: user.id,
                 email: { not: null }
             }
         });
@@ -59,7 +53,7 @@ export async function POST(req: Request) {
 
         const campaign = await db.customerEmailCampaign.create({
             data: {
-                ownerId: user.userId,
+                ownerId: user.id,
                 name: name.trim(),
                 subject: subject.trim(),
                 previewText: previewText?.trim(),

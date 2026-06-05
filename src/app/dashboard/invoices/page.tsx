@@ -1,47 +1,99 @@
-import { cookies, headers } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
-import { db } from '@/lib/db';
+"use client";
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { format, formatDistanceToNow } from 'date-fns';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { formatDistanceToNow } from 'date-fns';
 import { clsx } from 'clsx';
 import InvoiceActions from '@/components/invoices/InvoiceActions';
 import { IconFileInvoice, IconClock, IconDotsVertical } from '@tabler/icons-react';
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 
-// export const dynamic stripped by mobile build
+function InvoicesContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    
+    const filterParam = searchParams.get('filter') || 'all';
+    const sortParam = searchParams.get('sort') || 'newest';
 
-export default async function InvoicesHub(props: { searchParams?: Promise<{ filter?: string, sort?: string }> }) {
-    const searchParams = process.env.NEXT_MOBILE_BUILD === 'true' ? {} : await props.searchParams;
-    const filterParam = (searchParams as any)?.filter || 'all';
-    const sortParam = (searchParams as any)?.sort || 'newest';
+    const [user, setUser] = useState<any>(null);
+    const [isPro, setIsPro] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [rawInvoices, setRawInvoices] = useState<any[]>([]);
+    const [fetchError, setFetchError] = useState<string | null>(null);
 
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    const authUser = await verifyToken(token || '');
+    useEffect(() => {
+        (async () => {
+            try {
+                const headers = await getAuthHeader();
+                
+                // Fetch user
+                const userRes = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                    headers: { ...headers as any, 'Content-Type': 'application/json' }
+                });
 
-    if (!authUser) {
-        return <div>Unauthorized</div>;
+                if (userRes.status === 401) {
+                    router.push('/login');
+                    return;
+                }
+
+                let authUser = null;
+                if (userRes.ok) {
+                    authUser = await userRes.json();
+                    setUser(authUser);
+                    const userIsPro = (authUser.plan === "PRO" && authUser.planStatus !== "inactive") || authUser.role === "ADMIN" || authUser.role === "SUPER_ADMIN";
+                    setIsPro(userIsPro);
+
+                    if (userIsPro) {
+                        // Fetch invoices
+                        const invRes = await fetch(`${API_BASE_URL}/api/invoices`, {
+                            headers: { ...headers as any, 'Content-Type': 'application/json' }
+                        });
+                        if (invRes.ok) {
+                            const data = await invRes.json();
+                            if (data.success) {
+                                setRawInvoices(data.invoices || []);
+                            } else {
+                                setFetchError(data.error);
+                            }
+                        } else {
+                            setFetchError('Failed to load invoices');
+                        }
+                    }
+                }
+            } catch (err: any) {
+                console.error('Invoice Fetch Failed:', err);
+                setFetchError(err?.message || 'Unknown Network Error');
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [router]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center pb-24">
+                <div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+        );
     }
 
-    const isPro = (authUser.plan === "PRO" && authUser.planStatus !== "inactive") || authUser.role === "ADMIN" || authUser.role === "SUPER_ADMIN";
-    
+    if (!user) return null;
+
     if (!isPro) {
-        const headersList = await headers();
-        const userAgent = headersList.get('user-agent') || '';
-        const isMobileApp = /Capacitor|wv/i.test(userAgent);
+        // Fallback for non-pro users
+        const isMobileApp = typeof window !== 'undefined' && /Capacitor|wv/i.test(window.navigator.userAgent);
 
         return (
             <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)] relative">
-                {/* Minimal hero block for Unauthorized State */}
                 <div className="relative bg-[#0B0F1A] w-full px-4 pt-8 pb-32">
                      <div className="absolute inset-0 z-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(99,102,241,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.10) 1px, transparent 1px)', backgroundSize: '32px 32px', animation: 'grid-drift 8s linear infinite' }} />
                 </div>
                 
-                {/* Modal Overlay Background */}
                 <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
                 
-                {/* Modal Dialog */}
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-[var(--card)] w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-gray-100 dark:border-[var(--border)]">
+                    <div className="bg-white dark:bg-[var(--card)] w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-[var(--border)]">
                         <div className="p-8 text-center flex flex-col items-center">
                             <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6 shadow-inner ring-4 ring-blue-50 dark:ring-blue-900/20">
                                 <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" /></svg>
@@ -74,57 +126,34 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
         );
     }
 
-    let invoices: any[] = [];
     let stats = { total: 0, sent: 0, viewed: 0, overdue: 0, totalAmount: 0, sentAmount: 0, viewedAmount: 0, overdueAmount: 0 };
-    let fetchError: string | null = null;
-    try {
-        const allInvoices = await db.invoice.findMany({
-            where: {
-                OR: [
-                    { userId: authUser.userId },
-                    { paymentRequestLogs: { some: { recipientUserId: authUser.userId } } }
-                ]
-            },
-            include: { 
-                items: true,
-                user: { select: { name: true, businessName: true } }
-            }
-        });
+    const now = new Date();
+    
+    const processed = rawInvoices.map(inv => {
+        const times = [inv.createdAt, inv.sentAt, inv.lastViewedAt, inv.paymentConfirmedAt].filter(Boolean).map(t => new Date(t as string).getTime());
+        
+        stats.total++;
+        stats.totalAmount += inv.total;
+        if (inv.status === 'SENT') { stats.sent++; stats.sentAmount += inv.total; }
+        if (inv.status === 'VIEWED') { stats.viewed++; stats.viewedAmount += inv.total; }
+        if (inv.status !== 'PAID' && inv.dueDate && new Date(inv.dueDate) < now) { stats.overdue++; stats.overdueAmount += inv.total; }
 
-        const now = new Date();
-        const processed = allInvoices.map(inv => {
-            const times = [inv.createdAt, inv.sentAt, inv.lastViewedAt, inv.paymentConfirmedAt].filter(Boolean).map(t => new Date(t as Date).getTime());
-            
-            // Increment Stats
-            stats.total++;
-            stats.totalAmount += inv.total;
-            if (inv.status === 'SENT') { stats.sent++; stats.sentAmount += inv.total; }
-            if (inv.status === 'VIEWED') { stats.viewed++; stats.viewedAmount += inv.total; }
-            if (inv.status !== 'PAID' && inv.dueDate && inv.dueDate < now) { stats.overdue++; stats.overdueAmount += inv.total; }
+        return {
+            ...inv,
+            lastActivityAt: new Date(Math.max(...times))
+        };
+    });
 
-            return {
-                ...inv,
-                lastActivityAt: new Date(Math.max(...times))
-            };
-        });
+    let invoices = processed.filter(inv => {
+        if (filterParam === 'all') return true;
+        if (filterParam === 'overdue') return inv.status !== 'PAID' && inv.dueDate && new Date(inv.dueDate) < now;
+        return inv.status === filterParam.toUpperCase();
+    });
 
-        // Filter
-        invoices = processed.filter(inv => {
-            if (filterParam === 'all') return true;
-            if (filterParam === 'overdue') return inv.status !== 'PAID' && inv.dueDate && inv.dueDate < now;
-            return inv.status === filterParam.toUpperCase();
-        });
-
-        // Sort
-        if (sortParam === 'activity') {
-            invoices.sort((a, b) => b.lastActivityAt.getTime() - a.lastActivityAt.getTime());
-        } else {
-            invoices.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-        }
-
-    } catch (e: any) {
-        console.error('SERVER ACTION CRASH - Invoice Fetch Failed:', e);
-        fetchError = e?.message || String(e) || 'Unknown Database Error';
+    if (sortParam === 'activity') {
+        invoices.sort((a, b) => b.lastActivityAt.getTime() - a.lastActivityAt.getTime());
+    } else {
+        invoices.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
     const currentTotalSum = invoices.reduce((sum, inv) => sum + inv.total, 0);
@@ -132,10 +161,8 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
 
     return (
         <div className="min-h-screen bg-[#F4F5F9] dark:bg-[var(--bg)] flex flex-col font-sans text-[var(--text)] overflow-hidden">
-            
             {/* HERO SECTION */}
             <div className="relative bg-[#0B0F1A] w-full px-4 sm:px-6 pt-12 pb-12 overflow-hidden shrink-0">
-                {/* Grid Overlay */}
                 <div 
                     className="absolute inset-0 z-0 pointer-events-none"
                     style={{
@@ -144,8 +171,6 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                         animation: 'grid-drift 8s linear infinite'
                     }}
                 />
-                
-                {/* Glows */}
                 <div className="absolute top-0 left-0 w-96 h-96 bg-[#6366F1] rounded-full blur-[100px] opacity-24 z-0 pointer-events-none" />
                 <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#FB923C] rounded-full blur-[80px] opacity-12 z-0 pointer-events-none" />
 
@@ -160,7 +185,6 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                         </Link>
                     </div>
 
-                    {/* Stat Pills */}
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 backdrop-blur-md flex flex-col">
                             <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-0.5">Total</span>
@@ -182,10 +206,7 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                 </div>
             </div>
 
-            {/* BODY SURFACE */}
             <div className="relative z-10 flex-1 w-full bg-[#F4F5F9] dark:bg-[var(--bg)] rounded-t-[20px] -mt-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] flex flex-col pb-24">
-                
-                {/* Filter Chips */}
                 <div className="w-full overflow-x-auto whitespace-nowrap hide-scrollbar px-4 sm:px-6 pt-6 pb-3">
                     <div className="flex items-center gap-2 max-w-2xl mx-auto">
                         {['All', 'Draft', 'Sent', 'Viewed', 'Paid', 'Overdue'].map(f => {
@@ -209,7 +230,6 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                     </div>
                 </div>
 
-                {/* Sort Row */}
                 <div className="w-full px-4 sm:px-6 pb-4">
                     <div className="flex items-center gap-2 max-w-2xl mx-auto">
                         <Link 
@@ -237,7 +257,6 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                     </div>
                 </div>
 
-                {/* Section Header */}
                 <div className="w-full px-4 sm:px-6 pb-4">
                     <div className="flex justify-between items-end max-w-2xl mx-auto border-b border-[#E2E6F3] dark:border-[var(--border)] pb-2">
                         <h2 className="text-base font-bold text-[#111827] dark:text-white">All Invoices</h2>
@@ -247,7 +266,6 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                     </div>
                 </div>
 
-                {/* Invoice Cards */}
                 <div className="w-full px-4 sm:px-6 flex-1 overflow-y-auto custom-scrollbar">
                     <div className="max-w-2xl mx-auto flex flex-col gap-4 pb-12">
                         {fetchError ? (
@@ -267,7 +285,6 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                             </div>
                         ) : (
                             invoices.map((inv) => {
-                                // Status Colors mapping
                                 let iconBg = "bg-[#F1EFE8] dark:bg-gray-800";
                                 let iconColor = "text-[#5F5E5A] dark:text-gray-400";
                                 let pillBg = "bg-[#F1EFE8] dark:bg-gray-800";
@@ -288,17 +305,16 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                                     iconColor = "text-[#534AB7] dark:text-purple-400";
                                     pillBg = "bg-[#EEEDFE] dark:bg-purple-900/30";
                                     pillColor = "text-[#534AB7] dark:text-purple-400";
-                                } else if (inv.status === 'CANCELLED' || (inv.status !== 'PAID' && inv.dueDate && inv.dueDate < new Date())) {
-                                    // Treat overdue as red
+                                } else if (inv.status === 'CANCELLED' || (inv.status !== 'PAID' && inv.dueDate && new Date(inv.dueDate) < new Date())) {
                                     iconBg = "bg-[#FCEBEB] dark:bg-red-900/30";
                                     iconColor = "text-[#A32D2D] dark:text-red-400";
                                     pillBg = "bg-[#FCEBEB] dark:bg-red-900/30";
                                     pillColor = "text-[#A32D2D] dark:text-red-400";
                                 }
 
-                                const isOverdue = inv.status !== 'PAID' && inv.dueDate && inv.dueDate < new Date();
+                                const isOverdue = inv.status !== 'PAID' && inv.dueDate && new Date(inv.dueDate) < new Date();
                                 const displayStatus = isOverdue ? 'OVERDUE' : inv.status;
-                                const isReceived = inv.userId !== authUser.userId;
+                                const isReceived = inv.userId !== user.id;
 
                                 return (
                                     <div key={inv.id} className="bg-white dark:bg-[var(--card)] rounded-[14px] border border-[#E2E6F3] dark:border-[var(--border)] p-4 flex flex-col shadow-sm hover:shadow-md transition-shadow">
@@ -384,5 +400,13 @@ export default async function InvoicesHub(props: { searchParams?: Promise<{ filt
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function InvoicesHub() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[var(--bg)] flex items-center justify-center"><div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div></div>}>
+            <InvoicesContent />
+        </Suspense>
     );
 }

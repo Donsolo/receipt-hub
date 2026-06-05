@@ -1,32 +1,69 @@
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
-import { getLensAnalytics } from '@/lib/vero-lens/analytics/getLensAnalytics';
-import { generateLensInsights } from '@/lib/vero-lens/analytics/generateLensInsights';
+"use client";
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import KpiCard from '@/components/vero-lens/analytics/KpiCard';
 import FunnelChart from '@/components/vero-lens/analytics/FunnelChart';
 import { format } from 'date-fns';
 import { clsx } from 'clsx';
+import { getAuthHeader } from '@/lib/auth-client';
+import { API_BASE_URL } from '@/lib/config';
 
-export default async function LensAnalyticsPage({ searchParams }: { searchParams: Promise<{ range?: string }> }) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    const authUser = await verifyToken(token || '');
+function LensAnalyticsContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const rangeParam = searchParams.get('range');
+    const [payload, setPayload] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    if (!authUser) return <div className="p-8">Unauthorized</div>;
+    useEffect(() => {
+        (async () => {
+            setLoading(true);
+            try {
+                const headers = await getAuthHeader();
+                const url = new URL(`${API_BASE_URL}/api/vero/lens/analytics`);
+                if (rangeParam) {
+                    url.searchParams.set('range', rangeParam);
+                }
 
-    // Parse range
-    const params = process.env.NEXT_MOBILE_BUILD === 'true' ? {} : await searchParams;
-    const rangeParam = (params as any).range;
-    const daysBack = rangeParam === 'all' ? null : (rangeParam === '7' ? 7 : 30);
+                const res = await fetch(url.toString(), {
+                    headers: { ...headers as any, 'Content-Type': 'application/json' }
+                });
 
-    const data = await getLensAnalytics(authUser.userId, daysBack);
-    const insights = generateLensInsights(data.metrics);
+                if (res.status === 401) {
+                    router.push('/login');
+                    return;
+                }
+
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success) {
+                        setPayload(json);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load analytics data", err);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [router, rangeParam]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center pb-32">
+                <div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+        );
+    }
+
+    if (!payload) return <div className="p-8 text-center text-[var(--muted)]">Failed to load analytics</div>;
+
+    const { data, insights, daysBack } = payload;
 
     return (
         <div className="min-h-screen bg-[var(--bg)] font-sans pb-32">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-                
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
@@ -58,7 +95,7 @@ export default async function LensAnalyticsPage({ searchParams }: { searchParams
                         <div className="space-y-2">
                             <h3 className="text-sm font-bold text-[var(--text)] uppercase tracking-wider">AI Insights</h3>
                             <ul className="list-disc list-inside text-sm text-[var(--muted)] space-y-1">
-                                {insights.map((insight, idx) => (
+                                {insights.map((insight: any, idx: number) => (
                                     <li key={idx}>{insight}</li>
                                 ))}
                             </ul>
@@ -135,9 +172,7 @@ export default async function LensAnalyticsPage({ searchParams }: { searchParams
                             ) : (
                                 data.timeline.map((event: any) => (
                                     <div key={event.id} className="relative pl-6 pb-2">
-                                        {/* Timeline line */}
                                         <div className="absolute top-2 bottom-[-24px] left-[9px] w-[2px] bg-[var(--border)] last:hidden"></div>
-                                        {/* Timeline dot */}
                                         <div className={clsx(
                                             "absolute top-1.5 left-0 w-5 h-5 rounded-full border-4 border-[var(--card)] flex items-center justify-center",
                                             event.type === 'QUOTE_APPROVED' ? "bg-emerald-500" :
@@ -171,8 +206,15 @@ export default async function LensAnalyticsPage({ searchParams }: { searchParams
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
+    );
+}
+
+export default function LensAnalyticsPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[var(--bg)] flex items-center justify-center"><div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div></div>}>
+            <LensAnalyticsContent />
+        </Suspense>
     );
 }

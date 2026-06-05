@@ -1,16 +1,11 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { db as prisma } from '@/lib/db';
 
 export async function GET(req: Request) {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get('auth_token')?.value;
-        if (!token) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-
-        const user = await verifyToken(token);
-        if (!user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
+        const user = await getCurrentUser();
+        if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
         const { searchParams } = new URL(req.url);
         const status = searchParams.get('status');
@@ -18,8 +13,8 @@ export async function GET(req: Request) {
         const endDate = searchParams.get('endDate');
         const where: any = {
             OR: [
-                { userId: user.userId },
-                { paymentRequestLogs: { some: { recipientUserId: user.userId } } }
+                { userId: user.id },
+                { paymentRequestLogs: { some: { recipientUserId: user.id } } }
             ]
         };
 
