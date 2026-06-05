@@ -99,5 +99,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/dashboard/:path*', '/admin/:path*', '/login', '/register', '/uploads/:path*', '/create', '/history', '/settings', '/activate', '/feedback', '/api/:path*'],
+    matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.json|assets|images|icons).*)'],
 };
