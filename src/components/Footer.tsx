@@ -20,7 +20,7 @@ export default function Footer() {
                     <div className="flex flex-col space-y-4">
                         <div className="flex items-center space-x-2">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="/tektriq-logo.png" alt="Tektriq LLC" className="h-5 w-auto object-contain opacity-80 invert" />
+                            <img src="/tektriq-logo.png" alt="Tektriq LLC" className="h-5 w-auto object-contain opacity-80 dark:invert print:invert-0" />
                             <span className="text-sm font-semibold text-[var(--text-primary)]">Tektriq LLC</span>
                         </div>
                         <p className="text-xs text-[var(--text-secondary)]">

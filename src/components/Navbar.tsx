@@ -238,6 +238,11 @@ export default function Navbar({
         { href: '/register', label: 'Register' },
     ];
 
+    const normalizedPath = pathname?.replace(/\/$/, '') || '/';
+    if (!isAuthenticated && (normalizedPath === '/' || normalizedPath === '/login' || normalizedPath === '/register')) {
+        return null;
+    }
+
     return (
         <header className="sticky top-0 w-full flex-shrink-0 bg-[var(--header-bg)] border-b border-[var(--header-border)] z-50 pt-[env(safe-area-inset-top)]">
             <div className="max-w-7xl mx-auto px-[20px]">
@@ -262,15 +267,11 @@ export default function Navbar({
                             <img
                                 src="/assets/verihub-logo-icon.png"
                                 alt="Verihub Logo"
-                                width={36}
-                                height={36}
                                 className="h-[36px] w-auto mr-[12px] group-hover:-translate-y-[1px] transition-transform duration-200"
                             />
                             <img
                                 src="/assets/text-logo.png"
                                 alt="Verihub"
-                                width={180}
-                                height={45}
                                 className="h-[28px] sm:h-[32px] w-auto group-hover:-translate-y-[1px] transition-transform duration-200"
                             />
                         </Link>
