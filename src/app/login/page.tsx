@@ -18,22 +18,27 @@ export default function LoginPage() {
         e.preventDefault();
         setError('');
 
-        const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        });
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
 
-        const data = await res.json();
+            const data = await res.json();
 
-        if (res.ok) {
-            if (Capacitor.isNativePlatform() && data.token) {
-                await storeAuthToken(data.token);
+            if (res.ok) {
+                if (Capacitor.isNativePlatform() && data.token) {
+                    await storeAuthToken(data.token);
+                }
+                router.refresh();
+                router.push('/dashboard');
+            } else {
+                setError(data.error || 'Login failed');
             }
-            router.refresh();
-            router.push('/dashboard');
-        } else {
-            setError(data.error || 'Login failed');
+        } catch (err) {
+            console.error('[AUTH] Login fetch error:', err);
+            setError('Network error. Please check your connection and try again.');
         }
     };
 
