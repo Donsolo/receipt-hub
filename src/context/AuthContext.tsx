@@ -37,14 +37,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUser = async () => {
     try {
       const headers = await getAuthHeader();
-      const hasAuth = Object.keys(headers).length > 0 ||
-        document.cookie.includes('auth_token');
-
-      if (!hasAuth) {
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
 
       const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: {
