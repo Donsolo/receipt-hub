@@ -10,9 +10,13 @@ import PullToRefreshWrapper from '@/components/PullToRefreshWrapper';
 import InstallPrompt from '@/components/InstallPrompt';
 import { useAuth } from '@/context/AuthContext';
 
-export default function AuthenticatedLayout({ children }: any) {
+export default function AuthenticatedLayout({ children, initialIsAuthenticated = false }: any) {
   const { isAuthenticated, user } = useAuth();
   const isPro = (user?.plan === "PRO" && user?.planStatus !== "inactive") || user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
+  // Use the server's knowledge of auth state to ensure stable hydration,
+  // preventing a full tree remount when useAuth() finishes loading.
+  const isTrulyAuthenticated = isAuthenticated || initialIsAuthenticated;
 
   const content = (
     <div className="flex flex-col min-h-screen relative" style={{ width: '100dvw', maxWidth: '100dvw' }}>
@@ -34,7 +38,7 @@ export default function AuthenticatedLayout({ children }: any) {
           }),
         }}
       />
-      {isAuthenticated && <NotificationToasts />}
+      {isTrulyAuthenticated && <NotificationToasts />}
       <Navbar />
       <div className="flex-1 flex flex-col w-full relative">
         <BroadcastDisplay />
@@ -46,12 +50,12 @@ export default function AuthenticatedLayout({ children }: any) {
         <InstallPrompt />
         <Footer />
       </div>
-      {isAuthenticated && <BottomNav />}
-      {isAuthenticated && <GlobalVeroBubble isPro={isPro} />}
+      {isTrulyAuthenticated && <BottomNav />}
+      {isTrulyAuthenticated && <GlobalVeroBubble isPro={isPro} />}
     </div>
   );
 
-  if (isAuthenticated) {
+  if (isTrulyAuthenticated) {
     return <NotificationProvider>{content}</NotificationProvider>;
   }
 

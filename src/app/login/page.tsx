@@ -6,6 +6,7 @@ import { API_BASE_URL } from '@/lib/config';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import FintechBackground from '@/components/ui/FintechBackground';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -13,6 +14,7 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
+    const { refreshUser } = useAuth();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,6 +33,7 @@ export default function LoginPage() {
                 if (Capacitor.isNativePlatform() && data.token) {
                     await storeAuthToken(data.token);
                 }
+                await refreshUser();
                 router.refresh();
                 router.push('/dashboard');
             } else {
