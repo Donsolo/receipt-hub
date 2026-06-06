@@ -7,24 +7,28 @@ import { API_BASE_URL } from '@/lib/config';
 import DashboardUpgradeButton from '@/components/ui/DashboardUpgradeButton';
 import BillingDashboardWidget from '@/components/billing/BillingDashboardWidget';
 import DashboardHero from '@/components/dashboard/DashboardHero';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Dashboard() {
     const router = useRouter();
+    const { user, isLoading, isAuthenticated } = useAuth();
     const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const [loadingData, setLoadingData] = useState(true);
 
     useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            router.push('/login');
+            return;
+        }
+
+        if (!isAuthenticated) return;
+
         (async () => {
             try {
                 const headers = await getAuthHeader();
                 const res = await fetch(`${API_BASE_URL}/api/dashboard`, {
                     headers: { ...headers as any, 'Content-Type': 'application/json' }
                 });
-
-                if (res.status === 401) {
-                    router.push('/login');
-                    return;
-                }
 
                 if (res.ok) {
                     const json = await res.json();
@@ -35,12 +39,12 @@ export default function Dashboard() {
             } catch (err) {
                 console.error("Dashboard fetch error", err);
             } finally {
-                setLoading(false);
+                setLoadingData(false);
             }
         })();
-    }, [router]);
+    }, [isLoading, isAuthenticated, router]);
 
-    if (loading) {
+    if (isLoading || (isAuthenticated && loadingData)) {
         return (
             <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center pb-24">
                 <div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
@@ -48,11 +52,13 @@ export default function Dashboard() {
         );
     }
 
+    if (!isAuthenticated) return null;
+
     if (!data) {
         return <div className="p-8 text-center text-gray-500">Failed to load dashboard data.</div>;
     }
 
-    const { user, isPro, receipts, userInvoices, lensStats } = data;
+    const { isPro, receipts, userInvoices, lensStats } = data;
 
     // --- Smart Greeting Logic ---
     const tzTimeStr = new Date().toLocaleString("en-US", { timeZone: user?.timezone || 'America/New_York', hour: 'numeric', hour12: false });

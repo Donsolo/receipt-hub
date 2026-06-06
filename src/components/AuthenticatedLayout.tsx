@@ -1,5 +1,4 @@
 'use client';
-import { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import BottomNav from './BottomNav';
@@ -9,33 +8,11 @@ import NotificationToasts from '@/components/notifications/NotificationToasts';
 import BroadcastDisplay from '@/components/BroadcastDisplay';
 import PullToRefreshWrapper from '@/components/PullToRefreshWrapper';
 import InstallPrompt from '@/components/InstallPrompt';
+import { useAuth } from '@/context/AuthContext';
 
-export default function AuthenticatedLayout({ children, role, isPro, userName, businessName, businessLogoPath, activeInvoicesCount, initialIsAuthenticated = false }: any) {
-  const [isAuthenticated, setIsAuthenticated] = useState(initialIsAuthenticated);
-  const [checked, setChecked] = useState(false);
-
-  useEffect(() => {
-    // If the server already knows we are authenticated, we don't need to block rendering
-    if (initialIsAuthenticated) {
-      setChecked(true);
-    }
-    
-    import('@capacitor/core').then(({ Capacitor }) => {
-      if (Capacitor.isNativePlatform()) {
-        import('@capacitor/preferences').then(({ Preferences }) => {
-          Preferences.get({ key: 'auth_token' }).then(({ value }) => {
-            setIsAuthenticated(!!value || initialIsAuthenticated);
-            setChecked(true);
-          });
-        });
-      } else {
-        setIsAuthenticated(initialIsAuthenticated);
-        setChecked(true);
-      }
-    });
-  }, [initialIsAuthenticated]);
-
-  if (!checked) return <div className="min-h-screen" />;
+export default function AuthenticatedLayout({ children }: any) {
+  const { isAuthenticated, user } = useAuth();
+  const isPro = (user?.plan === "PRO" && user?.planStatus !== "inactive") || user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
 
   const content = (
     <div className="flex flex-col min-h-screen relative" style={{ width: '100dvw', maxWidth: '100dvw' }}>
@@ -58,7 +35,7 @@ export default function AuthenticatedLayout({ children, role, isPro, userName, b
         }}
       />
       {isAuthenticated && <NotificationToasts />}
-      <Navbar isAuthenticated={isAuthenticated} role={role} isPro={isPro} userName={userName} businessName={businessName} businessLogoPath={businessLogoPath} activeInvoicesCount={activeInvoicesCount} />
+      <Navbar />
       <div className="flex-1 flex flex-col w-full relative">
         <BroadcastDisplay />
         <main className="flex-grow w-full flex flex-col relative">
@@ -69,7 +46,7 @@ export default function AuthenticatedLayout({ children, role, isPro, userName, b
         <InstallPrompt />
         <Footer />
       </div>
-      {isAuthenticated && <BottomNav isPro={isPro} />}
+      {isAuthenticated && <BottomNav />}
       {isAuthenticated && <GlobalVeroBubble isPro={isPro} />}
     </div>
   );

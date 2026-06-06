@@ -4,7 +4,6 @@ import { db } from '@/lib/db';
 
 export async function GET(req: Request) {
     try {
-        ')[0];
         
         const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -23,7 +22,6 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        ')[0];
         
         const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -4,6 +4,7 @@ import './globals.css';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 
 import { cookies } from 'next/headers';
+import { AuthProvider } from '@/context/AuthContext';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-dm-sans' });
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'], variable: '--font-dm-mono' });
@@ -148,19 +149,21 @@ export default async function RootLayout({
       <ThemeProvider initialTheme={initialTheme}>
         <NetworkProvider>
           <body className={`${dmSans.variable} ${dmMono.variable} font-sans antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out overflow-x-hidden w-full m-0 p-0`}>
-            <NativeFetchInterceptor />
-            <OfflineBanner />
-            <AuthenticatedLayout 
-              role={userRole} 
-              isPro={isPro} 
-              userName={userName} 
-              businessName={businessName} 
-              businessLogoPath={businessLogoPath} 
-              activeInvoicesCount={activeInvoicesCount}
-              initialIsAuthenticated={isAuthenticated}
-            >
-              {children}
-            </AuthenticatedLayout>
+            <AuthProvider>
+              <NativeFetchInterceptor />
+              <OfflineBanner />
+              <AuthenticatedLayout 
+                role={userRole} 
+                isPro={isPro} 
+                userName={userName} 
+                businessName={businessName} 
+                businessLogoPath={businessLogoPath} 
+                activeInvoicesCount={activeInvoicesCount}
+                initialIsAuthenticated={isAuthenticated}
+              >
+                {children}
+              </AuthenticatedLayout>
+            </AuthProvider>
           </body>
         </NetworkProvider>
       </ThemeProvider>

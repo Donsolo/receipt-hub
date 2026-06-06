@@ -2,11 +2,13 @@
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import { getCached, setCached } from '@/lib/api-cache';
 import { useNetwork } from '@/lib/network-context';
 import HeroSection from '@/components/ui/HeroSection';
+import { useAuth } from '@/context/AuthContext';
 
 type ConversationListResponse = {
     id: string;
@@ -30,42 +32,46 @@ type ConversationListResponse = {
 };
 
 export default function ConversationsPage() {
+    const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+    const authUserId = user?.id;
     const [conversations, setConversations] = useState<ConversationListResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [authUserId, setAuthUserId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isStale, setIsStale] = useState(false);
     const { isOnline } = useNetwork();
+    const router = useRouter();
 
-        useEffect(() => {
+    useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login');
+        }
+    }, [authLoading, isAuthenticated, router]);
+
+    useEffect(() => {
+        if (!isAuthenticated) return;
         const loadData = async () => {
             try {
                 const headers = { ...((await getAuthHeader()) as any) };
                 
-                let authData, convoData;
+                let convoData;
                 
                 try {
-                    const [authRes, convoRes] = await Promise.all([
-                        fetch(`${API_BASE_URL}/api/auth/me`, { headers }),
+                    const [convoRes] = await Promise.all([
                         fetch(`${API_BASE_URL}/api/conversations`, { headers })
                     ]);
                     
-                    if (!authRes.ok || !convoRes.ok) throw new Error('Network error');
+                    if (!convoRes.ok) throw new Error('Network error');
                     
-                    authData = await authRes.json();
                     convoData = await convoRes.json();
                     
-                    await setCached('auth_me', authData);
                     await setCached('conversations', convoData);
                     setIsStale(false);
                 } catch (e) {
                     console.warn('Falling back to cache');
-                    authData = await getCached<any>('auth_me', 7 * 24 * 60 * 60 * 1000);
                     convoData = await getCached<any>('conversations', 7 * 24 * 60 * 60 * 1000);
                     setIsStale(true);
                 }
 
-                if (authData?.id) setAuthUserId(authData.id);
                 if (convoData) setConversations(convoData);
                 else setConversations([]);
                 
@@ -77,7 +83,7 @@ export default function ConversationsPage() {
         };
 
         loadData();
-    }, []);
+    }, [isAuthenticated]);
 
     const getDisplayNameInfo = (targetUser: any) => {
         if (!targetUser) return { primary: "Unknown User", secondary: "" };
@@ -109,7 +115,7 @@ export default function ConversationsPage() {
                         </div>
                     )}
 
-                    {isLoading ? (
+                    {authLoading || isLoading ? (
                         <div className="flex justify-center items-center py-20">
                             <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
                         </div>

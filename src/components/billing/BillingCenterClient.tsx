@@ -6,8 +6,12 @@ import Link from 'next/link';
 import { clsx } from 'clsx';
 import HeroSection from '@/components/ui/HeroSection';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function BillingCenterClient() {
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing' | 'installments' | 'receipts'>('incoming');
     const [incoming, setIncoming] = useState<any[]>([]);
     const [outgoing, setOutgoing] = useState<any[]>([]);
@@ -15,6 +19,13 @@ export default function BillingCenterClient() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login');
+        }
+    }, [authLoading, isAuthenticated, router]);
+
+    useEffect(() => {
+        if (!isAuthenticated) return;
         Promise.all([
             (async () => fetch(`${API_BASE_URL}/api/billing/incoming`, { headers: { ...((await getAuthHeader()) as any) } }))().then(res => res.json()),
             (async () => fetch(`${API_BASE_URL}/api/billing/outgoing`, { headers: { ...((await getAuthHeader()) as any) } }))().then(res => res.json()),
@@ -28,7 +39,7 @@ export default function BillingCenterClient() {
             console.error('Failed to load billing data', err);
             setLoading(false);
         });
-    }, []);
+    }, [isAuthenticated]);
 
     const allInvoices = [...incoming, ...outgoing];
     const receipts = allInvoices.filter(inv => inv.status === 'PAID' || inv.paymentStatus === 'PAID');
@@ -109,7 +120,7 @@ export default function BillingCenterClient() {
                         description="Manage incoming invoices, outgoing payments, and installments in one place."
                     />
 
-                    {loading ? (
+                    {authLoading || loading ? (
                         <div className="h-64 flex items-center justify-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
                         </div>

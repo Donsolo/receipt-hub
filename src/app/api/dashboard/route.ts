@@ -26,8 +26,8 @@ export async function GET(req: Request) {
         const receipts = receiptsRaw.map(r => ({
             id: r.id,
             createdAt: r.createdAt,
-            totalAmount: r.totalAmount,
-            vendorName: r.vendorName
+            totalAmount: r.total,
+            vendorName: r.clientName
         }));
 
         let userInvoices: any[] = [];

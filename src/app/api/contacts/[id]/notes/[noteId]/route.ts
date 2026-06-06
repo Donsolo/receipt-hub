@@ -5,7 +5,6 @@ import { db } from '@/lib/db';
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string, noteId: string }> }) {
     try {
         const { id, noteId } = await params;
-        ')[0];
         
         const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

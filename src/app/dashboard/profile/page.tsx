@@ -10,6 +10,7 @@ import HeroSection from '@/components/ui/HeroSection';
 import { usePlatform } from '@/lib/platform';
 import { useNetwork } from '@/lib/network-context';
 import { getCached, setCached } from '@/lib/api-cache';
+import { useAuth } from '@/context/AuthContext';
 
 type UserProfile = {
     email: string;
@@ -27,6 +28,7 @@ type UserProfile = {
 };
 
 export default function ProfilePage() {
+    const { isAuthenticated, isLoading, user } = useAuth();
     const router = useRouter();
     const { theme, setTheme } = useTheme();
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -103,22 +105,25 @@ export default function ProfilePage() {
     }
 
     useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            router.push('/login');
+            return;
+        }
+
+        if (!isAuthenticated) return;
+
         const fetchProfile = async () => {
             try {
-                let authData, profileData, notifData;
+                let profileData, notifData;
                 
                 try {
-                    const res = await fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } });
-                    if (!res.ok) throw new Error('Network error');
-                    authData = await res.json();
-                    await setCached('auth_me', authData);
-                    
-                    const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, { headers: { ...((await getAuthHeader()) as any) }, cache: 'no-store' });
+                    const headers = await getAuthHeader();
+                    const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, { headers: { ...headers as any }, cache: 'no-store' });
                     if (!profileRes.ok) throw new Error('Network error');
                     profileData = await profileRes.json();
                     await setCached('user_profile', profileData);
 
-                    const notifRes = await fetch(`${API_BASE_URL}/api/user/notification-preferences`, { headers: { ...((await getAuthHeader()) as any) } });
+                    const notifRes = await fetch(`${API_BASE_URL}/api/user/notification-preferences`, { headers: { ...headers as any } });
                     if (notifRes.ok) {
                         notifData = await notifRes.json();
                         await setCached('user_notif', notifData);
@@ -126,18 +131,17 @@ export default function ProfilePage() {
                     setIsStale(false);
                 } catch (e) {
                     console.warn('Network fetch failed, falling back to cache');
-                    authData = await getCached<any>('auth_me', 7 * 24 * 60 * 60 * 1000);
                     profileData = await getCached<any>('user_profile', 7 * 24 * 60 * 60 * 1000);
                     notifData = await getCached<any>('user_notif', 7 * 24 * 60 * 60 * 1000);
                     setIsStale(true);
                     
-                    if (!authData || !profileData) {
+                    if (!profileData) {
                         router.push('/login');
                         return;
                     }
                 }
 
-                setRole(authData.role);
+                setRole(user?.role || profileData.role || 'USER');
                 setProfile(profileData);
                 setName(profileData.name || '');
                 setBusinessName(profileData.businessName || '');
@@ -162,7 +166,7 @@ export default function ProfilePage() {
         };
 
         fetchProfile();
-    }, [router]);
+    }, [isLoading, isAuthenticated, router, user]);
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -238,7 +242,8 @@ export default function ProfilePage() {
         }
     };
 
-    if (loading) return <div className="p-8 text-[var(--muted)] min-h-screen bg-[var(--bg)]">Loading profile...</div>;
+    if (isLoading || (isAuthenticated && loading)) return <div className="p-8 text-[var(--muted)] min-h-screen bg-[var(--bg)]">Loading profile...</div>;
+    if (!isAuthenticated) return null;
     if (!profile) return <div className="p-8 text-red-500 min-h-screen bg-[var(--bg)]">Profile not found.</div>;
 
     const needsBusinessName = !profile.businessName;

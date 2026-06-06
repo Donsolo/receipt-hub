@@ -7,6 +7,7 @@ import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import { getCached, setCached } from '@/lib/api-cache';
 import { useNetwork } from '@/lib/network-context';
 import NetworkHero from '@/components/network/NetworkHero';
+import { useAuth } from '@/context/AuthContext';
 
 type UserResult = {
     id: string;
@@ -57,6 +58,8 @@ type Message = {
 };
 
 export default function ConnectionsPage() {
+    const { isAuthenticated, isLoading, user: authUser } = useAuth();
+    const authUserId = authUser?.id;
     // Search State
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<UserResult[]>([]);
@@ -78,9 +81,7 @@ export default function ConnectionsPage() {
     // Toast State
     const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-    // Messaging Routing State
-    const [authUserId, setAuthUserId] = useState<string | null>(null);
-    const [authUser, setAuthUser] = useState<any>(null);
+    const router = useRouter();
 
     // Layout State
     const [isDiscoverOpen, setIsDiscoverOpen] = useState(false);
@@ -89,31 +90,11 @@ export default function ConnectionsPage() {
     const [isStale, setIsStale] = useState(false);
     const { isOnline } = useNetwork();
 
-    const router = useRouter();
-
-        // Fetch auth userId on mount for message rendering logic
     useEffect(() => {
-        const fetchAuth = async () => {
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } });
-                if (res.ok) {
-                    const data = await res.json();
-                    setAuthUserId(data.id);
-                    setAuthUser(data);
-                    await setCached('auth_me', data);
-                } else {
-                    throw new Error('Network error');
-                }
-            } catch (e) {
-                const data = await getCached<any>('auth_me', 7 * 24 * 60 * 60 * 1000);
-                if (data) {
-                    setAuthUserId(data.id);
-                    setAuthUser(data);
-                }
-            }
-        };
-        fetchAuth();
-    }, []);
+        if (!isLoading && !isAuthenticated) {
+            router.push('/login');
+        }
+    }, [isLoading, isAuthenticated, router]);
 
     const showToast = (message: string) => {
         setToastMessage(message);
@@ -155,8 +136,14 @@ export default function ConnectionsPage() {
 
 
     useEffect(() => {
-        loadData();
-    }, [loadData]);
+        if (isAuthenticated) {
+            loadData();
+        }
+    }, [loadData, isAuthenticated]);
+
+    if (isLoading || (!isAuthenticated && isLoading === false)) {
+        return <div className="p-8 text-[var(--muted)] min-h-screen bg-[var(--bg)]">Loading...</div>;
+    }
 
     // Load Suggested Businesses
     useEffect(() => {

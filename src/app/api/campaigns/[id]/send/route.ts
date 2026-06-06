@@ -6,7 +6,6 @@ import nodemailer from 'nodemailer';
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
-        ')[0];
         
         const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

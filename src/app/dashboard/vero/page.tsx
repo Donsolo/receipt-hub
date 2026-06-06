@@ -1,6 +1,4 @@
 "use client";
-import { getAuthHeader } from '@/lib/auth-client';
-import { API_BASE_URL } from '@/lib/config';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -9,11 +7,12 @@ import HeroSection from '@/components/ui/HeroSection';
 import CalculatorWidget from '@/components/vero/CalculatorWidget';
 import VeroAssistant from '@/components/vero/VeroAssistant';
 import { usePlatform } from '@/lib/platform';
+import { useAuth } from '@/context/AuthContext';
 
 export default function VeroSuitePage() {
+    const { user, isLoading, isAuthenticated } = useAuth();
     const router = useRouter();
     const [isPro, setIsPro] = useState(false);
-    const [loading, setLoading] = useState(true);
     const [activeWidget, setActiveWidget] = useState<'basic' | 'business' | 'estimator' | 'tax' | 'margin' | null>(null);
     const [hasActivity, setHasActivity] = useState(false); // Controls dynamic workspace empty states
     const [userName, setUserName] = useState<string | null>(null);
@@ -21,36 +20,30 @@ export default function VeroSuitePage() {
     const { isNativeAndroid } = usePlatform();
 
     useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            router.push('/login');
+            return;
+        }
+
+        if (isAuthenticated && user) {
+            const isUserPro = (user.plan === 'PRO' && user.planStatus !== 'inactive') || user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+            setIsPro(isUserPro);
+            setHasActivity(false); // Simulated for new user
+            if (user.name) {
+                setUserName(user.name.split(' ')[0]); // Get first name
+            } else if (user.businessName) {
+                setUserName(user.businessName);
+            }
+            
+            document.title = isUserPro ? 'Vero Suite+ | Verihub' : 'Vero Suite | Verihub';
+        }
+        
         // Load session memory
         const storedTool = localStorage.getItem('vero_last_used_tool') as 'basic' | 'business' | 'estimator' | 'tax' | 'margin' | null;
         if (storedTool) {
             setLastUsedTool(storedTool);
         }
-
-        const checkPlan = async () => {
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/user/profile`, { headers: { ...((await getAuthHeader()) as any) } });
-                if (res.ok) {
-                    const data = await res.json();
-                    const isUserPro = (data.plan === 'PRO' && data.planStatus !== 'inactive') || data.role === 'ADMIN' || data.role === 'SUPER_ADMIN';
-                    setIsPro(isUserPro);
-                    setHasActivity(false); // Simulated for new user
-                    if (data.name) {
-                        setUserName(data.name.split(' ')[0]); // Get first name
-                    }
-                    
-                    document.title = isUserPro ? 'Vero Suite+ | Verihub' : 'Vero Suite | Verihub';
-                } else {
-                    router.push('/login');
-                }
-            } catch (err) {
-                console.error("Failed to load user plan", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        checkPlan();
-    }, [router]);
+    }, [isLoading, isAuthenticated, user, router]);
 
     const handleOpenTool = (tool: 'basic' | 'business' | 'estimator' | 'tax' | 'margin') => {
         setActiveWidget(tool);
@@ -65,7 +58,7 @@ export default function VeroSuitePage() {
         return 'Good evening';
     };
 
-    if (loading) {
+    if (isLoading || (!isAuthenticated && isLoading === false)) {
         return (
             <div className="p-8 text-[var(--muted)] min-h-screen bg-[var(--bg)] flex items-center justify-center">
                 <div className="animate-pulse flex flex-col items-center">

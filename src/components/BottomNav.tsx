@@ -7,8 +7,11 @@ import { clsx } from 'clsx';
 import { useState, useRef, useEffect } from 'react';
 import VeroAssistant from './vero/VeroAssistant';
 import { IconReceipt, IconFileText, IconSparkles, IconCreditCard, IconUsers } from '@tabler/icons-react';
+import { useAuth } from '@/context/AuthContext';
 
-export default function BottomNav({ isPro }: { isPro?: boolean }) {
+export default function BottomNav() {
+    const { isAuthenticated, user } = useAuth();
+    const isPro = (user?.plan === "PRO" && user?.planStatus !== "inactive") || user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
     const pathname = usePathname();
     const [showVeroOverlay, setShowVeroOverlay] = useState(false);
     const [startVoice, setStartVoice] = useState(false);
@@ -55,7 +58,7 @@ export default function BottomNav({ isPro }: { isPro?: boolean }) {
     }, []);
 
     // Do not show on invoice public view pages
-    if (pathname?.startsWith('/invoice/')) return null;
+    if (pathname?.startsWith('/invoice/') || !isAuthenticated) return null;
 
     const navItems = [
         {

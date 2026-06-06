@@ -8,6 +8,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
 import { useNotifications } from '@/context/NotificationContext';
 import NavigationDrawer from './NavigationDrawer';
+import { useAuth } from '@/context/AuthContext';
 
 function formatTimeAgo(dateString: string) {
     const date = new Date(dateString);
@@ -174,33 +175,25 @@ function NotificationBell() {
     );
 }
 
-export default function Navbar({ 
-    isAuthenticated, 
-    role, 
-    isPro,
-    userName = "",
-    businessName = "",
-    businessLogoPath = null,
-    activeInvoicesCount = 0
-}: { 
-    isAuthenticated: boolean; 
-    role?: string; 
-    isPro?: boolean;
-    userName?: string;
-    businessName?: string;
-    businessLogoPath?: string | null;
-    activeInvoicesCount?: number;
-}) {
+export default function Navbar() {
+    const { isAuthenticated, isLoading, user, logout } = useAuth();
+    
+    const role = user?.role;
+    const isPro = (user?.plan === "PRO" && user?.planStatus !== "inactive") || user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+    const userName = user?.name || "";
+    const businessName = user?.businessName || "";
+    const businessLogoPath = user?.businessLogoPath || null;
+
     const pathname = usePathname();
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    if (isLoading) return <div className="h-[60px] bg-[var(--header-bg)] border-b border-[var(--header-border)]" />;
+    
     if (pathname?.startsWith('/invoice/')) return null;
 
     const handleLogout = async () => {
-        await fetch(`${API_BASE_URL}/api/auth/logout`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' });
-        router.refresh();
-        router.push('/');
+        await logout();
     };
 
     const authLinks = [
@@ -326,7 +319,7 @@ export default function Navbar({
                     businessLogoPath={businessLogoPath}
                     isPro={!!isPro}
                     role={role}
-                    activeInvoicesCount={activeInvoicesCount}
+                    activeInvoicesCount={0}
                     handleLogout={handleLogout}
                     pathname={pathname}
                 />
