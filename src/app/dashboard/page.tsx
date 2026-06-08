@@ -16,12 +16,11 @@ export default function Dashboard() {
     const [loadingData, setLoadingData] = useState(true);
 
     useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
+        if (isLoading) return;
+        if (!isAuthenticated) {
             router.push('/login');
             return;
         }
-
-        if (!isAuthenticated) return;
 
         (async () => {
             try {

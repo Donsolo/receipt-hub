@@ -232,7 +232,14 @@ export default function Navbar() {
     ];
 
     const normalizedPath = pathname?.replace(/\/$/, '') || '/';
-    if (!isAuthenticated && (normalizedPath === '/' || normalizedPath === '/login' || normalizedPath === '/register')) {
+    const isPublicPath = 
+        normalizedPath === '/' || 
+        normalizedPath === '/index.html' || 
+        normalizedPath.startsWith('/login') || 
+        normalizedPath.startsWith('/register') || 
+        normalizedPath.startsWith('/forgot-password');
+
+    if (!isAuthenticated && isPublicPath) {
         return null;
     }
 
@@ -257,11 +264,6 @@ export default function Navbar() {
                         </div>
 
                         <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex-shrink-0 flex items-center group transition-transform duration-200 hover:opacity-90">
-                            <img
-                                src="/assets/verihub-logo-icon.png"
-                                alt="Verihub Logo"
-                                className="h-[36px] w-auto mr-[12px] group-hover:-translate-y-[1px] transition-transform duration-200"
-                            />
                             <img
                                 src="/assets/text-logo.png"
                                 alt="Verihub"

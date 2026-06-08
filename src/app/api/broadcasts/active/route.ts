@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
     try {
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         if (!token) return NextResponse.json([], { status: 200 }); // Return empty for non-auth
 
         const user = await verifyToken(token);

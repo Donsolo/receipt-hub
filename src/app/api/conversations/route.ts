@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 // GET all conversations for the authenticated user
 export async function GET(request: Request) {
     try {
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const user = await verifyToken(token);
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 // POST to find or create a conversation with a target user
 export async function POST(request: Request) {
     try {
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const user = await verifyToken(token);

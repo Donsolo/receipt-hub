@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import { DM_Sans, DM_Mono } from 'next/font/google';
 import './globals.css';
-import AuthenticatedLayout from '@/components/AuthenticatedLayout';
-
 import { cookies } from 'next/headers';
 import { AuthProvider } from '@/context/AuthContext';
 
@@ -75,6 +73,15 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import NativeFetchInterceptor from '@/components/NativeFetchInterceptor';
 import { NetworkProvider } from '@/lib/network-context';
 import OfflineBanner from '@/components/OfflineBanner';
+import Navbar from '@/components/Navbar';
+import BottomNav from '@/components/BottomNav';
+import Footer from '@/components/Footer';
+import GlobalVeroBubble from '@/components/vero/GlobalVeroBubble';
+import { NotificationProvider } from '@/context/NotificationContext';
+import NotificationToasts from '@/components/notifications/NotificationToasts';
+import BroadcastDisplay from '@/components/BroadcastDisplay';
+import PullToRefreshWrapper from '@/components/PullToRefreshWrapper';
+import InstallPrompt from '@/components/InstallPrompt';
 
 export default async function RootLayout({
   children,
@@ -150,19 +157,24 @@ export default async function RootLayout({
         <NetworkProvider>
           <body className={`${dmSans.variable} ${dmMono.variable} font-sans antialiased min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-250 ease-in-out overflow-x-hidden w-full m-0 p-0`}>
             <AuthProvider>
-              <NativeFetchInterceptor />
-              <OfflineBanner />
-              <AuthenticatedLayout 
-                role={userRole} 
-                isPro={isPro} 
-                userName={userName} 
-                businessName={businessName} 
-                businessLogoPath={businessLogoPath} 
-                activeInvoicesCount={activeInvoicesCount}
-                initialIsAuthenticated={isAuthenticated}
-              >
-                {children}
-              </AuthenticatedLayout>
+              <NotificationProvider>
+                <NativeFetchInterceptor />
+                <OfflineBanner />
+                <NotificationToasts />
+                <Navbar />
+                <div className="flex-1 flex flex-col w-full relative">
+                  <BroadcastDisplay />
+                  <main className="flex-grow w-full flex flex-col relative">
+                    <PullToRefreshWrapper>
+                      {children}
+                    </PullToRefreshWrapper>
+                  </main>
+                  <InstallPrompt />
+                  <Footer />
+                </div>
+                <BottomNav />
+                <GlobalVeroBubble isPro={isPro} />
+              </NotificationProvider>
             </AuthProvider>
           </body>
         </NetworkProvider>

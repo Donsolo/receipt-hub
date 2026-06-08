@@ -5,7 +5,7 @@ import { verifyToken, isAdmin } from '@/lib/auth';
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
     try {
         const params = await context.params;
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         const user = await verifyToken(token || '');
 
         if (!user || !(await isAdmin(user.userId))) {
@@ -35,7 +35,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
     try {
         const params = await context.params;
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         const user = await verifyToken(token || '');
 
         if (!user || !(await isAdmin(user.userId))) {

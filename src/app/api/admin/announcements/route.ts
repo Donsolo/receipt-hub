@@ -4,7 +4,7 @@ import { verifyToken, isAdmin } from '@/lib/auth';
 
 export async function GET(request: Request) {
     try {
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         const user = await verifyToken(token || '');
 
         if (!user || !(await isAdmin(user.userId))) {
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         const user = await verifyToken(token || '');
 
         if (!user || !(await isAdmin(user.userId))) {

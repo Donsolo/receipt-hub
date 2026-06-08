@@ -8,7 +8,7 @@ export async function PATCH(
 ) {
     try {
         const { id } = await params;
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         const user = await verifyToken(token || '');
 
         if (!user || !(await isAdmin(user.userId))) {
@@ -48,7 +48,7 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         const user = await verifyToken(token || '');
 
         if (!user || !(await isAdmin(user.userId))) {

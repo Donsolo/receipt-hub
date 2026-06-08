@@ -91,7 +91,8 @@ export default function ConnectionsPage() {
     const { isOnline } = useNetwork();
 
     useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
+        if (isLoading) return;
+        if (!isAuthenticated) {
             router.push('/login');
         }
     }, [isLoading, isAuthenticated, router]);

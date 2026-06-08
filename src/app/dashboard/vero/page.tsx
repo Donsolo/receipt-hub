@@ -20,7 +20,8 @@ export default function VeroSuitePage() {
     const { isNativeAndroid } = usePlatform();
 
     useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
+        if (isLoading) return;
+        if (!isAuthenticated) {
             router.push('/login');
             return;
         }

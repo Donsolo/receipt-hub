@@ -57,10 +57,11 @@ export default function BottomNav() {
         };
     }, []);
 
+    const normalizedPath = pathname?.replace(/\.html$/, '').replace(/\/index$/, '').replace(/\/$/, '') || '/';
     // Do not show on invoice public view pages
-    if (pathname?.startsWith('/invoice/') || !isAuthenticated) return null;
+    if (normalizedPath.startsWith('/invoice/') || !isAuthenticated) return null;
 
-    const navItems = [
+    const navItems: Array<{ href: string, label: string, isSpecial?: boolean, badge?: number, icon: React.ReactNode }> = [
         {
             href: '/history',
             label: 'Receipts',
@@ -92,9 +93,13 @@ export default function BottomNav() {
 
     return (
         <>
+            {/* Overlay for Vero Voice Assistant */}
+            {/* The previous overlay logic is consolidated at the bottom. */}
+
             {/* Spacer to prevent content from hiding behind the fixed bottom nav on mobile */}
             <div className="h-24 md:hidden w-full flex-shrink-0" />
 
+            {/* Bottom Nav Container */}
             <div className={clsx(
                 "md:hidden fixed bottom-5 left-5 right-5 z-50 pb-safe pointer-events-none transition-transform duration-300",
                 isKeyboardOpen ? "translate-y-[150%] opacity-0" : "translate-y-0 opacity-100"
@@ -103,7 +108,7 @@ export default function BottomNav() {
                 <div className="absolute inset-0 bg-indigo-500/5 blur-2xl rounded-full" />
                 <div className="relative bg-[var(--card)]/70 dark:bg-[#0B1220]/60 backdrop-blur-3xl border border-[var(--border)] shadow-2xl shadow-black/50 rounded-[32px] flex items-center justify-around h-[72px] px-2 pointer-events-auto overflow-visible">
                     {navItems.map((item) => {
-                        const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                        const isActive = normalizedPath === item.href || (item.href !== '/dashboard' && normalizedPath.startsWith(item.href));
                         
                         if (item.isSpecial) {
                             return (

@@ -11,7 +11,7 @@ export async function POST(
 ) {
     try {
         const { id } = await params;
-        const tokenString = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const tokenString = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         if (!tokenString) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const user = await verifyToken(tokenString);

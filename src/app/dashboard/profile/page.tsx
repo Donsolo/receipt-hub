@@ -105,12 +105,11 @@ export default function ProfilePage() {
     }
 
     useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
+        if (isLoading) return;
+        if (!isAuthenticated) {
             router.push('/login');
             return;
         }
-
-        if (!isAuthenticated) return;
 
         const fetchProfile = async () => {
             try {

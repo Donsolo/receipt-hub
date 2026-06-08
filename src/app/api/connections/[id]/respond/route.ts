@@ -9,7 +9,7 @@ export async function PATCH(
 ) {
     const params = await props.params;
     try {
-        const token = request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
         if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const user = await verifyToken(token);

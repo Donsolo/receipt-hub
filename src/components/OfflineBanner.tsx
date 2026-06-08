@@ -8,14 +8,20 @@ export default function OfflineBanner() {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
+        let timer: NodeJS.Timeout;
         if (!isOnline) {
-            setVisible(true);
+            // Only show offline banner after 2 seconds to avoid false flash
+            timer = setTimeout(() => setVisible(true), 2000);
         } else {
-            // Auto hide when connection restores
-            const timer = setTimeout(() => setVisible(false), 3000);
-            return () => clearTimeout(timer);
+            // If we came back online but visible is true, show "Back online" for 3s then hide
+            if (visible) {
+                timer = setTimeout(() => setVisible(false), 3000);
+            } else {
+                setVisible(false);
+            }
         }
-    }, [isOnline]);
+        return () => clearTimeout(timer);
+    }, [isOnline, visible]);
 
     if (!visible && isOnline) return null;
 
