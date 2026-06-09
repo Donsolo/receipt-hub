@@ -2,8 +2,10 @@
   "appId": "com.tektriq.verihub",
   "appName": "Verihub",
   "webDir": "out",
+  "backgroundColor": "#0B1220",
   "server": {
-    "androidScheme": "https",
+    "androidScheme": "http",
+    "cleartext": true,
     "allowNavigation": [
       "verihub.app",
       "*.verihub.app",

@@ -49,6 +49,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         // Uses `setUser(data)` because our `/api/auth/me` returns the user object directly at the top level
         setUser(data);
+      } else if (res.status === 401) {
+        setUser(null);
+        // Also clear any stale native token if server says unauthorized
+        if (Capacitor.isNativePlatform()) {
+          await Preferences.remove({ key: 'auth_token' });
+        }
+        return;
       } else {
         setUser(null);
         // Clear invalid token
@@ -69,13 +76,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = async () => {
-    if (Capacitor.isNativePlatform()) {
-      await Preferences.remove({ key: 'auth_token' });
-    }
-    // Clear cookie for web
-    document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    console.log('[LOGOUT] Step 1: Setting user to null');
     setUser(null);
-    window.location.href = '/login';
+
+    console.log('[LOGOUT] Step 2: Removing Capacitor Preferences token');
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await Preferences.remove({ key: 'auth_token' });
+        const check = await Preferences.get({ key: 'auth_token' });
+        console.log('[LOGOUT] Token after removal:', JSON.stringify(check));
+      } catch (err) {
+        console.error('[LOGOUT] Preferences.remove failed:', err);
+      }
+    }
+
+    console.log('[LOGOUT] Step 3: Calling logout API');
+    try {
+      const authHeaders = await getAuthHeader();
+      const res = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { ...authHeaders, 'Content-Type': 'application/json' },
+      });
+      console.log('[LOGOUT] API response status:', res.status);
+    } catch (err) {
+      console.error('[LOGOUT] Logout API failed:', err);
+    }
+
+    console.log('[LOGOUT] Step 4: Hard navigating to /login');
+    window.location.replace('/login');
   };
 
   return (

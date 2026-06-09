@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { Capacitor } from '@capacitor/core';
 
 type Theme = "dark" | "light" | "system";
 
@@ -18,7 +19,34 @@ export function ThemeProvider({
     children: React.ReactNode;
     initialTheme: Theme;
 }) {
-    const [theme, setThemeState] = useState<Theme>(initialTheme);
+    const [theme, setThemeState] = useState<Theme>(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('theme');
+            if (stored === 'light' || stored === 'dark' || stored === 'system') return stored as Theme;
+            return 'system';
+        }
+        return initialTheme;
+    });
+
+    const [resolvedIsDark, setResolvedIsDark] = useState<boolean>(() => {
+        if (typeof window !== 'undefined') {
+            const storedTheme = localStorage.getItem('theme') || 'system';
+            if (storedTheme === 'system') {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches;
+            }
+            return storedTheme === 'dark';
+        }
+        return initialTheme === 'dark';
+    });
+
+    useEffect(() => {
+        const migrated = localStorage.getItem('theme_migrated_v2');
+        if (!migrated) {
+            localStorage.removeItem('theme');
+            localStorage.removeItem('user-theme');
+            localStorage.setItem('theme_migrated_v2', 'true');
+        }
+    }, []);
 
     useEffect(() => {
         const applyTheme = (currentTheme: Theme) => {
@@ -29,21 +57,31 @@ export function ThemeProvider({
                 isDark = currentTheme === 'dark';
             }
             
+            setResolvedIsDark(isDark);
             document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
             
-            // Dynamically update theme-color meta tag for status bar text color logic
-            let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-            if (!metaThemeColor) {
-                metaThemeColor = document.createElement('meta');
-                metaThemeColor.setAttribute('name', 'theme-color');
-                document.head.appendChild(metaThemeColor);
+            // DO NOT update theme-color meta tag on Native platforms 
+            // because Capacitor automatically intercepts it and calls 
+            // StatusBar.setBackgroundColor, destroying our transparent overlay!
+            if (!Capacitor.isNativePlatform()) {
+                let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+                if (!metaThemeColor) {
+                    metaThemeColor = document.createElement('meta');
+                    metaThemeColor.setAttribute('name', 'theme-color');
+                    document.head.appendChild(metaThemeColor);
+                }
+                metaThemeColor.setAttribute('content', isDark ? '#0B1220' : '#ffffff');
             }
-            metaThemeColor.setAttribute('content', '#0B1220');
         };
 
         // Apply immediately
         applyTheme(theme);
-        localStorage.setItem("user-theme", theme);
+        if (theme === 'system') {
+            localStorage.removeItem("theme");
+            localStorage.removeItem("user-theme");
+        } else {
+            localStorage.setItem("theme", theme);
+        }
 
         // Listen for OS changes if in system mode
         if (theme === 'system') {

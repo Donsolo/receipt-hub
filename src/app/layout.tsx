@@ -98,7 +98,7 @@ export default async function RootLayout({
   let businessLogoPath: string | null = null;
   let activeInvoicesCount = 0;
 
-  let initialTheme: "dark" | "light" | "system" = "dark";
+  let initialTheme: "dark" | "light" | "system" = "system";
 
   if (token) {
     const payload = await verifyToken(token);

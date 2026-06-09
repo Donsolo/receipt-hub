@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import HeroSection from '@/components/ui/HeroSection';
 import LandingPricing from '@/components/ui/LandingPricing';
+import ClientLandingWrapper from '@/components/ClientLandingWrapper';
 
 // export const dynamic stripped by mobile build
 
@@ -45,7 +46,8 @@ export default async function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)]">
+    <ClientLandingWrapper>
+      <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)]">
       {/* Global Hero Banners */}
       <HeroSection pageKey="landing" textAlignment="center">
         <div className="text-center z-10 w-full max-w-4xl relative flex flex-col items-center">
@@ -365,5 +367,6 @@ export default async function LandingPage() {
         </div>
       </footer >
     </div >
+    </ClientLandingWrapper>
   );
 }

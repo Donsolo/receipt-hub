@@ -28,7 +28,7 @@ type UserProfile = {
 };
 
 export default function ProfilePage() {
-    const { isAuthenticated, isLoading, user } = useAuth();
+    const { isAuthenticated, isLoading, user, logout } = useAuth();
     const router = useRouter();
     const { theme, setTheme } = useTheme();
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -117,8 +117,9 @@ export default function ProfilePage() {
                 
                 try {
                     const headers = await getAuthHeader();
+                    console.log('ProfilePage fetching:', `${API_BASE_URL}/api/user/profile`);
                     const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, { headers: { ...headers as any }, cache: 'no-store' });
-                    if (!profileRes.ok) throw new Error('Network error');
+                    if (!profileRes.ok) throw new Error(`Network error: ${profileRes.status} ${profileRes.statusText}`);
                     profileData = await profileRes.json();
                     await setCached('user_profile', profileData);
 
@@ -128,7 +129,8 @@ export default function ProfilePage() {
                         await setCached('user_notif', notifData);
                     }
                     setIsStale(false);
-                } catch (e) {
+                } catch (e: any) {
+                    console.error('Network fetch failed!', e.message, e);
                     console.warn('Network fetch failed, falling back to cache');
                     profileData = await getCached<any>('user_profile', 7 * 24 * 60 * 60 * 1000);
                     notifData = await getCached<any>('user_notif', 7 * 24 * 60 * 60 * 1000);
@@ -763,9 +765,7 @@ export default function ProfilePage() {
                             </div>
                             <button
                                 onClick={async () => {
-                                    await fetch(`${API_BASE_URL}/api/auth/logout`, { headers: { ...((await getAuthHeader()) as any) }, method: 'POST' });
-                                    router.refresh();
-                                    router.push('/');
+                                    await logout();
                                 }}
                                 className="mt-4 sm:mt-0 inline-flex items-center px-6 py-2.5 border border-red-500/50 text-sm font-medium rounded-md text-red-500 bg-transparent hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                             >

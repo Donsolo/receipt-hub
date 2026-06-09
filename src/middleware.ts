@@ -72,7 +72,7 @@ export async function middleware(request: NextRequest) {
     }
 
     const origin = request.headers.get('origin') ?? '';
-    const isTrustedOrigin = origin.startsWith('capacitor://') || origin === 'https://verihub.app' || origin === 'https://localhost' || origin.startsWith('http://localhost:');
+    const isTrustedOrigin = origin.startsWith('capacitor://') || origin === 'https://verihub.app' || origin === 'https://localhost' || origin === 'http://localhost' || origin.startsWith('http://localhost:');
 
     if (request.method === 'OPTIONS' && isTrustedOrigin) {
         return new NextResponse(null, {
