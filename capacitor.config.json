@@ -12,5 +12,10 @@
       "*.stripe.com",
       "checkout.stripe.com"
     ]
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
   }
 }
