@@ -104,7 +104,7 @@ try {
   }
 
   // Run the Next.js static export build using webpack
-  execSync('cross-env NEXT_MOBILE_BUILD=true next build --webpack', {
+  execSync('cross-env NEXT_MOBILE_BUILD=true NEXT_PUBLIC_IS_MOBILE=true next build --webpack', {
     stdio: 'inherit',
     cwd: root,
   });
