@@ -4,8 +4,7 @@
   "webDir": "out",
   "backgroundColor": "#0B1220",
   "server": {
-    "androidScheme": "http",
-    "cleartext": true,
+    "androidScheme": "https",
     "allowNavigation": [
       "verihub.app",
       "*.verihub.app",
