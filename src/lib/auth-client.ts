@@ -18,6 +18,14 @@ export async function removeAuthToken() {
     }
 }
 
+export async function getAuthToken(): Promise<string | null> {
+    if (Capacitor.isNativePlatform()) {
+        const { value } = await Preferences.get({ key: TOKEN_KEY });
+        return value || null;
+    }
+    return null;
+}
+
 export async function getAuthHeader(): Promise<HeadersInit> {
     if (Capacitor.isNativePlatform()) {
         const { value } = await Preferences.get({ key: TOKEN_KEY });

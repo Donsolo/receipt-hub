@@ -1,5 +1,5 @@
 "use client";
-import { getAuthHeader } from '@/lib/auth-client';
+import { getAuthHeader, getAuthToken } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,6 +8,8 @@ import { useTheme } from '@/components/ThemeProvider';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import HeroSection from '@/components/ui/HeroSection';
 import { usePlatform } from '@/lib/platform';
+import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 import { useNetwork } from '@/lib/network-context';
 import { getCached, setCached } from '@/lib/api-cache';
 import { useAuth } from '@/context/AuthContext';
@@ -215,6 +217,19 @@ export default function ProfilePage() {
         }
     };
 
+    const handleManageBilling = async () => {
+        if (Capacitor.isNativePlatform()) {
+            const token = await getAuthToken();
+            if (token) {
+                await Browser.open({ url: `${API_BASE_URL}/api/auth/mobile-login?redirect=/billing&token=${token}` });
+            } else {
+                await Browser.open({ url: `${API_BASE_URL}/billing` });
+            }
+        } else {
+            router.push('/billing');
+        }
+    };
+
     const handleNotificationToggle = async (key: string, currentValue: boolean) => {
         const newValue = !currentValue;
 
@@ -317,11 +332,13 @@ export default function ProfilePage() {
                                     <div className="flex flex-col border-b border-gray-200 dark:border-[var(--border)] pb-3">
                                         <div className="flex justify-between items-center mb-1">
                                             <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Current Plan</span>
-                                            {!isNativeAndroid && (
-                                                <Link href="/billing" className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
-                                                    Manage Billing
-                                                </Link>
-                                            )}
+                                            <button 
+                                                type="button"
+                                                onClick={handleManageBilling}
+                                                className="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+                                            >
+                                                Manage Billing
+                                            </button>
                                         </div>
                                         <div className="flex items-center">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border ${profile.plan === 'PRO' ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' : 'bg-gray-100 dark:bg-[var(--card-hover)] text-gray-700 dark:text-[var(--text)] border-gray-200 dark:border-[var(--border)]'}`}>
