@@ -17,7 +17,7 @@ export default function ReceiptViewPage() {
         if (!params.id) return;
         (async () => fetch(`${API_BASE_URL}/api/receipts/${params.id}`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(r => r.json())
-            .then(data => setData({ receipt: data.initialData, business: data.user }))
+            .then(data => setData({ receipt: data.initialData, business: data.business || {} }))
             .catch(err => console.error(err));
     }, [params.id]);
 

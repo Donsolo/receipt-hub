@@ -19,6 +19,19 @@ export async function GET(
             where: {
                 id: params.id,
                 userId: user.userId,
+            },
+            include: {
+                items: true,
+                user: {
+                    select: {
+                        businessName: true,
+                        businessLogoPath: true,
+                        businessRegistrationNumber: true,
+                        email: true,
+                        businessAddress: true,
+                        businessPhone: true
+                    }
+                }
             }
         });
 
@@ -26,7 +39,9 @@ export async function GET(
             return NextResponse.json({ error: 'Receipt not found' }, { status: 404 });
         }
 
-        return NextResponse.json({ initialData: receipt, user });
+        const globalProfile = await db.businessProfile.findFirst();
+
+        return NextResponse.json({ initialData: receipt, user, business: globalProfile });
     } catch (error) {
         console.error('Fetch Receipt Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
