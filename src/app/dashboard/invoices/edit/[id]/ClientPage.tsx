@@ -14,11 +14,78 @@ export default function EditInvoicePage() {
 
     useEffect(() => {
         if (!params.id) return;
-        // TODO Phase 4: replace with fetch(`${API_BASE_URL}/api/...`)
-        (async () => fetch(`${API_BASE_URL}/api/PLACEHOLDER/${params.id}`, { headers: { ...((await getAuthHeader()) as any) } }))()
-            .then(r => r.json())
-            .then(setData)
-            .catch(err => console.error(err));
+        (async () => {
+            try {
+                const headers = { ...((await getAuthHeader()) as any) };
+                
+                const [invoiceRes, metaRes] = await Promise.all([
+                    fetch(`${API_BASE_URL}/api/invoices/${params.id}`, { headers }),
+                    fetch(`${API_BASE_URL}/api/invoices/create/metadata`, { headers })
+                ]);
+                
+                const invoiceData = await invoiceRes.json();
+                const metaData = await metaRes.json();
+                
+                if (!invoiceData.success) {
+                    console.error("Failed to load invoice");
+                    return;
+                }
+
+                const invoice = invoiceData.invoice;
+                const userRecord = metaData.userRecord;
+                const globalProfile = metaData.globalProfile;
+
+                const initialData = {
+                    id: invoice.id,
+                    clientName: invoice.clientName,
+                    clientEmail: invoice.clientEmail || '',
+                    clientCompany: invoice.clientCompany || '',
+                    clientPhone: invoice.clientPhone || '',
+                    clientAddress: invoice.clientAddress || '',
+                    clientPropertyAddress: invoice.clientPropertyAddress || '',
+                    title: invoice.title,
+                    description: invoice.description || '',
+                    issueDate: new Date(invoice.issueDate).toISOString(),
+                    dueDate: invoice.dueDate ? new Date(invoice.dueDate).toISOString() : '',
+                    notes: invoice.notes || '',
+                    attachedPhotos: invoice.attachedPhotos ? (invoice.attachedPhotos as string[]) : undefined,
+                    tax: invoice.tax || 0,
+                    depositAmount: invoice.depositAmount || 0,
+                    paymentMethod: invoice.paymentMethod || '',
+                    payments: invoice.payments ? (invoice.payments as any) : undefined,
+                    discountType: invoice.discountType || "none",
+                    discountValue: invoice.discountValue || 0,
+                    status: invoice.status,
+                    total: invoice.total,
+                    items: invoice.items ? invoice.items.map((i: any) => ({
+                        id: i.id,
+                        name: i.name,
+                        description: i.description || '',
+                        quantity: i.quantity,
+                        unitPrice: i.unitPrice
+                    })) : []
+                };
+
+                setData({
+                    isPro: metaData.isPro,
+                    businessName: userRecord?.businessName || userRecord?.email?.split('@')[0] || globalProfile?.businessName || undefined,
+                    businessLogoPath: userRecord?.businessLogoPath || globalProfile?.logoPath || undefined,
+                    businessRegistrationNumber: userRecord?.businessRegistrationNumber || globalProfile?.businessRegistrationNumber || undefined,
+                    initialData,
+                    initialPlanEnabled: invoice.paymentPlanEnabled,
+                    initialInstallments: invoice.installments ? invoice.installments.map((i: any) => ({
+                        id: i.id,
+                        label: i.label,
+                        amount: i.amount,
+                        dueDate: i.dueDate ? new Date(i.dueDate).toISOString() : null,
+                        status: i.status
+                    })) : []
+                });
+
+            } catch (err) {
+                console.error(err);
+            }
+        })();
     }, [params.id]);
 
     if (!data) return <div className="p-8 text-[var(--muted)]">Loading...</div>;

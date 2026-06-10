@@ -11,8 +11,7 @@ export default function CampaignDetailPage() {
 
     useEffect(() => {
         if (!params.id) return;
-        // TODO Phase 4: replace with fetch(`${API_BASE_URL}/api/...`)
-        (async () => fetch(`${API_BASE_URL}/api/PLACEHOLDER/${params.id}`, { headers: { ...((await getAuthHeader()) as any) } }))()
+        (async () => fetch(`${API_BASE_URL}/api/campaigns/${params.id}`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(r => r.json())
             .then(setCampaign)
             .catch(err => console.error(err));

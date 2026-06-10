@@ -2,6 +2,37 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyToken, ensureActivated } from '@/lib/auth';
 
+export async function GET(
+    request: Request,
+    props: { params: Promise<{ id: string }> }
+) {
+    const params = await props.params;
+    try {
+        const token = (request.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0] || (request.headers.get('authorization')?.startsWith('Bearer ') ? request.headers.get('authorization')?.substring(7) : undefined));
+        const user = await verifyToken(token || '');
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const receipt = await db.receipt.findUnique({
+            where: {
+                id: params.id,
+                userId: user.userId,
+            }
+        });
+
+        if (!receipt) {
+            return NextResponse.json({ error: 'Receipt not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ initialData: receipt, user });
+    } catch (error) {
+        console.error('Fetch Receipt Error:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
+
 export async function DELETE(
     request: Request,
     props: { params: Promise<{ id: string }> }

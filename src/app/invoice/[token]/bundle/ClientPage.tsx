@@ -12,10 +12,9 @@ export default function InvoiceBundlePage() {
 
     useEffect(() => {
         if (!params.token) return;
-        // TODO Phase 4: replace with fetch(`${API_BASE_URL}/api/...`)
-        (async () => fetch(`${API_BASE_URL}/api/PLACEHOLDER/${params.token}`, { headers: { ...((await getAuthHeader()) as any) } }))()
+        (async () => fetch(`${API_BASE_URL}/api/public/invoice/${params.token}`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(r => r.json())
-            .then(setInvoice)
+            .then(data => setInvoice(data.invoice))
             .catch(err => console.error(err));
     }, [params.token]);
 

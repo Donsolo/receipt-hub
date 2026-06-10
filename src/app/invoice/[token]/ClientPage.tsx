@@ -10,10 +10,9 @@ export default function PublicInvoicePage() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
     useEffect(() => {
-        // TODO Phase 4: replace with fetch(`${API_BASE_URL}/api/...`)
-        (async () => fetch(`${API_BASE_URL}/api/PLACEHOLDER/auth-status`, { headers: { ...((await getAuthHeader()) as any) } }))()
+        (async () => fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(r => r.json())
-            .then(data => setIsAuthenticated(data.isAuthenticated))
+            .then(data => setIsAuthenticated(!data.error))
             .catch(err => console.error(err));
     }, []);
 

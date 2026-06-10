@@ -11,8 +11,7 @@ export default function EditReceiptPage() {
 
     useEffect(() => {
         if (!params.id) return;
-        // TODO Phase 4: replace with fetch(`${API_BASE_URL}/api/...`)
-        (async () => fetch(`${API_BASE_URL}/api/PLACEHOLDER/${params.id}`, { headers: { ...((await getAuthHeader()) as any) } }))()
+        (async () => fetch(`${API_BASE_URL}/api/receipts/${params.id}`, { headers: { ...((await getAuthHeader()) as any) } }))()
             .then(r => r.json())
             .then(setData)
             .catch(err => console.error(err));
