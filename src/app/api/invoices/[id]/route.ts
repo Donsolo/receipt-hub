@@ -51,7 +51,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         }
 
         const body = await req.json();
-        const { customerContactId, clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, status, attachedPhotos, items, depositAmount, paymentMethod, payments, acceptOnlinePayment } = body;
+        const { customerContactId, clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, status, attachedPhotos, items, depositAmount, paymentMethod, payments, acceptOnlinePayment, miscTitle, miscItems, miscTaxValue, miscDiscountType, miscDiscountValue } = body;
 
         let dataToUpdate: any = {};
         
@@ -87,6 +87,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
         if (discountType !== undefined) dataToUpdate.discountType = discountType;
         if (discountValue !== undefined) dataToUpdate.discountValue = Number(discountValue) || 0;
+        if (miscTitle !== undefined) dataToUpdate.miscTitle = miscTitle || "Miscellaneous";
+        if (miscDiscountType !== undefined) dataToUpdate.miscDiscountType = miscDiscountType;
+        if (miscDiscountValue !== undefined) dataToUpdate.miscDiscountValue = Number(miscDiscountValue) || 0;
         if (depositAmount !== undefined) dataToUpdate.depositAmount = Number(depositAmount) || 0;
         if (paymentMethod !== undefined) dataToUpdate.paymentMethod = paymentMethod || null;
         if (payments !== undefined && Array.isArray(payments)) dataToUpdate.payments = payments;
@@ -105,9 +108,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         if (attachedPhotos !== undefined && Array.isArray(attachedPhotos)) dataToUpdate.attachedPhotos = attachedPhotos;
 
         // Handle mathematical items payload enforcement
-        if (items && Array.isArray(items)) {
+        if ((items && Array.isArray(items)) || (miscItems && Array.isArray(miscItems))) {
+            const processItemsList = items && Array.isArray(items) ? items : invoice.items.filter((i: any) => i.type === 'MAIN');
+            const processMiscItemsList = miscItems && Array.isArray(miscItems) ? miscItems : invoice.items.filter((i: any) => i.type === 'MISC');
+
             let calculatedSubtotal = 0;
-            const newItems = items.map((item: any) => {
+            const newItems = processItemsList.map((item: any) => {
                 const qty = Number(item.quantity) || 0;
                 const price = Number(item.unitPrice) || 0;
                 const lineTotal = qty * price;
@@ -117,7 +123,24 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                     description: item.description || null,
                     quantity: qty,
                     unitPrice: price,
-                    total: lineTotal
+                    total: lineTotal,
+                    type: 'MAIN'
+                };
+            });
+
+            let calculatedMiscSubtotal = 0;
+            const newMiscItems = processMiscItemsList.map((item: any) => {
+                const qty = Number(item.quantity) || 0;
+                const price = Number(item.unitPrice) || 0;
+                const lineTotal = qty * price;
+                calculatedMiscSubtotal += lineTotal;
+                return {
+                    name: item.name || "Item",
+                    description: item.description || null,
+                    quantity: qty,
+                    unitPrice: price,
+                    total: lineTotal,
+                    type: 'MISC'
                 };
             });
 
@@ -133,11 +156,28 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
             const subtotalAfterDiscount = Math.max(0, calculatedSubtotal - calculatedDiscount);
             const calculatedTax = tax !== undefined ? Number(tax) : Number(invoice.tax || 0);
-            const calculatedTotal = subtotalAfterDiscount + calculatedTax;
+            const mainTotal = subtotalAfterDiscount + calculatedTax;
+
+            let activeMiscDiscountType = dataToUpdate.miscDiscountType ?? invoice.miscDiscountType;
+            let activeMiscDiscountValue = dataToUpdate.miscDiscountValue !== undefined ? dataToUpdate.miscDiscountValue : invoice.miscDiscountValue;
+
+            let calculatedMiscDiscount = 0;
+            if (activeMiscDiscountType === "percent") {
+                calculatedMiscDiscount = calculatedMiscSubtotal * ((activeMiscDiscountValue || 0) / 100);
+            } else if (activeMiscDiscountType === "flat") {
+                calculatedMiscDiscount = activeMiscDiscountValue || 0;
+            }
+
+            const miscSubtotalAfterDiscount = Math.max(0, calculatedMiscSubtotal - calculatedMiscDiscount);
+            const calculatedMiscTax = miscTaxValue !== undefined ? Number(miscTaxValue) : Number(invoice.miscTaxValue || 0);
+            const calculatedMiscTotal = miscSubtotalAfterDiscount + calculatedMiscTax;
 
             dataToUpdate.subtotal = calculatedSubtotal;
             dataToUpdate.tax = calculatedTax;
-            dataToUpdate.total = calculatedTotal;
+            dataToUpdate.miscSubtotal = calculatedMiscSubtotal;
+            dataToUpdate.miscTaxValue = calculatedMiscTax;
+            dataToUpdate.miscTotal = calculatedMiscTotal;
+            dataToUpdate.total = mainTotal + calculatedMiscTotal;
 
             // Delete old items and replace with new ones
             await prisma.invoiceLineItem.deleteMany({
@@ -145,14 +185,33 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             });
             
             dataToUpdate.items = {
-                create: newItems
+                create: [...newItems, ...newMiscItems]
             };
-        } else if (tax !== undefined) {
+        } else if (tax !== undefined || miscTaxValue !== undefined) {
              // Only updating tax without items
-             const currentSubtotal = invoice.subtotal;
-             const newTax = Number(tax);
-             dataToUpdate.tax = newTax;
-             dataToUpdate.total = currentSubtotal + newTax;
+             const calculatedTax = tax !== undefined ? Number(tax) : Number(invoice.tax || 0);
+             const calculatedMiscTax = miscTaxValue !== undefined ? Number(miscTaxValue) : Number(invoice.miscTaxValue || 0);
+             
+             // Recompute main total
+             let activeDiscountType = dataToUpdate.discountType ?? invoice.discountType;
+             let activeDiscountValue = dataToUpdate.discountValue !== undefined ? dataToUpdate.discountValue : invoice.discountValue;
+             let calculatedDiscount = 0;
+             if (activeDiscountType === "percent") calculatedDiscount = invoice.subtotal * ((activeDiscountValue || 0) / 100);
+             else if (activeDiscountType === "flat") calculatedDiscount = activeDiscountValue || 0;
+             const mainTotal = Math.max(0, invoice.subtotal - calculatedDiscount) + calculatedTax;
+
+             // Recompute misc total
+             let activeMiscDiscountType = dataToUpdate.miscDiscountType ?? invoice.miscDiscountType;
+             let activeMiscDiscountValue = dataToUpdate.miscDiscountValue !== undefined ? dataToUpdate.miscDiscountValue : invoice.miscDiscountValue;
+             let calculatedMiscDiscount = 0;
+             if (activeMiscDiscountType === "percent") calculatedMiscDiscount = invoice.miscSubtotal * ((activeMiscDiscountValue || 0) / 100);
+             else if (activeMiscDiscountType === "flat") calculatedMiscDiscount = activeMiscDiscountValue || 0;
+             const miscTotal = Math.max(0, invoice.miscSubtotal - calculatedMiscDiscount) + calculatedMiscTax;
+
+             dataToUpdate.tax = calculatedTax;
+             dataToUpdate.miscTaxValue = calculatedMiscTax;
+             dataToUpdate.miscTotal = miscTotal;
+             dataToUpdate.total = mainTotal + miscTotal;
         }
 
         const updatedInvoice = await prisma.invoice.update({

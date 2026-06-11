@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         if (!user) return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
 
         const body = await req.json();
-        const { customerContactId, clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, attachedPhotos, items, depositAmount, paymentMethod, payments } = body;
+        const { customerContactId, clientName, clientEmail, clientCompany, clientPhone, clientAddress, clientPropertyAddress, title, description, currency, tax, discountType, discountValue, issueDate, dueDate, notes, attachedPhotos, items, depositAmount, paymentMethod, payments, miscTitle, miscItems, miscTaxValue, miscDiscountType, miscDiscountValue } = body;
 
         if (!clientName || !title || !issueDate || !items || !Array.isArray(items) || items.length === 0) {
             return NextResponse.json({ success: false, error: 'Missing required fields or items' }, { status: 400 });
@@ -35,9 +35,30 @@ export async function POST(req: Request) {
                 description: item.description || null,
                 quantity: qty,
                 unitPrice: price,
-                total: lineTotal
+                total: lineTotal,
+                type: 'MAIN'
             };
         });
+
+        // Misc Math Calculation
+        let calculatedMiscSubtotal = 0;
+        const processedMiscItems = (miscItems || []).map((item: any) => {
+            const qty = Number(item.quantity) || 0;
+            const price = Number(item.unitPrice) || 0;
+            const lineTotal = qty * price;
+            calculatedMiscSubtotal += lineTotal;
+            
+            return {
+                name: item.name || "Item",
+                description: item.description || null,
+                quantity: qty,
+                unitPrice: price,
+                total: lineTotal,
+                type: 'MISC'
+            };
+        });
+
+        const allItems = [...processedItems, ...processedMiscItems];
 
         // Discount Validation
         let calculatedDiscount = 0;
@@ -52,7 +73,24 @@ export async function POST(req: Request) {
 
         const subtotalAfterDiscount = Math.max(0, calculatedSubtotal - calculatedDiscount);
         const calculatedTax = Number(tax) || 0;
-        const calculatedTotal = subtotalAfterDiscount + calculatedTax;
+        const mainTotal = subtotalAfterDiscount + calculatedTax;
+
+        // Misc Discount & Tax
+        let calculatedMiscDiscount = 0;
+        const mDT = miscDiscountType || "none";
+        const mdV = Number(miscDiscountValue) || 0;
+
+        if (mDT === "percent") {
+            calculatedMiscDiscount = calculatedMiscSubtotal * (mdV / 100);
+        } else if (mDT === "flat") {
+            calculatedMiscDiscount = mdV;
+        }
+
+        const miscSubtotalAfterDiscount = Math.max(0, calculatedMiscSubtotal - calculatedMiscDiscount);
+        const calculatedMiscTax = Number(miscTaxValue) || 0;
+        const calculatedMiscTotal = miscSubtotalAfterDiscount + calculatedMiscTax;
+
+        const calculatedTotal = mainTotal + calculatedMiscTotal;
 
         // Generate Document Sequence Number
         const seqData = await getNextSequenceData(user.userId, 'INVOICE');
@@ -83,6 +121,12 @@ export async function POST(req: Request) {
                 discountValue: dV,
                 subtotal: calculatedSubtotal,
                 tax: calculatedTax,
+                miscTitle: miscTitle || "Miscellaneous",
+                miscTaxValue: calculatedMiscTax,
+                miscDiscountType: mDT,
+                miscDiscountValue: mdV,
+                miscSubtotal: calculatedMiscSubtotal,
+                miscTotal: calculatedMiscTotal,
                 total: calculatedTotal,
                 issueDate: new Date(issueDate),
                 dueDate: dueDate ? new Date(dueDate) : null,
@@ -93,7 +137,7 @@ export async function POST(req: Request) {
                 publicToken: tokenValue,
                 publicTokenExpiresAt: expirationDate,
                 items: {
-                    create: processedItems
+                    create: allItems
                 }
             },
             include: {

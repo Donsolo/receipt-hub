@@ -109,8 +109,14 @@ export async function createReceipt(formData: {
     discountValue?: number;
     categoryId?: string | null;
     subtotal: number;
+    miscTitle?: string;
+    miscTaxValue?: number;
+    miscDiscountType?: string;
+    miscDiscountValue?: number;
+    miscSubtotal?: number;
+    miscTotal?: number;
     total: number;
-    items: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
+    items: { description: string; quantity: number; unitPrice: number; lineTotal: number; type?: 'MAIN' | 'MISC' }[];
     ocrNormalized?: any;
     sourceType?: string;
 }) {
@@ -143,6 +149,12 @@ export async function createReceipt(formData: {
             discountType: formData.discountType,
             discountValue: formData.discountValue,
             subtotal: formData.subtotal,
+            miscTitle: formData.miscTitle || "Miscellaneous",
+            miscTaxValue: formData.miscTaxValue || 0,
+            miscDiscountType: formData.miscDiscountType || "none",
+            miscDiscountValue: formData.miscDiscountValue || 0,
+            miscSubtotal: formData.miscSubtotal || 0,
+            miscTotal: formData.miscTotal || 0,
             total: formData.total,
             items: {
                 create: formData.items, // Prisma handles the array
@@ -250,8 +262,14 @@ export async function updateReceipt(id: string, formData: {
     discountValue?: number;
     categoryId?: string | null;
     subtotal: number;
+    miscTitle?: string;
+    miscTaxValue?: number;
+    miscDiscountType?: string;
+    miscDiscountValue?: number;
+    miscSubtotal?: number;
+    miscTotal?: number;
     total: number;
-    items: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
+    items: { description: string; quantity: number; unitPrice: number; lineTotal: number; type?: 'MAIN' | 'MISC' }[];
     ocrNormalized?: any;
     sourceType?: string;
 }) {
@@ -274,6 +292,12 @@ export async function updateReceipt(id: string, formData: {
             discountType: formData.discountType,
             discountValue: formData.discountValue,
             subtotal: formData.subtotal,
+            miscTitle: formData.miscTitle || "Miscellaneous",
+            miscTaxValue: formData.miscTaxValue || 0,
+            miscDiscountType: formData.miscDiscountType || "none",
+            miscDiscountValue: formData.miscDiscountValue || 0,
+            miscSubtotal: formData.miscSubtotal || 0,
+            miscTotal: formData.miscTotal || 0,
             total: formData.total,
             items: {
                 deleteMany: {},

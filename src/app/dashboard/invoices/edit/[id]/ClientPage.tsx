@@ -55,6 +55,10 @@ export default function EditInvoicePage() {
                     payments: invoice.payments ? (invoice.payments as any) : undefined,
                     discountType: invoice.discountType || "none",
                     discountValue: invoice.discountValue || 0,
+                    miscTitle: invoice.miscTitle,
+                    miscTaxValue: invoice.miscTaxValue,
+                    miscDiscountType: invoice.miscDiscountType,
+                    miscDiscountValue: invoice.miscDiscountValue,
                     status: invoice.status,
                     total: invoice.total,
                     items: invoice.items ? invoice.items.map((i: any) => ({
@@ -62,7 +66,8 @@ export default function EditInvoicePage() {
                         name: i.name,
                         description: i.description || '',
                         quantity: i.quantity,
-                        unitPrice: i.unitPrice
+                        unitPrice: i.unitPrice,
+                        type: i.type
                     })) : []
                 };
 

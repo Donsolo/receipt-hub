@@ -24,6 +24,7 @@ export interface InvoiceItem {
     description: string;
     quantity: number;
     unitPrice: number;
+    type?: 'MAIN' | 'MISC';
 }
 
 export interface PaymentRecord {
@@ -62,6 +63,10 @@ export interface InvoiceWizardProps {
         discountType?: string;
         discountValue?: number;
         items: InvoiceItem[];
+        miscTitle?: string;
+        miscTaxValue?: number;
+        miscDiscountType?: string;
+        miscDiscountValue?: number;
         status?: string;
     };
 }
@@ -125,10 +130,18 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
     const [dueDate, setDueDate] = useState(initialData?.dueDate ? new Date(initialData.dueDate).toISOString().slice(0, 10) : '');
 
     // Step 3: Items
-    const [items, setItems] = useState<InvoiceItem[]>(initialData?.items?.length ? initialData.items : [{ id: '1', name: '', description: '', quantity: 1, unitPrice: 0 }]);
+    const [items, setItems] = useState<InvoiceItem[]>(initialData?.items?.length ? initialData.items.filter(i => i.type !== 'MISC') : [{ id: '1', name: '', description: '', quantity: 1, unitPrice: 0, type: 'MAIN' }]);
     const [tax, setTax] = useState(initialData?.tax || 0);
     const [discountType, setDiscountType] = useState<"none" | "percent" | "flat">(initialData?.discountType as any || "none");
     const [discountValue, setDiscountValue] = useState<number>(initialData?.discountValue || 0);
+
+    const [miscItems, setMiscItems] = useState<InvoiceItem[]>(initialData?.items?.filter(i => i.type === 'MISC') || []);
+    const [miscTitle, setMiscTitle] = useState(initialData?.miscTitle || 'Miscellaneous');
+    const [miscTaxValue, setMiscTaxValue] = useState(initialData?.miscTaxValue || 0);
+    const [miscDiscountType, setMiscDiscountType] = useState<"none" | "percent" | "flat">(initialData?.miscDiscountType as any || "none");
+    const [miscDiscountValue, setMiscDiscountValue] = useState<number>(initialData?.miscDiscountValue || 0);
+    const [showMisc, setShowMisc] = useState(miscItems.length > 0 || (initialData?.items && initialData.items.filter(i => i.type === 'MISC').length > 0));
+
     
     // Payments & Installments State
     const [payments, setPayments] = useState<PaymentRecord[]>(() => {
@@ -204,12 +217,42 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
     }, [subtotal, discountType, discountValue]);
 
     const subtotalAfterDiscount = Math.max(0, subtotal - calculatedDiscount);
-    const total = subtotalAfterDiscount + Number(tax);
+    const mainTotal = subtotalAfterDiscount + Number(tax);
+
+    const miscSubtotal = useMemo(() => {
+        return miscItems.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unitPrice)), 0);
+    }, [miscItems]);
+
+    const calculatedMiscDiscount = useMemo(() => {
+        if (miscDiscountType === "percent") {
+            return miscSubtotal * ((miscDiscountValue || 0) / 100);
+        } else if (miscDiscountType === "flat") {
+            return miscDiscountValue || 0;
+        }
+        return 0;
+    }, [miscSubtotal, miscDiscountType, miscDiscountValue]);
+
+    const miscSubtotalAfterDiscount = Math.max(0, miscSubtotal - calculatedMiscDiscount);
+    const miscTotal = miscSubtotalAfterDiscount + Number(miscTaxValue);
+
+    const total = mainTotal + miscTotal;
     
     const totalPaid = useMemo(() => payments.reduce((sum, p) => sum + Number(p.amount || 0), 0), [payments]);
     const balanceDue = Math.max(0, total - totalPaid);
 
     // Handlers
+    const addMiscItem = () => {
+        setMiscItems(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), name: '', description: '', quantity: 1, unitPrice: 0, type: 'MISC' }]);
+    };
+
+    const removeMiscItem = (id: string) => {
+        setMiscItems(prev => prev.filter(i => i.id !== id));
+    };
+
+    const updateMiscItem = (id: string, field: keyof InvoiceItem, value: any) => {
+        setMiscItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+    };
+
     const addPayment = () => {
         setPayments(prev => [...prev, { 
             id: Math.random().toString(36).substr(2, 9), 
@@ -674,6 +717,96 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                                 Add Another Item
                             </button>
                         </div>
+                        {/* MISCELLANEOUS / MATERIALS SECTION */}
+                        <div className="mt-8 pt-6 border-t border-[var(--border)]/50">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                                <div>
+                                    <h2 className="text-xl font-bold text-[var(--text)] flex items-center gap-2">
+                                        <input 
+                                            type="text" 
+                                            value={miscTitle}
+                                            onChange={(e) => setMiscTitle(e.target.value)}
+                                            className="bg-transparent border-b border-transparent hover:border-[var(--border)] focus:border-blue-500 outline-none transition-colors"
+                                            placeholder="Miscellaneous"
+                                        />
+                                    </h2>
+                                    <p className="text-sm text-[var(--muted)] mt-1">Additional items like materials, travel, etc.</p>
+                                </div>
+                                <div className="text-xl font-bold text-blue-500 tabular-nums bg-blue-500/10 px-4 py-1.5 rounded-lg border border-blue-500/20">
+                                    ${miscSubtotal.toFixed(2)}
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                {miscItems.map((item, index) => (
+                                    <div key={item.id} className="relative bg-[var(--bg)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 transition-all focus-within:ring-2 focus-within:ring-blue-500/30 group">
+                                        <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--muted)] text-xs font-bold shadow-sm">
+                                            {index + 1}
+                                        </div>
+                                        <button 
+                                            onClick={() => removeMiscItem(item.id)}
+                                            className="absolute top-4 right-4 text-red-500/40 hover:text-red-500 transition-colors p-1"
+                                            title="Remove Item"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                        </button>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                                            <div className="sm:col-span-5">
+                                                <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1.5">Item Name</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={item.name} 
+                                                    onChange={(e) => updateMiscItem(item.id, 'name', e.target.value)}
+                                                    placeholder="e.g. Paint Supplies"
+                                                    className="w-full bg-transparent border-b border-[var(--border)] focus:border-blue-500 text-[var(--text)] px-1 py-2 outline-none transition-colors font-semibold"
+                                                />
+                                            </div>
+                                            <div className="sm:col-span-2">
+                                                <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1.5">Qty</label>
+                                                <input 
+                                                    type="number" 
+                                                    min="1"
+                                                    value={item.quantity === 0 ? '' : item.quantity} 
+                                                    onChange={(e) => updateMiscItem(item.id, 'quantity', Number(e.target.value))}
+                                                    className="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 tabular-nums"
+                                                />
+                                            </div>
+                                            <div className="sm:col-span-3">
+                                                <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mb-1.5">Unit Price</label>
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]">$</span>
+                                                    <input 
+                                                        type="number" 
+                                                        min="0"
+                                                        step="0.01"
+                                                        value={item.unitPrice === 0 ? '' : item.unitPrice} 
+                                                        onChange={(e) => updateMiscItem(item.id, 'unitPrice', Number(e.target.value))}
+                                                        className="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-lg pl-7 pr-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/30 tabular-nums"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="sm:col-span-2 flex flex-col justify-end">
+                                                <div className="text-right pb-2">
+                                                    <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider mr-2 hidden sm:inline">Total:</span>
+                                                    <span className="text-[var(--text)] font-semibold tabular-nums">${(item.quantity * item.unitPrice).toFixed(2)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <button 
+                                    onClick={addMiscItem}
+                                    className="w-full py-4 border-2 border-dashed border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg)] hover:border-blue-500/30 rounded-2xl transition-all font-semibold flex items-center justify-center gap-2 text-sm group"
+                                >
+                                    <div className="w-6 h-6 rounded-full bg-[var(--border)] group-hover:bg-blue-500/20 text-[var(--text)] group-hover:text-blue-500 flex items-center justify-center transition-colors">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                                    </div>
+                                    Add {miscTitle}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -750,6 +883,22 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                                     </div>
                                 ))}
                             </div>
+                            {miscItems.length > 0 && (
+                                <>
+                                    <div className="text-sm font-bold text-[var(--muted)] uppercase tracking-wider mt-4 mb-2 border-t border-[var(--border)] pt-4">{miscTitle}</div>
+                                    <div className="space-y-3 mb-6">
+                                        {miscItems.map((item, idx) => (
+                                            <div key={idx} className="flex justify-between text-sm items-center">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-[var(--muted)]">{item.quantity}x</span>
+                                                    <span className="font-medium text-[var(--text)]">{item.name}</span>
+                                                </div>
+                                                <span className="text-[var(--text)] tabular-nums">${(item.quantity * item.unitPrice).toFixed(2)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
 
                             <div className="border-t border-[var(--border)] pt-5 space-y-3">
                                 <div className="flex justify-between text-sm text-[var(--muted)]">
@@ -808,6 +957,63 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                                     </div>
                                 </div>
 
+                                {miscItems.length > 0 && (
+                                    <div className="border-t border-[var(--border)] pt-4 mt-4 space-y-3">
+                                        <div className="flex justify-between text-sm text-[var(--muted)]">
+                                            <span>{miscTitle} Subtotal</span>
+                                            <span className="tabular-nums">${miscSubtotal.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[var(--muted)] text-xs font-bold uppercase tracking-wider">Discount</span>
+                                                <select
+                                                    value={miscDiscountType}
+                                                    onChange={(e) => setMiscDiscountType(e.target.value as any)}
+                                                    className="bg-[var(--card)] border border-[var(--border)] rounded px-1.5 py-1 text-xs outline-none text-[var(--text)]"
+                                                >
+                                                    <option value="none">None</option>
+                                                    <option value="percent">%</option>
+                                                    <option value="flat">$ Flat</option>
+                                                </select>
+                                            </div>
+                                            <div className="flex items-center gap-2 max-w-[120px]">
+                                                {miscDiscountType !== 'none' && (
+                                                    <>
+                                                        {miscDiscountType === 'flat' && <span className="text-[var(--muted)]">$</span>}
+                                                        {miscDiscountType === 'percent' && <span className="text-[var(--muted)]">%</span>}
+                                                        <input 
+                                                            type="number" 
+                                                            min="0"
+                                                            step="0.01"
+                                                            value={miscDiscountValue === 0 ? '' : miscDiscountValue}
+                                                            onChange={(e) => setMiscDiscountValue(Number(e.target.value))}
+                                                            className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-2 py-1 outline-none text-right tabular-nums focus:border-blue-500 transition-colors"
+                                                            placeholder="0.00"
+                                                        />
+                                                    </>
+                                                )}
+                                                <span className="text-red-400 font-medium tabular-nums w-16 text-right">
+                                                    -{calculatedMiscDiscount.toFixed(2)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-[var(--muted)]">{miscTitle} Tax</span>
+                                            <div className="flex items-center gap-2 max-w-[120px]">
+                                                <span className="text-[var(--muted)]">$</span>
+                                                <input 
+                                                    type="number" 
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={miscTaxValue === 0 ? '' : miscTaxValue}
+                                                    onChange={(e) => setMiscTaxValue(Number(e.target.value))}
+                                                    className="w-full bg-[var(--card)] border border-[var(--border)] rounded px-2 py-1 outline-none text-right tabular-nums focus:border-blue-500 transition-colors"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-end pt-3 text-[var(--text)] border-t border-[var(--border)]">
                                     <span className="font-bold uppercase tracking-wider text-xs">Total Amount</span>
                                     <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight">${total.toFixed(2)}</span>

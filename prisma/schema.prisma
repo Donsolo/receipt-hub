@@ -74,6 +74,10 @@ model Category {
 
   @@unique([name, userId])
 }
+enum ItemType {
+  MAIN
+  MISC
+}
 
 model Receipt {
   id              String              @id @default(cuid())
@@ -90,6 +94,12 @@ model Receipt {
   discountType    String              @default("none")
   discountValue   Float?
   subtotal        Float               @default(0)
+  miscTitle       String?             @default("Miscellaneous")
+  miscTaxValue    Float?
+  miscDiscountType String             @default("none")
+  miscDiscountValue Float?
+  miscSubtotal    Float               @default(0)
+  miscTotal       Float               @default(0)
   total           Float               @default(0)
   createdAt       DateTime            @default(now())
   fileSize        Int?
@@ -116,6 +126,7 @@ model ReceiptItem {
   quantity    Int
   unitPrice   Float
   lineTotal   Float
+  type        ItemType @default(MAIN)
   receipt     Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
 }
 
@@ -405,6 +416,12 @@ model Invoice {
   discountValue      Float?
   subtotal           Float
   tax                Float?
+  miscTitle          String?           @default("Miscellaneous")
+  miscTaxValue       Float?
+  miscDiscountType   String            @default("none")
+  miscDiscountValue  Float?
+  miscSubtotal       Float             @default(0)
+  miscTotal          Float             @default(0)
   total              Float
   depositAmount      Float?            @default(0)
   paymentMethod      String?
@@ -470,6 +487,7 @@ model InvoiceLineItem {
   quantity    Int
   unitPrice   Float
   total       Float
+  type        ItemType @default(MAIN)
   
   invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
@@ -762,6 +780,12 @@ model VeroLensSession {
   aiRawJson       Json?
   confidenceScore Float?
   disclaimer         String?
+  miscTitle          String?           @default("Miscellaneous")
+  miscTaxValue       Float?
+  miscDiscountType   String            @default("none")
+  miscDiscountValue  Float?
+  miscSubtotal       Float             @default(0)
+  miscTotal          Float             @default(0)
   convertedInvoiceId String?
   activeVersionId    String?
   createdAt          DateTime @default(now())
@@ -877,6 +901,7 @@ model VeroLensLineItem {
   confidence         Float?
   source             String   @default("AI")
   sortOrder          Int      @default(0)
+  type               ItemType @default(MAIN)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

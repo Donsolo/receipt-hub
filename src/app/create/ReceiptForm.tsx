@@ -14,6 +14,7 @@ interface ReceiptItem {
     quantity: number;
     unitPrice: number;
     lineTotal: number;
+    type?: 'MAIN' | 'MISC';
 }
 
 export interface ReceiptData {
@@ -27,7 +28,14 @@ export interface ReceiptData {
     discountType?: string;
     discountValue?: number | null;
     categoryId?: string | null;
-    items?: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
+    items?: { description: string; quantity: number; unitPrice: number; lineTotal: number; type?: 'MAIN' | 'MISC' }[];
+    miscTitle?: string;
+    miscTaxValue?: number;
+    miscDiscountType?: string;
+    miscDiscountValue?: number;
+    miscSubtotal?: number;
+    miscTotal?: number;
+    miscItems?: { description: string; quantity: number; unitPrice: number; lineTotal: number; type?: 'MAIN' | 'MISC' }[];
 }
 
 // Hook for debouncing
@@ -109,11 +117,22 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
 
     // Items
     const [items, setItems] = useState<ReceiptItem[]>(
-        initialData.items && initialData.items.length > 0
-            ? initialData.items.map(i => ({ ...i, id: Math.random().toString(), unitPrice: Number(i.unitPrice), lineTotal: Number(i.lineTotal) }))
-            : [{ id: '1', description: "", quantity: 1, unitPrice: 0, lineTotal: 0 }]
+        initialData.items && initialData.items.filter(i => i.type !== 'MISC').length > 0
+            ? initialData.items.filter(i => i.type !== 'MISC').map(i => ({ ...i, id: Math.random().toString(), unitPrice: Number(i.unitPrice), lineTotal: Number(i.lineTotal), type: 'MAIN' as const }))
+            : [{ id: '1', description: "", quantity: 1, unitPrice: 0, lineTotal: 0, type: 'MAIN' as const }]
     );
     const [activeEditItemId, setActiveEditItemId] = useState<string | null>(null);
+
+    const [miscItems, setMiscItems] = useState<ReceiptItem[]>(
+        initialData.items && initialData.items.filter(i => i.type === 'MISC').length > 0
+            ? initialData.items.filter(i => i.type === 'MISC').map(i => ({ ...i, id: Math.random().toString(), unitPrice: Number(i.unitPrice), lineTotal: Number(i.lineTotal), type: 'MISC' as const }))
+            : []
+    );
+    const [miscTitle, setMiscTitle] = useState(initialData.miscTitle || 'Miscellaneous');
+    const [miscTaxValue, setMiscTaxValue] = useState<number>(initialData.miscTaxValue ? Number(initialData.miscTaxValue) : 0);
+    const [miscDiscountType, setMiscDiscountType] = useState<"none" | "percent" | "flat">(initialData.miscDiscountType as any || "none");
+    const [miscDiscountValue, setMiscDiscountValue] = useState<number>(initialData.miscDiscountValue ? Number(initialData.miscDiscountValue) : 0);
+
 
     // Totals
     const [taxType, setTaxType] = useState<"none" | "percent" | "flat">(initialData.taxType as any || "none");
@@ -167,7 +186,6 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
     const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
 
     let calculatedDiscount = 0;
-    // Assume `discountType` and `discountValue` exist in state
     if (discountType === "percent") {
         calculatedDiscount = subtotal * (discountValue / 100);
     } else if (discountType === "flat") {
@@ -183,7 +201,23 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
         calculatedTax = taxValue;
     }
 
-    const total = subtotalAfterDiscount + calculatedTax;
+    const mainTotal = subtotalAfterDiscount + calculatedTax;
+
+    const miscSubtotal = miscItems.reduce((sum, item) => sum + item.lineTotal, 0);
+
+    let calculatedMiscDiscount = 0;
+    if (miscDiscountType === "percent") {
+        calculatedMiscDiscount = miscSubtotal * (miscDiscountValue / 100);
+    } else if (miscDiscountType === "flat") {
+        calculatedMiscDiscount = miscDiscountValue;
+    }
+
+    const miscSubtotalAfterDiscount = Math.max(0, miscSubtotal - calculatedMiscDiscount);
+    const calculatedMiscTax = miscTaxValue;
+
+    const miscTotal = miscSubtotalAfterDiscount + calculatedMiscTax;
+
+    const total = mainTotal + miscTotal;
 
     // Update line totals when qty/price changes
     const updateItem = (id: string, field: keyof ReceiptItem, value: any) => {
@@ -204,6 +238,32 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
             setActiveSuggestionIndex(-1);
             if (!value) setSuggestions([]);
         }
+    };
+
+    const updateMiscItem = (id: string, field: keyof ReceiptItem, value: any) => {
+        setMiscItems(prev => prev.map(item => {
+            if (item.id === id) {
+                const newItem = { ...item, [field]: value };
+                if (field === 'quantity' || field === 'unitPrice') {
+                    newItem.lineTotal = Number(newItem.quantity) * Number(newItem.unitPrice);
+                }
+                return newItem;
+            }
+            return item;
+        }));
+    };
+
+    const addMiscItem = () => {
+        const newId = Date.now().toString() + "m";
+        setMiscItems(prev => [
+            ...prev,
+            { id: newId, description: "", quantity: 1, unitPrice: 0, lineTotal: 0, type: 'MISC' }
+        ]);
+        setActiveEditItemId(newId);
+    };
+
+    const removeMiscItem = (id: string) => {
+        setMiscItems(prev => prev.filter(item => item.id !== id));
     };
 
     const handleSelectSuggestion = (id: string, value: string) => {
@@ -260,9 +320,20 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
             discountValue,
             subtotal,
             total,
-            items: items.map(({ description, quantity, unitPrice, lineTotal }) => ({
-                description, quantity, unitPrice, lineTotal
-            })),
+            items: [
+                ...items.map(({ description, quantity, unitPrice, lineTotal }) => ({
+                    description, quantity, unitPrice, lineTotal, type: 'MAIN' as any
+                })),
+                ...miscItems.map(({ description, quantity, unitPrice, lineTotal }) => ({
+                    description, quantity, unitPrice, lineTotal, type: 'MISC' as any
+                }))
+            ],
+            miscTitle,
+            miscTaxValue,
+            miscDiscountType,
+            miscDiscountValue,
+            miscSubtotal,
+            miscTotal,
             ocrNormalized: ocrData || undefined,
             sourceType: ocrData ? "ocr" : undefined
         };
@@ -607,6 +678,79 @@ export default function ReceiptForm({ initialData, user }: { initialData: Receip
                             </div>
                         </div>
                     </div>
+                    {/* Section: Misc Items */}
+                    <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] p-4 sm:p-6 mb-24 lg:mb-0 mt-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <h3 className="text-xs font-semibold text-[var(--muted)] uppercase tracking-widest flex items-center">
+                                <input 
+                                    type="text" 
+                                    value={miscTitle}
+                                    onChange={(e) => setMiscTitle(e.target.value)}
+                                    className="bg-transparent border-b border-transparent hover:border-[var(--border)] focus:border-blue-500 outline-none transition-colors"
+                                    placeholder="Miscellaneous"
+                                />
+                            </h3>
+                        </div>
+                        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] overflow-hidden">
+                            <div className="grid grid-cols-4 sm:grid-cols-12 gap-2 px-4 py-3 bg-[var(--card)] border-b border-[var(--border)] text-[10px] sm:text-xs font-medium text-[var(--muted)] uppercase tracking-wider items-center">
+                                <div className="col-span-2 sm:col-span-5">Item Name</div>
+                                <div className="col-span-1 sm:col-span-2 text-center">Qty</div>
+                                <div className="col-span-1 sm:col-span-3 text-right">Price</div>
+                                <div className="hidden sm:block col-span-2 text-right">Total</div>
+                            </div>
+                            <div className="divide-y divide-white/10">
+                                {miscItems.map((item) => (
+                                    <div 
+                                        key={item.id} 
+                                        className="group hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors px-4 py-3 grid grid-cols-4 sm:grid-cols-12 gap-2 items-center relative"
+                                    >
+                                        <div className="col-span-2 sm:col-span-5 w-full pr-2 text-sm text-[var(--text)] font-medium">
+                                            <input 
+                                                type="text" 
+                                                value={item.description} 
+                                                onChange={(e) => updateMiscItem(item.id, 'description', e.target.value)}
+                                                placeholder="e.g. Paint Supplies"
+                                                className="w-full bg-transparent outline-none transition-colors"
+                                            />
+                                        </div>
+                                        <div className="col-span-1 sm:col-span-2 text-center text-sm text-[var(--text)] tabular-nums">
+                                            <input 
+                                                type="number" 
+                                                min="1"
+                                                value={item.quantity === 0 ? '' : item.quantity} 
+                                                onChange={(e) => updateMiscItem(item.id, 'quantity', Number(e.target.value))}
+                                                className="w-full bg-transparent text-center outline-none tabular-nums"
+                                            />
+                                        </div>
+                                        <div className="col-span-1 sm:col-span-3 lg:col-span-2 text-right text-sm text-[var(--text)] tabular-nums font-medium">
+                                            <input 
+                                                type="number" 
+                                                min="0"
+                                                step="0.01"
+                                                value={item.unitPrice === 0 ? '' : item.unitPrice} 
+                                                onChange={(e) => updateMiscItem(item.id, 'unitPrice', Number(e.target.value))}
+                                                className="w-full bg-transparent text-right outline-none tabular-nums"
+                                            />
+                                        </div>
+                                        <div className="hidden sm:block col-span-2 text-right text-sm text-[var(--text)] font-semibold tabular-nums">
+                                            ${item.lineTotal.toFixed(2)}
+                                        </div>
+                                        <div className="hidden lg:flex col-span-1 justify-center items-center">
+                                            <button type="button" onClick={(e) => { e.stopPropagation(); removeMiscItem(item.id); }} className="text-[var(--muted)] hover:text-red-500 p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5">
+                                                &times;
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="bg-[var(--card)] px-4 py-3 border-t border-[var(--border)]">
+                                <button type="button" onClick={addMiscItem} className="text-sm text-blue-400 hover:text-blue-300 font-medium flex items-center transition-colors">
+                                    <span className="mr-1.5 text-lg leading-none">+</span> Add {miscTitle || "Misc Item"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 {/* Right Column (Sidebar Area) */}
