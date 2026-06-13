@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "connect-src 'self' https://connect-js.stripe.com https://*.stripe.com; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://connect-js.stripe.com https://js.stripe.com; frame-src 'self' https://connect-js.stripe.com https://*.stripe.com;"
+          }
+        ]
+      },
+      {
         source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },

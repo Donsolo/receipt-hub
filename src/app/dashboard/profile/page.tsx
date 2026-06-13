@@ -41,6 +41,24 @@ export default function ProfilePage() {
     const { isNativeAndroid } = usePlatform();
     const { isOnline } = useNetwork();
     const [isStale, setIsStale] = useState(false);
+    const [isConnectLoading, setIsConnectLoading] = useState(false);
+
+    const handleConnectAction = async (endpoint: string) => {
+        setIsConnectLoading(true);
+        try {
+            const res = await fetch(endpoint, { method: 'POST' });
+            const data = await res.json();
+            if (data.url) {
+                window.open(data.url, '_blank');
+            } else {
+                setToastMessage(data.error || 'Failed to generate link. Please try again.');
+            }
+        } catch (e) {
+            setToastMessage('Network error. Please try again.');
+        } finally {
+            setIsConnectLoading(false);
+        }
+    };
 
     const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
         if (newTheme === theme) return;
@@ -265,6 +283,43 @@ export default function ProfilePage() {
 
     const needsBusinessName = !profile.businessName;
 
+    const getPaymentSetupContent = () => {
+        switch (profile.connectOnboardingStatus) {
+            case 'IN_PROGRESS':
+                return {
+                    label: "Payment Setup — In Progress",
+                    body: "You started payment setup but haven't finished. Complete your Stripe onboarding to start accepting payments.",
+                    cta: "Continue setup",
+                    action: '/api/connect/create-account-link',
+                    statusClass: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                };
+            case 'COMPLETE':
+                return {
+                    label: "Payments Active",
+                    body: "You're set up to accept online invoice payments.",
+                    cta: "Manage on Stripe",
+                    action: '/api/connect/create-login-link',
+                    statusClass: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                };
+            case 'RESTRICTED':
+                return {
+                    label: "Action Required",
+                    body: "Your payment account needs attention. Please update your information to continue accepting payments.",
+                    cta: "Update information",
+                    action: '/api/connect/create-account-link',
+                    statusClass: 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'
+                };
+            default: // NOT_STARTED
+                return {
+                    label: "Payment Setup",
+                    body: "Accept online payments on your invoices. Set up takes about 5 minutes and is powered by Stripe.",
+                    cta: "Set up payments",
+                    action: '/api/connect/create-account-link',
+                    statusClass: 'bg-gray-100 dark:bg-[var(--card-hover)] text-gray-700 dark:text-[var(--text)] border-gray-200 dark:border-[var(--border)]'
+                };
+        }
+    };
+
     const isDirty = name !== (profile.name || '') ||
         businessName !== (profile.businessName || '') ||
         businessPhone !== (profile.businessPhone || '') ||
@@ -353,39 +408,33 @@ export default function ProfilePage() {
                                             {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </span>
                                     </div>
-                                    {profile.plan === 'PRO' && (
-                                        <div className="flex flex-col pt-1">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Payments Setup</span>
-                                                <button 
-                                                    type="button"
-                                                    onClick={async () => {
-                                                        const res = await fetch('/api/connect/create-account-link', { method: 'POST' });
-                                                        const data = await res.json();
-                                                        if (data.url) window.location.href = data.url;
-                                                    }}
-                                                    className="inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-600 dark:bg-emerald-600/80 text-white text-xs font-medium hover:bg-emerald-700 transition-colors shadow-sm"
-                                                >
-                                                    Manage Setup
-                                                </button>
-                                            </div>
-                                            <div className="flex items-center">
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border ${
-                                                    profile.connectOnboardingStatus === 'COMPLETE' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 
-                                                    profile.connectOnboardingStatus === 'IN_PROGRESS' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800' : 
-                                                    profile.connectOnboardingStatus === 'RESTRICTED' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800' : 
-                                                    'bg-gray-100 dark:bg-[var(--card-hover)] text-gray-700 dark:text-[var(--text)] border-gray-200 dark:border-[var(--border)]'
-                                                }`}>
-                                                    {profile.connectOnboardingStatus === 'COMPLETE' ? 'Ready' :
-                                                     profile.connectOnboardingStatus === 'IN_PROGRESS' ? 'In Progress' :
-                                                     profile.connectOnboardingStatus === 'RESTRICTED' ? 'Action Required' :
-                                                     'Not Started'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </section>
+
+                            {/* PAYMENT SETUP */}
+                            {profile.plan === 'PRO' && (
+                                <section className="bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-[var(--border)] rounded-xl shadow-sm p-6 sm:p-8 relative overflow-hidden">
+                                    <div className="mb-6">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">{getPaymentSetupContent().label}</h2>
+                                        </div>
+                                        <p className="text-sm text-[var(--muted)]">{getPaymentSetupContent().body}</p>
+                                    </div>
+                                    <button 
+                                        type="button"
+                                        disabled={isConnectLoading}
+                                        onClick={() => handleConnectAction(getPaymentSetupContent().action)}
+                                        className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+                                    >
+                                        {isConnectLoading ? (
+                                            <>
+                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                Loading...
+                                            </>
+                                        ) : getPaymentSetupContent().cta}
+                                    </button>
+                                </section>
+                            )}
                         </div>
 
                         {/* RIGHT COLUMN (60%): Business Identity */}
