@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
 
 export default function ConnectRefreshPage() {
     const router = useRouter();
@@ -35,7 +34,7 @@ export default function ConnectRefreshPage() {
             <div className="max-w-md w-full bg-gray-800 rounded-xl p-8 shadow-2xl border border-gray-700 text-center">
                 <div className="mb-6 flex justify-center">
                     <div className="w-16 h-16 bg-blue-600/20 text-blue-500 rounded-2xl flex items-center justify-center">
-                        <Loader2 className="w-8 h-8 animate-spin" />
+                        <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
                     </div>
                 </div>
                 <h1 className="text-2xl font-bold mb-4">Resuming setup</h1>
