@@ -59,64 +59,83 @@ export default function ProOnboardingCTA() {
 
     return (
         <div 
-            className="relative overflow-hidden rounded-[20px] p-5 sm:p-6 mb-8 w-full group transition-all"
+            className="relative rounded-[20px] mb-8 w-full group transition-all"
             style={{ 
-                background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1040 50%, #0d1f3c 100%)',
                 boxShadow: '0 8px 32px rgba(139, 92, 246, 0.15)',
-                border: '1px solid rgba(139, 92, 246, 0.3)'
             }}
         >
-            {/* Shimmer effect */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-1000"
-                 style={{ background: 'radial-gradient(circle at center, rgba(139, 92, 246, 0.15) 0%, transparent 70%)' }}></div>
-            
-            <button 
-                onClick={handleDismiss}
-                className="absolute top-4 right-4 text-white/50 hover:text-white/90 transition-colors z-20"
-                aria-label="Dismiss"
-            >
-                <IconX size={20} />
-            </button>
-
-            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5 relative z-10">
-                <div 
-                    className="flex items-center justify-center rounded-xl shrink-0 shadow-[0_4px_20px_rgba(139,92,246,0.3)] w-12 h-12"
-                    style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)' }}
-                >
-                    <IconCreditCard className="w-6 h-6 text-white" stroke={1.5} />
-                </div>
-                
-                <div className="flex-1 min-w-0 pr-2 sm:pr-6">
-                    <h3 className="font-bold mb-1.5 text-white text-[18px] tracking-tight">
-                        Get paid faster with Stripe
-                    </h3>
-                    <p className="mb-5 max-w-xl text-white/75 text-[13.5px] leading-relaxed">
-                        Your invoicing is unlocked — set up payments to start accepting online card payments directly to your bank account. Takes about 5 minutes.
-                    </p>
-                    
-                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                        <button
-                            onClick={handleSetup}
-                            disabled={isLoading}
-                            className="w-full sm:w-auto flex items-center justify-center font-bold rounded-full transition-all duration-200 bg-white text-[#0f0f1a] hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98] px-6 py-2.5 text-[14px] disabled:opacity-80 disabled:pointer-events-none shadow-md"
-                        >
-                            {isLoading ? <div className="w-4 h-4 border-2 border-[#0f0f1a]/30 border-t-[#0f0f1a] rounded-full animate-spin"></div> : 'Set up payments'}
-                        </button>
-                        <button
-                            onClick={handleDismiss}
-                            className="w-full sm:w-auto text-center font-medium transition-colors py-2 px-1 text-white/60 hover:text-white/90 text-[14px]"
-                        >
-                            Later
-                        </button>
-                    </div>
+            {/* The animated rotating gradient border background (CLIPPED) */}
+            <div className="absolute inset-0 rounded-[20px] overflow-hidden pointer-events-none">
+                <div className="absolute inset-[-100%] animate-[spin_3s_linear_infinite] motion-reduce:hidden"
+                     style={{
+                         background: 'conic-gradient(from 0deg, rgba(139,92,246,0.3) 0%, rgba(255,255,255,0.6) 15%, rgba(99,102,241,0.2) 30%, rgba(139,92,246,0.3) 50%, rgba(139,92,246,0.3) 100%)'
+                     }}>
                 </div>
             </div>
             
-            {/* Powered by Stripe badge */}
-            <div className="absolute bottom-3 right-4 hidden sm:block opacity-30 select-none pointer-events-none">
-                <span className="text-[10px] font-medium tracking-[0.02em] uppercase text-white">
-                    Powered by Stripe
-                </span>
+            {/* Static border fallback for motion-reduce */}
+            <div className="absolute inset-0 rounded-[20px] border border-[rgba(139,92,246,0.3)] pointer-events-none hidden motion-reduce:block"></div>
+            
+            {/* The inner dark card background */}
+            <div 
+                className="relative z-10 rounded-[19px] overflow-hidden p-5 sm:p-6"
+                style={{ 
+                    margin: '1px',
+                    background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1040 50%, #0d1f3c 100%)',
+                }}
+            >
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-1000"
+                     style={{ background: 'radial-gradient(circle at center, rgba(139, 92, 246, 0.15) 0%, transparent 70%)' }}></div>
+                
+                <button 
+                    onClick={handleDismiss}
+                    className="absolute top-4 right-4 text-white/50 hover:text-white/90 transition-colors z-20"
+                    aria-label="Dismiss"
+                >
+                    <IconX size={20} />
+                </button>
+
+                <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5 relative z-10">
+                    <div 
+                        className="flex items-center justify-center rounded-xl shrink-0 shadow-[0_4px_20px_rgba(139,92,246,0.3)] w-12 h-12"
+                        style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)' }}
+                    >
+                        <IconCreditCard className="w-6 h-6 text-white" stroke={1.5} />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0 pr-2 sm:pr-6">
+                        <h3 className="font-bold mb-1.5 text-white text-[18px] tracking-tight">
+                            Get paid faster with Stripe
+                        </h3>
+                        <p className="mb-5 max-w-xl text-white/75 text-[13.5px] leading-relaxed">
+                            Your invoicing is unlocked — set up payments to start accepting online card payments directly to your bank account. Takes about 5 minutes.
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                            <button
+                                onClick={handleSetup}
+                                disabled={isLoading}
+                                className="w-full sm:w-auto flex items-center justify-center font-bold rounded-full transition-all duration-200 bg-white text-[#0f0f1a] hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98] px-6 py-2.5 text-[14px] disabled:opacity-80 disabled:pointer-events-none shadow-md"
+                            >
+                                {isLoading ? <div className="w-4 h-4 border-2 border-[#0f0f1a]/30 border-t-[#0f0f1a] rounded-full animate-spin"></div> : 'Set up payments'}
+                            </button>
+                            <button
+                                onClick={handleDismiss}
+                                className="w-full sm:w-auto text-center font-medium transition-colors py-2 px-1 text-white/60 hover:text-white/90 text-[14px]"
+                            >
+                                Later
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Powered by Stripe badge */}
+                <div className="absolute bottom-3 right-4 hidden sm:block opacity-30 select-none pointer-events-none">
+                    <span className="text-[10px] font-medium tracking-[0.02em] uppercase text-white">
+                        Powered by Stripe
+                    </span>
+                </div>
             </div>
         </div>
     );
