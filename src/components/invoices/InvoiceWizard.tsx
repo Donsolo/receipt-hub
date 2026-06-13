@@ -381,8 +381,7 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                 ],
                 notes,
                 attachedPhotos,
-                status: targetStatus,
-                items
+                status: targetStatus
             };
 
             const endpoint = isEdit ? `/api/invoices/${initialData.id}` : '/api/invoices/create';
