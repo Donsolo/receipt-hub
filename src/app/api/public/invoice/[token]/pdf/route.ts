@@ -25,7 +25,7 @@ export async function GET(
             return NextResponse.json({ error: "Invoice not found or link expired" }, { status: 404 });
         }
 
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://verihub.app';
         const targetUrl = `${baseUrl}/invoice/${token}`;
 
         let browser;

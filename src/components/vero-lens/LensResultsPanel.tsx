@@ -234,7 +234,8 @@ export default function LensResultsPanel({ session, onLineItemUpdate }: { sessio
         }
     };
 
-    const shareUrl = activeShare ? `${window.location.origin}/quote/${activeShare.token}` : '';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://verihub.app';
+    const shareUrl = activeShare ? `${baseUrl}/quote/${activeShare.token}` : '';
 
     const renderConfidence = (score: number | null | undefined) => {
         if (score === null || score === undefined) return null;

@@ -92,7 +92,8 @@ export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: {
         setIsLoading(true);
         try {
             const token = await getOrCreateToken();
-            const link = `${window.location.origin}/portal/invoice/${token}?src=copy`;
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://verihub.app';
+            const link = `${baseUrl}/portal/invoice/${token}?src=copy`;
             await navigator.clipboard.writeText(link);
             alert('Secure portal link copied.');
             
@@ -140,7 +141,8 @@ export default function InvoiceActions({ invoice, isPro, trigger }: { invoice: {
         setIsSending(true);
         try {
             const token = await getOrCreateToken();
-            const link = `${window.location.origin}/invoice/${token}`;
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://verihub.app';
+            const link = `${baseUrl}/invoice/${token}`;
             
             const res = await fetch(`${API_BASE_URL}/api/messages/${userId}`, {
                 method: 'POST',

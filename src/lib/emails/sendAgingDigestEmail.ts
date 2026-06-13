@@ -77,7 +77,7 @@ export async function sendAgingDigestEmail(data: AgingDigestData) {
         </div>
         ` : ''}
 
-        <p>To follow up on these and review full details, please visit your <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/invoices/aging" style="color: #4F46E5;">Invoice Aging Dashboard</a>.</p>
+        <p>To follow up on these and review full details, please visit your <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://verihub.app'}/dashboard/invoices/aging" style="color: #4F46E5;">Invoice Aging Dashboard</a>.</p>
         
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
         <p style="font-size: 12px; color: #6b7280; text-align: center;">

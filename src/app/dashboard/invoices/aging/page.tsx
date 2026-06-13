@@ -22,7 +22,8 @@ export default function InvoiceAgingDashboard() {
     }, []);
 
     const copyLink = (token: string) => {
-        const link = `${window.location.origin}/portal/invoice/${token}?src=copy`;
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://verihub.app';
+        const link = `${baseUrl}/portal/invoice/${token}?src=copy`;
         navigator.clipboard.writeText(link);
         alert('Secure portal link copied to clipboard!');
     };

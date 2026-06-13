@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
         const token = await createPasswordResetToken(user.id, user.password);
         
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://verihub.app';
         const resetUrl = `${appUrl}/reset-password?token=${token}&email=${encodeURIComponent(user.email)}`;
 
         const emailSent = await sendPasswordResetEmail(user.email, resetUrl);
