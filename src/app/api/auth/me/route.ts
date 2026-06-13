@@ -20,7 +20,8 @@ export async function GET(request: Request) {
             businessLogoPath: true,
             businessRegistrationNumber: true,
             plan: true,
-            planStatus: true
+            planStatus: true,
+            connectOnboardingStatus: true
         }
     });
 

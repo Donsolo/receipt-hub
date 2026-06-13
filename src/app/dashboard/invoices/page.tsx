@@ -8,6 +8,7 @@ import InvoiceActions from '@/components/invoices/InvoiceActions';
 import { IconFileInvoice, IconClock, IconDotsVertical } from '@tabler/icons-react';
 import { getAuthHeader } from '@/lib/auth-client';
 import { API_BASE_URL } from '@/lib/config';
+import ProOnboardingCTA from '@/components/connect/ProOnboardingCTA';
 
 function InvoicesContent() {
     const router = useRouter();
@@ -207,7 +208,10 @@ function InvoicesContent() {
             </div>
 
             <div className="relative z-10 flex-1 w-full bg-[#F4F5F9] dark:bg-[var(--bg)] rounded-t-[20px] -mt-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] flex flex-col pb-24">
-                <div className="w-full overflow-x-auto whitespace-nowrap hide-scrollbar px-4 sm:px-6 pt-6 pb-3">
+                <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-6 w-full">
+                    {stats.sent > 0 && <ProOnboardingCTA />}
+                </div>
+                <div className="w-full overflow-x-auto whitespace-nowrap hide-scrollbar px-4 sm:px-6 pt-2 pb-3">
                     <div className="flex items-center gap-2 max-w-2xl mx-auto">
                         {['All', 'Draft', 'Sent', 'Viewed', 'Paid', 'Overdue'].map(f => {
                             const val = f.toLowerCase();

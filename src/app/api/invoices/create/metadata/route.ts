@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
         const userRecord = await (db as any).user.findUnique({
             where: { id: authUser.id },
-            select: { businessName: true, businessLogoPath: true, businessRegistrationNumber: true, email: true, plan: true, planStatus: true, role: true }
+            select: { businessName: true, businessLogoPath: true, businessRegistrationNumber: true, email: true, plan: true, planStatus: true, role: true, connectOnboardingStatus: true }
         });
 
         const isPro = (userRecord?.plan === "PRO" && userRecord?.planStatus !== "inactive") || userRecord?.role === "ADMIN" || userRecord?.role === "SUPER_ADMIN";

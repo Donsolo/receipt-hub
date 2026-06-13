@@ -86,7 +86,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
             paymentConfirmedAt: invoice.paymentConfirmedAt,
             authorizedSignature: invoice.authorizedSignature,
             
-            acceptOnlinePayment: invoice.acceptOnlinePayment,
+            acceptOnlinePayment: invoice.acceptOnlinePayment && invoice.user?.connectChargesEnabled,
             paymentStatus: invoice.paymentStatus,
             amountPaid: invoice.amountPaid,
             remainingBalance: invoice.remainingBalance ?? (invoice.total - (invoice.amountPaid || 0)),

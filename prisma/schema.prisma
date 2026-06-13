@@ -61,6 +61,13 @@ model User {
   veroLensSessions         VeroLensSession[]
   veroLensPricingPresets   VeroLensPricingPreset[]
   veroLensCustomContexts   VeroLensCustomContext[]
+  
+  // Stripe Connect
+  stripeConnectAccountId   String?   @unique
+  connectOnboardingStatus  String    @default("NOT_STARTED")
+  connectChargesEnabled    Boolean   @default(false)
+  connectPayoutsEnabled    Boolean   @default(false)
+  connectOnboardedAt       DateTime?
 }
 
 model Category {

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
         const profile = await db.user.findUnique({
             where: { id: user.userId },
-            select: { role: true, email: true, createdAt: true, plan: true, planStatus: true, stripeCustomerId: true, ...({ name: true, businessName: true, businessPhone: true, businessAddress: true, businessLogoPath: true, businessRegistrationNumber: true, timezone: true } as any) }
+            select: { role: true, email: true, createdAt: true, plan: true, planStatus: true, stripeCustomerId: true, connectOnboardingStatus: true, ...({ name: true, businessName: true, businessPhone: true, businessAddress: true, businessLogoPath: true, businessRegistrationNumber: true, timezone: true } as any) }
         });
 
         if (!profile) return NextResponse.json({ error: 'User not found' }, { status: 404 });

@@ -34,6 +34,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
             return NextResponse.json({ success: false, error: 'Online payments are not enabled for this account.' }, { status: 403 });
         }
 
+        if (!invoice.user?.connectChargesEnabled || !invoice.user?.stripeConnectAccountId) {
+            return NextResponse.json({ success: false, error: 'The invoice owner has not fully set up payments to receive funds.' }, { status: 400 });
+        }
+
         if (!invoice.acceptOnlinePayment) {
             return NextResponse.json({ success: false, error: 'Online payments are currently disabled for this invoice.' }, { status: 400 });
         }
@@ -107,6 +111,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
         const session = await stripeInstance.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'payment',
+            payment_intent_data: {
+                transfer_data: {
+                    destination: invoice.user.stripeConnectAccountId,
+                },
+            },
             line_items: [
                 {
                     price_data: {

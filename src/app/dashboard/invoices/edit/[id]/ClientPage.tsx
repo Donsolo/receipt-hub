@@ -60,6 +60,7 @@ export default function EditInvoicePage() {
                     miscDiscountType: invoice.miscDiscountType,
                     miscDiscountValue: invoice.miscDiscountValue,
                     status: invoice.status,
+                    acceptOnlinePayment: invoice.acceptOnlinePayment,
                     total: invoice.total,
                     items: invoice.items ? invoice.items.map((i: any) => ({
                         id: i.id,
@@ -76,6 +77,7 @@ export default function EditInvoicePage() {
                     businessName: userRecord?.businessName || userRecord?.email?.split('@')[0] || globalProfile?.businessName || undefined,
                     businessLogoPath: userRecord?.businessLogoPath || globalProfile?.logoPath || undefined,
                     businessRegistrationNumber: userRecord?.businessRegistrationNumber || globalProfile?.businessRegistrationNumber || undefined,
+                    connectOnboardingStatus: userRecord?.connectOnboardingStatus || 'NOT_STARTED',
                     initialData,
                     initialPlanEnabled: invoice.paymentPlanEnabled,
                     initialInstallments: invoice.installments ? invoice.installments.map((i: any) => ({
@@ -103,6 +105,7 @@ export default function EditInvoicePage() {
                 businessName={data.businessName}
                 businessLogoPath={data.businessLogoPath}
                 businessRegistrationNumber={data.businessRegistrationNumber}
+                connectOnboardingStatus={data.connectOnboardingStatus}
                 initialData={data.initialData} 
             />
 

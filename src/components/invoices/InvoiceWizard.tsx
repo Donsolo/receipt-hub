@@ -41,6 +41,7 @@ export interface InvoiceWizardProps {
     businessName?: string;
     businessLogoPath?: string;
     businessRegistrationNumber?: string;
+    connectOnboardingStatus?: string;
     initialData?: {
         id?: string;
         customerContactId?: string | null;
@@ -68,10 +69,11 @@ export interface InvoiceWizardProps {
         miscDiscountType?: string;
         miscDiscountValue?: number;
         status?: string;
+        acceptOnlinePayment?: boolean;
     };
 }
 
-export default function InvoiceWizard({ isPro = false, businessName, businessLogoPath, businessRegistrationNumber, initialData }: InvoiceWizardProps) {
+export default function InvoiceWizard({ isPro = false, businessName, businessLogoPath, businessRegistrationNumber, connectOnboardingStatus = 'NOT_STARTED', initialData }: InvoiceWizardProps) {
     const router = useRouter();
     const isEdit = !!initialData?.id;
 
@@ -162,6 +164,7 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
 
     const [notes, setNotes] = useState(initialData?.notes || '');
     const [attachedPhotos, setAttachedPhotos] = useState<string[]>(initialData?.attachedPhotos || []);
+    const [acceptOnlinePayment, setAcceptOnlinePayment] = useState<boolean>(initialData?.acceptOnlinePayment || false);
 
     // Smart Autofill State
     const [activeInputId, setActiveInputId] = useState<string | null>(null);
@@ -372,6 +375,10 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                 depositAmount: totalPaid > 0 ? payments[0]?.amount || 0 : 0, // Fallback for old schema
                 paymentMethod: payments.length > 0 ? payments[0].method : '',
                 payments,
+                acceptOnlinePayment,
+                items: [
+                    ...items.map(i => ({ name: i.name, description: i.description, quantity: i.quantity, unitPrice: i.unitPrice, type: i.type })),
+                ],
                 notes,
                 attachedPhotos,
                 status: targetStatus,
@@ -1022,14 +1029,75 @@ export default function InvoiceWizard({ isPro = false, businessName, businessLog
                                 <div className="pt-4 mt-4 border-t border-[var(--border)]/50 border-dashed space-y-3">
                                     <div className="flex justify-between items-center">
                                         <span className="text-sm font-bold text-[var(--text)]">Payments & Installments</span>
-                                        <button 
-                                            onClick={addPayment}
-                                            className="text-xs font-bold text-blue-500 hover:text-blue-600 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
-                                        >
-                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                                            Add Payment
-                                        </button>
+                                        <div className="flex items-center gap-3">
+                                            {isPro && (
+                                                <div className="flex items-center gap-2 mr-2">
+                                                    <span className="text-xs font-medium text-[var(--muted)]">Accept Online Payments</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (!acceptOnlinePayment && connectOnboardingStatus !== 'COMPLETE') {
+                                                                // Blocked alert shown inline below instead, but let's toggle it briefly or just show alert.
+                                                                // The user asked for an "inline alert". We can just let it fail or toggle it but show a message?
+                                                                // Let's just set a state to show the alert, or do it immediately here.
+                                                                // actually, we will handle it via conditional rendering.
+                                                                if (connectOnboardingStatus !== 'COMPLETE') return;
+                                                            }
+                                                            setAcceptOnlinePayment(!acceptOnlinePayment);
+                                                        }}
+                                                        className={clsx(
+                                                            "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full focus:outline-none transition-colors duration-200 ease-in-out",
+                                                            acceptOnlinePayment ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-white/10',
+                                                            (!acceptOnlinePayment && connectOnboardingStatus !== 'COMPLETE') && "opacity-50 cursor-not-allowed"
+                                                        )}
+                                                    >
+                                                        <span
+                                                            aria-hidden="true"
+                                                            className={clsx(
+                                                                "pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                                                acceptOnlinePayment ? 'translate-x-2' : '-translate-x-2'
+                                                            )}
+                                                        />
+                                                    </button>
+                                                </div>
+                                            )}
+                                            <button 
+                                                onClick={addPayment}
+                                                className="text-xs font-bold text-blue-500 hover:text-blue-600 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+                                            >
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                                                Add Payment
+                                            </button>
+                                        </div>
                                     </div>
+
+                                    {isPro && !acceptOnlinePayment && connectOnboardingStatus !== 'COMPLETE' && (
+                                        <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 rounded-lg p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                            <div className="flex gap-2">
+                                                <svg className="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                <div className="text-xs text-amber-800 dark:text-amber-200">
+                                                    <strong>Payment setup incomplete.</strong><br/>You must set up your Stripe account to receive online payments.
+                                                </div>
+                                            </div>
+                                            <button 
+                                                onClick={async () => {
+                                                    const res = await fetch('/api/connect/create-account-link', { method: 'POST' });
+                                                    const data = await res.json();
+                                                    if (data.url) {
+                                                        if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.()) {
+                                                            const { Browser } = require('@capacitor/browser');
+                                                            await Browser.open({ url: data.url });
+                                                        } else {
+                                                            window.location.href = data.url;
+                                                        }
+                                                    }
+                                                }}
+                                                className="text-xs font-bold bg-amber-500 text-white px-3 py-1.5 rounded hover:bg-amber-600 transition-colors shrink-0"
+                                            >
+                                                Setup Payments
+                                            </button>
+                                        </div>
+                                    )}
 
                                     {payments.length === 0 ? (
                                         <div className="text-[11px] text-[var(--muted)] text-center py-2 italic bg-[var(--bg)] rounded-lg border border-[var(--border)]">

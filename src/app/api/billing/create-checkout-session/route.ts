@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
-import { stripe } from '@/lib/stripe';
+import { getStripeInstance } from '@/lib/stripe';
 import { db } from '@/lib/db';
 
 export async function POST(req: Request) {
@@ -26,6 +26,7 @@ export async function POST(req: Request) {
 
         // If user doesn't have a Stripe customer ID, create one
         if (!customerId) {
+            const stripe = getStripeInstance();
             const customer = await stripe.customers.create({
                 email: user.email,
                 metadata: {
@@ -48,6 +49,7 @@ export async function POST(req: Request) {
         }
 
         // Create Checkout Session
+        const stripe = getStripeInstance();
         const session = await stripe.checkout.sessions.create({
             customer: customerId,
             mode: 'subscription',

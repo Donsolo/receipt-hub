@@ -8,6 +8,7 @@ import HeroSection from '@/components/ui/HeroSection';
 import PageHeaderCard from '@/components/ui/PageHeaderCard';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import ProOnboardingCTA from '@/components/connect/ProOnboardingCTA';
 
 export default function BillingCenterClient() {
     const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -119,6 +120,8 @@ export default function BillingCenterClient() {
                         title="Billing Center" 
                         description="Manage incoming invoices, outgoing payments, and installments in one place."
                     />
+
+                    <ProOnboardingCTA />
 
                     {authLoading || loading ? (
                         <div className="h-64 flex items-center justify-center">

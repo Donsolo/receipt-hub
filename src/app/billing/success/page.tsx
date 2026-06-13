@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ProOnboardingCTA from '@/components/connect/ProOnboardingCTA';
 
 export default async function BillingSuccessPage({
     searchParams,
@@ -22,7 +23,9 @@ export default async function BillingSuccessPage({
                     Your account is being upgraded. It may take a few moments for the new features to become available.
                 </p>
 
-                <div className="flex flex-col space-y-3">
+                <ProOnboardingCTA />
+
+                <div className="flex flex-col space-y-3 mt-6">
                     <Link
                         href="/dashboard"
                         className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 transition-colors w-full"

@@ -27,6 +27,7 @@ type UserProfile = {
     timezone: string;
     plan?: string;
     planStatus?: string;
+    connectOnboardingStatus?: string;
 };
 
 export default function ProfilePage() {
@@ -346,12 +347,43 @@ export default function ProfilePage() {
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col pt-1">
+                                    <div className="flex flex-col border-b border-gray-200 dark:border-[var(--border)] pb-3">
                                         <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-1">Joined Date</span>
                                         <span className="text-[15px] font-medium text-gray-900 dark:text-[var(--text)]">
                                             {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </span>
                                     </div>
+                                    {profile.plan === 'PRO' && (
+                                        <div className="flex flex-col pt-1">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider">Payments Setup</span>
+                                                <button 
+                                                    type="button"
+                                                    onClick={async () => {
+                                                        const res = await fetch('/api/connect/create-account-link', { method: 'POST' });
+                                                        const data = await res.json();
+                                                        if (data.url) window.location.href = data.url;
+                                                    }}
+                                                    className="inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-600 dark:bg-emerald-600/80 text-white text-xs font-medium hover:bg-emerald-700 transition-colors shadow-sm"
+                                                >
+                                                    Manage Setup
+                                                </button>
+                                            </div>
+                                            <div className="flex items-center">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border ${
+                                                    profile.connectOnboardingStatus === 'COMPLETE' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 
+                                                    profile.connectOnboardingStatus === 'IN_PROGRESS' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800' : 
+                                                    profile.connectOnboardingStatus === 'RESTRICTED' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800' : 
+                                                    'bg-gray-100 dark:bg-[var(--card-hover)] text-gray-700 dark:text-[var(--text)] border-gray-200 dark:border-[var(--border)]'
+                                                }`}>
+                                                    {profile.connectOnboardingStatus === 'COMPLETE' ? 'Ready' :
+                                                     profile.connectOnboardingStatus === 'IN_PROGRESS' ? 'In Progress' :
+                                                     profile.connectOnboardingStatus === 'RESTRICTED' ? 'Action Required' :
+                                                     'Not Started'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </section>
                         </div>

@@ -1,17 +1,16 @@
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-    console.error('Missing STRIPE_SECRET_KEY. Please set it in your environment.');
+export function getStripeInstance(): Stripe {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+        throw new Error('STRIPE_SECRET_KEY is required for Pro subscription billing.');
+    }
+    return new Stripe(key, {
+        apiVersion: '2026-01-28.clover' as any,
+        typescript: true,
+        appInfo: { name: 'Verihub', version: '1.0.0' },
+    });
 }
-
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-    apiVersion: '2026-01-28.clover' as any,
-    typescript: true,
-    appInfo: {
-        name: 'Verihub',
-        version: '1.0.0',
-    },
-});
 
 /**
  * Returns a Stripe instance specifically for Invoice Payment Checkout.
@@ -38,11 +37,12 @@ export function getInvoiceStripeInstance(): { stripeInstance: Stripe, mode: 'liv
     }
     
     if (mode === 'test') {
-        if (!process.env.STRIPE_TEST_SECRET_KEY) {
-            throw new Error('STRIPE_TEST_SECRET_KEY is missing but test mode was requested for invoice payments.');
+        const testKey = process.env.STRIPE_TEST_SECRET_KEY;
+        if (!testKey) {
+            throw new Error('STRIPE_TEST_SECRET_KEY is required for test mode invoice payments. Add it to your .env file.');
         }
         return {
-            stripeInstance: new Stripe(process.env.STRIPE_TEST_SECRET_KEY, {
+            stripeInstance: new Stripe(testKey, {
                 apiVersion: '2026-01-28.clover' as any,
                 typescript: true,
                 appInfo: { name: 'Verihub QA', version: '1.0.0' },
@@ -54,7 +54,7 @@ export function getInvoiceStripeInstance(): { stripeInstance: Stripe, mode: 'liv
             throw new Error('STRIPE_SECRET_KEY is missing but live mode was requested for invoice payments.');
         }
         return {
-            stripeInstance: stripe, // Reuse existing live instance
+            stripeInstance: getStripeInstance(), // Reuse existing live instance
             mode
         };
     }

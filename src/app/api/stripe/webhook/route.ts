@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { getStripeInstance } from '@/lib/stripe';
 import { db } from '@/lib/db';
 import Stripe from 'stripe';
 import { convertInvoiceToReceipt } from '@/lib/invoices/convertInvoiceToReceipt';
@@ -26,12 +26,14 @@ export async function POST(req: Request) {
             // Try live secret first
             if (webhookSecret) {
                 try {
+                    const stripe = getStripeInstance();
                     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
                     secretUsed = 'live';
                 } catch (liveErr) {
                     // Fall back to test secret if present
                     if (testWebhookSecret) {
                         try {
+                            const stripe = getStripeInstance();
                             event = stripe.webhooks.constructEvent(body, signature, testWebhookSecret);
                             secretUsed = 'test';
                         } catch (testErr) {
@@ -42,6 +44,7 @@ export async function POST(req: Request) {
                     }
                 }
             } else if (testWebhookSecret) {
+                const stripe = getStripeInstance();
                 event = stripe.webhooks.constructEvent(body, signature, testWebhookSecret);
                 secretUsed = 'test';
             }
@@ -275,6 +278,7 @@ export async function POST(req: Request) {
                     });
                 } else {
                     // Try to find by email if stripeCustomerId was not set
+                    const stripe = getStripeInstance();
                     const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
                     if (customer.email) {
                         const userByEmail = await db.user.findUnique({ where: { email: customer.email } });
@@ -317,6 +321,68 @@ export async function POST(req: Request) {
                         where: { stripePaymentIntentId: intent.id, status: 'PAYMENT_PENDING' },
                         data: { status: 'UNPAID', stripePaymentIntentId: null }
                     });
+                }
+                break;
+            }
+            case 'account.updated': {
+                const account = event.data.object as Stripe.Account;
+                const userId = account.metadata?.userId;
+                
+                if (userId || account.id) {
+                    const user = await db.user.findFirst({
+                        where: userId ? { id: userId } : { stripeConnectAccountId: account.id }
+                    });
+
+                    if (user) {
+                        const chargesEnabled = account.charges_enabled;
+                        const payoutsEnabled = account.payouts_enabled;
+                        const currentlyDue = account.requirements?.currently_due || [];
+                        
+                        let status = user.connectOnboardingStatus;
+                        let onboardedAt = user.connectOnboardedAt;
+
+                        if (chargesEnabled && payoutsEnabled) {
+                            if (status !== 'COMPLETE') {
+                                status = 'COMPLETE';
+                                onboardedAt = onboardedAt || new Date();
+                                
+                                // Create Notification for completion
+                                await db.notification.create({
+                                    data: {
+                                        userId: user.id,
+                                        type: 'SYSTEM',
+                                        title: 'Payments Ready',
+                                        message: 'Your payments setup is complete. You can now accept online payments for your invoices.',
+                                        link: '/dashboard/billing'
+                                    }
+                                });
+                            }
+                        } else if (status === 'COMPLETE' && currentlyDue.length > 0) {
+                            status = 'RESTRICTED';
+                            
+                            // Create Notification for restriction
+                            await db.notification.create({
+                                data: {
+                                    userId: user.id,
+                                    type: 'SYSTEM',
+                                    title: 'Payment Setup Requires Action',
+                                    message: 'Stripe requires additional information to keep your account active. Please update your information.',
+                                    link: '/dashboard/billing'
+                                }
+                            });
+                        }
+
+                        await db.user.update({
+                            where: { id: user.id },
+                            data: {
+                                stripeConnectAccountId: account.id, // Ensure it's saved
+                                connectChargesEnabled: chargesEnabled,
+                                connectPayoutsEnabled: payoutsEnabled,
+                                connectOnboardingStatus: status,
+                                connectOnboardedAt: onboardedAt
+                            }
+                        });
+                    }
                 }
                 break;
             }

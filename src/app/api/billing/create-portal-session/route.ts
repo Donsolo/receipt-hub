@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
-import { stripe } from '@/lib/stripe';
+import { getStripeInstance } from '@/lib/stripe';
 import { db } from '@/lib/db';
 
 export async function POST(req: Request) {
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://verihub.app';
 
         // Create Portal Session
+        const stripe = getStripeInstance();
         const session = await stripe.billingPortal.sessions.create({
             customer: user.stripeCustomerId,
             return_url: `${appUrl}/billing`,

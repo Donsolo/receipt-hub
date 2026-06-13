@@ -99,6 +99,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             if (!isPro && acceptOnlinePayment === true) {
                 return NextResponse.json({ success: false, error: 'Pro plan required to enable online payments.' }, { status: 403 });
             }
+            if (acceptOnlinePayment === true) {
+                const dbUser = await prisma.user.findUnique({ where: { id: user.userId } });
+                if (!dbUser?.connectChargesEnabled) {
+                    return NextResponse.json({ success: false, error: 'You must set up payments before enabling online payments.' }, { status: 403 });
+                }
+            }
             dataToUpdate.acceptOnlinePayment = acceptOnlinePayment;
             if (acceptOnlinePayment && !invoice.paymentEnabledAt) {
                 dataToUpdate.paymentEnabledAt = new Date();
