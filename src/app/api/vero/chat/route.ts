@@ -65,7 +65,6 @@ export async function POST(req: Request) {
         CRITICAL RULE 2: NEVER leave a response blank after calling a tool. Once you receive the tool results, you MUST generate a text response summarizing the data naturally for the user.`;
 
         const result = await streamText({
-            // @ts-ignore - Bypass type mismatch between ai and @ai-sdk/google versions
             model: google('gemini-1.5-flash'),
             system: systemPrompt,
             messages,
