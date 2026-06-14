@@ -1,7 +1,7 @@
 "use client";
 
 // @ts-ignore
-import { useChat } from 'ai/react';
+import { useChat } from '@ai-sdk/react';
 import { useEffect, useRef, useState } from 'react';
 // @ts-ignore
 import ReactMarkdown from 'react-markdown';
